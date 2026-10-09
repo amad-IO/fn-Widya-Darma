@@ -9,7 +9,7 @@ export const navigation = [
   { label: "Profil", href: "/profil" },
   { label: "SPMB", href: "/spmb" },
   { label: "Publikasi & Galeri", href: "/publikasi" },
-  { label: "Kontak", href: "/kontak" },
+  { label: "Tanya-AI", href: "/tanya-ai" },
 ];
 export const articles: Article[] = [
   {

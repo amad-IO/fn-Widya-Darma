@@ -48,6 +48,84 @@ export function SchoolIntro({ profile = false }: { profile?: boolean }) {
     },
   ];
 
+  if (profile) {
+    return (
+      <section
+        id="sekilas-sekolah"
+        className={`${sectionClass} relative`}
+        aria-label="Tentang SMA Widya Darma"
+      >
+        <div className="container-width">
+          {/* Top Row: Grid 2 Kolom (Kiri: Judul & Statistik, Kanan: Paragraf Penjelasan) */}
+          <div className="grid items-start gap-10 lg:grid-cols-12 lg:gap-14">
+            {/* Kolom Kiri: Judul & Statistik */}
+            <Reveal className="flex flex-col justify-between lg:col-span-5">
+              <div>
+                <h2 className="text-3xl font-bold leading-[1.15] tracking-tight text-ink sm:text-4xl lg:text-[2.65rem]">
+                  Membangun generasi unggul melalui{" "}
+                  <span className="text-primary">pendidikan berkualitas.</span>
+                </h2>
+              </div>
+
+              <div className="mt-8 flex flex-wrap items-center gap-6 border-t border-black/10 pt-6 sm:gap-8">
+                <div>
+                  <p className="text-2xl font-bold tracking-tight text-ink sm:text-3xl">
+                    A<span className="text-primary">+</span>
+                  </p>
+                  <p className="text-[11px] text-muted">Standar Mutu</p>
+                </div>
+                <div className="h-8 w-px bg-black/10" />
+                <div>
+                  <p className="text-2xl font-bold tracking-tight text-ink sm:text-3xl">
+                    15<span className="text-primary">+</span>
+                  </p>
+                  <p className="text-[11px] text-muted">Ekstrakurikuler</p>
+                </div>
+                <div className="h-8 w-px bg-black/10" />
+                <div>
+                  <p className="text-2xl font-bold tracking-tight text-ink sm:text-3xl">
+                    100<span className="text-primary">%</span>
+                  </p>
+                  <p className="text-[11px] text-muted">Pendidik Kompeten</p>
+                </div>
+              </div>
+            </Reveal>
+
+            {/* Kolom Kanan: Paragraf Penjelasan */}
+            <Reveal delay={0.06} className="flex flex-col gap-5 lg:col-span-7">
+              <p className="body-copy leading-8">
+                {copy.body}
+              </p>
+              <p className="body-copy leading-8">
+                {copy.short}
+              </p>
+              <p className="body-copy leading-8">
+                Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor
+                incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud
+                exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.
+              </p>
+            </Reveal>
+          </div>
+
+          {/* Bottom Row — 3 Pillars (Open Editorial, Tanpa Card) */}
+          <div className="mt-14 grid gap-8 border-t border-black/10 pt-10 md:grid-cols-3">
+            {pillars.map((item, idx) => (
+              <Reveal key={item.tag} delay={0.12 + idx * 0.06}>
+                <span className="text-[11px] font-bold uppercase tracking-wider text-primary">
+                  {item.tag}
+                </span>
+                <h3 className="mt-2.5 text-base font-semibold tracking-tight text-ink sm:text-lg">
+                  {item.title}
+                </h3>
+                <p className="mt-2 text-xs leading-6 text-muted">{item.desc}</p>
+              </Reveal>
+            ))}
+          </div>
+        </div>
+      </section>
+    );
+  }
+
   return (
     <section
       id="sekilas-sekolah"
@@ -57,7 +135,7 @@ export function SchoolIntro({ profile = false }: { profile?: boolean }) {
       <div className="container-width">
         {/* Top Row: Open Editorial Text + Visual Showcase */}
         <div className="grid items-center gap-10 lg:grid-cols-12 lg:gap-12">
-          {/* Main Story — Tanpa Card */}
+          {/* Main Story */}
           <Reveal className="flex flex-col justify-between lg:col-span-7">
             <div>
               <h2 className="text-3xl font-bold leading-[1.15] tracking-tight text-ink sm:text-4xl lg:text-[2.65rem]">
@@ -92,7 +170,7 @@ export function SchoolIntro({ profile = false }: { profile?: boolean }) {
             </div>
           </Reveal>
 
-          {/* Visual Showcase */}
+          {/* Visual Showcase — hanya tampil di beranda */}
           <Reveal
             delay={0.08}
             className="group relative min-h-[340px] overflow-hidden rounded-[2rem] border-2 border-white bg-white shadow-[0_12px_30px_-18px_rgba(32,44,69,0.2)] lg:col-span-5"

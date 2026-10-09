@@ -1,5 +1,4 @@
 import Image from "next/image";
-import PageHeader from "@/components/shared/PageHeader";
 import SectionLabel from "@/components/shared/SectionLabel";
 import StaffCard from "@/components/shared/StaffCard";
 import Reveal from "@/components/shared/Reveal";
@@ -15,117 +14,222 @@ export const metadata = { title: "Profil & Visi Misi — SMA Widya Darma" };
 export default function ProfilPage() {
   return (
     <>
-      <PageHeader title="SMA Widya Darma" label="Profil & Visi Misi Sekolah" />
+      {/* HERO — Profil Sekolah */}
+      <section className="relative flex min-h-[70vh] items-center justify-center overflow-hidden">
+        {/* Background foto */}
+        <Image
+          src="/images/campus.jpg"
+          alt="Foto kampus SMA Widya Darma"
+          fill
+          priority
+          sizes="100vw"
+          className="object-cover"
+        />
+        {/* Overlay gelap netral */}
+        <div className="absolute inset-0 bg-black/40" />
 
+        {/* Konten teks */}
+        <div className="relative z-10 px-6 text-center text-white">
+          <p
+            className="mb-4 text-sm font-semibold uppercase tracking-[0.25em] text-white"
+            style={{ animation: "fadeSlideUp 0.7s ease both" }}
+          >
+            PROFIL
+          </p>
+          <h1
+            className="text-4xl font-bold leading-tight tracking-tight sm:text-5xl md:text-6xl lg:text-7xl"
+            style={{ animation: "fadeSlideUp 0.85s 0.15s ease both" }}
+          >
+            SMA Widya Darma
+          </h1>
+        </div>
+
+        {/* Garis dekoratif bawah */}
+        <div className="absolute bottom-0 left-0 right-0 h-20 bg-gradient-to-t from-[#f5f7fb] to-transparent" />
+      </section>
+
+      {/* Keyframes animasi */}
+      <style>{`
+        @keyframes fadeSlideUp {
+          from { opacity: 0; transform: translateY(28px); }
+          to   { opacity: 1; transform: translateY(0); }
+        }
+      `}</style>
+
+      {/* Paragraf perkenalan */}
+      <section className="school-section py-16 sm:py-20">
+        <div className="container-width max-w-3xl">
+          <p className="body-copy leading-8 text-gray-600">
+            Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt
+            ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation
+            ullamco laboris nisi ut aliquip ex ea commodo consequat.
+          </p>
+          <p className="body-copy mt-5 leading-8 text-gray-600">
+            Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat
+            nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia
+            deserunt mollit anim id est laborum. Nemo enim ipsam voluptatem quia voluptas sit
+            aspernatur aut odit aut fugit.
+          </p>
+        </div>
+      </section>
       {/* 01 — Identitas & Sejarah Sekolah */}
       <SchoolIntro profile />
 
       {/* 02 — Visi & Misi Sekolah */}
-      <section id="visi-misi" className="school-section py-16 sm:py-24">
+      <section id="visi-misi" className="school-section py-20 sm:py-28">
         <div className="container-width">
-          <SectionLabel number="02">Visi & misi sekolah</SectionLabel>
-          <div className="grid gap-8 lg:grid-cols-12">
-            <Reveal className="flex flex-col justify-between rounded-3xl border border-blue-200/60 bg-primary p-8 text-white shadow-xl shadow-blue-950/10 sm:p-10 lg:col-span-5">
-              <div>
-                <span className="inline-block rounded-full bg-white/15 px-3.5 py-1 text-[11px] font-semibold uppercase tracking-wider text-blue-50">
+          {/* Section Heading dengan garis aksen biru */}
+          <Reveal className="mb-20 text-center">
+            <h2 className="relative inline-block text-3xl font-bold tracking-tight text-ink sm:text-4xl lg:text-5xl">
+              Visi &amp; Misi
+              <span className="absolute -bottom-3 left-1/2 h-1 w-20 -translate-x-1/2 rounded-full bg-primary" />
+            </h2>
+          </Reveal>
+
+          <div className="space-y-24 sm:space-y-32">
+            {/* ROW 1: 3 KARTU DI KIRI, VISI DI KANAN */}
+            <div className="grid items-center gap-12 lg:grid-cols-12 lg:gap-16">
+              {/* Kiri: 3 Kartu Foto Vertikal */}
+              <Reveal className="flex justify-center lg:col-span-6">
+                <div className="flex items-center justify-center gap-3 py-4 sm:gap-4">
+                  <div className="relative h-64 w-24 overflow-hidden rounded-[2.5rem] border-2 border-white shadow-lg shadow-blue-950/10 sm:h-80 sm:w-32 lg:h-88 lg:w-36">
+                    <Image
+                      src="/images/students.jpg"
+                      alt="Siswa SMA Widya Darma"
+                      fill
+                      sizes="(max-width: 640px) 96px, 144px"
+                      className="object-cover"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-blue-950/30 to-transparent" />
+                  </div>
+                  <div className="relative h-76 w-28 -translate-y-3 overflow-hidden rounded-[2.5rem] border-2 border-white shadow-xl shadow-blue-950/15 sm:h-96 sm:w-36 sm:-translate-y-4 lg:h-[26rem] lg:w-44">
+                    <Image
+                      src="/images/campus.jpg"
+                      alt="Kampus SMA Widya Darma"
+                      fill
+                      sizes="(max-width: 640px) 112px, 176px"
+                      className="object-cover"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-blue-950/30 to-transparent" />
+                  </div>
+                  <div className="relative h-64 w-24 translate-y-3 overflow-hidden rounded-[2.5rem] border-2 border-white shadow-lg shadow-blue-950/10 sm:h-80 sm:w-32 sm:translate-y-4 lg:h-88 lg:w-36">
+                    <Image
+                      src="/images/classroom.jpg"
+                      alt="Kelas SMA Widya Darma"
+                      fill
+                      sizes="(max-width: 640px) 96px, 144px"
+                      className="object-cover"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-blue-950/30 to-transparent" />
+                  </div>
+                </div>
+              </Reveal>
+
+              {/* Kanan: Teks Visi */}
+              <Reveal delay={0.08} className="flex flex-col justify-center lg:col-span-6">
+                <span className="text-xs font-bold uppercase tracking-widest text-primary">
                   Visi Sekolah
                 </span>
-                <h2 className="mt-6 text-2xl font-semibold leading-snug tracking-tight sm:text-3xl">
-                  Lorem ipsum dolor sit amet, consectetur adipiscing elit.
-                </h2>
-              </div>
-              <p className="mt-8 text-xs leading-6 text-blue-100 sm:text-sm">
-                {copy.body}
-              </p>
-            </Reveal>
+                <blockquote className="mt-4 text-2xl font-bold leading-snug tracking-tight text-ink sm:text-3xl lg:text-4xl">
+                  &ldquo;Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.&rdquo;
+                </blockquote>
+                <p className="mt-5 text-sm leading-7 text-muted sm:text-base sm:leading-8">
+                  Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat
+                  nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui
+                  officia deserunt mollit anim id est laborum.
+                </p>
+              </Reveal>
+            </div>
 
-            <div className="flex flex-col justify-between gap-4 lg:col-span-7">
-              {[
-                {
-                  no: "01",
-                  title: "Lorem ipsum dolor sit amet",
-                  desc: copy.body,
-                },
-                {
-                  no: "02",
-                  title: "Consectetur adipiscing elit sed do",
-                  desc: copy.body,
-                },
-                {
-                  no: "03",
-                  title: "Eiusmod tempor incididunt ut labore",
-                  desc: copy.body,
-                },
-              ].map((misi, idx) => (
-                <Reveal
-                  key={misi.no}
-                  delay={idx * 0.06}
-                  className="flex gap-5 rounded-3xl border border-white bg-white/80 p-6 shadow-sm"
-                >
-                  <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-blue-50 text-xs font-bold text-primary">
-                    {misi.no}
-                  </span>
-                  <div>
-                    <p className="text-[10px] font-semibold uppercase tracking-wider text-primary">
-                      Misi {misi.no}
-                    </p>
-                    <h3 className="mt-1 text-base font-semibold tracking-tight sm:text-lg">
-                      {misi.title}
-                    </h3>
-                    <p className="mt-2 text-xs leading-6 text-muted">
-                      {misi.desc}
-                    </p>
+            {/* ROW 2: MISI DI KIRI, 3 KARTU DI KANAN */}
+            <div className="grid items-center gap-12 lg:grid-cols-12 lg:gap-16">
+              {/* Kiri: Teks Misi */}
+              <Reveal className="order-2 flex flex-col justify-center lg:order-1 lg:col-span-6">
+                <span className="text-xs font-bold uppercase tracking-widest text-primary">
+                  Misi Sekolah
+                </span>
+                <h3 className="mt-4 text-2xl font-bold leading-snug tracking-tight text-ink sm:text-3xl lg:text-4xl">
+                  Lorem ipsum dolor sit amet, consectetur adipiscing elit sed do eiusmod tempor.
+                </h3>
+                <div className="mt-6 space-y-4">
+                  {[
+                    {
+                      no: "01",
+                      title: "Lorem ipsum dolor sit amet",
+                      desc: "Consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.",
+                    },
+                    {
+                      no: "02",
+                      title: "Sed do eiusmod tempor",
+                      desc: "Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.",
+                    },
+                    {
+                      no: "03",
+                      title: "Duis aute irure dolor in reprehenderit",
+                      desc: "Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.",
+                    },
+                  ].map((item) => (
+                    <div key={item.no} className="flex items-start gap-4">
+                      <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full border border-blue-200 bg-blue-50 text-xs font-bold text-primary">
+                        {item.no}
+                      </span>
+                      <div>
+                        <h4 className="text-sm font-semibold text-ink">
+                          {item.title}
+                        </h4>
+                        <p className="mt-1 text-xs leading-6 text-muted sm:text-sm">
+                          {item.desc}
+                        </p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </Reveal>
+
+              {/* Kanan: 3 Kartu Foto Vertikal */}
+              <Reveal delay={0.08} className="order-1 flex justify-center lg:order-2 lg:col-span-6">
+                <div className="flex items-center justify-center gap-3 py-4 sm:gap-4">
+                  <div className="relative h-64 w-24 overflow-hidden rounded-[2.5rem] border-2 border-white shadow-lg shadow-blue-950/10 sm:h-80 sm:w-32 lg:h-88 lg:w-36">
+                    <Image
+                      src="/images/library.jpg"
+                      alt="Perpustakaan SMA Widya Darma"
+                      fill
+                      sizes="(max-width: 640px) 96px, 144px"
+                      className="object-cover"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-blue-950/30 to-transparent" />
                   </div>
-                </Reveal>
-              ))}
+                  <div className="relative h-76 w-28 -translate-y-3 overflow-hidden rounded-[2.5rem] border-2 border-white shadow-xl shadow-blue-950/15 sm:h-96 sm:w-36 sm:-translate-y-4 lg:h-[26rem] lg:w-44">
+                    <Image
+                      src="/images/students.jpg"
+                      alt="Aktivitas Siswa SMA Widya Darma"
+                      fill
+                      sizes="(max-width: 640px) 112px, 176px"
+                      className="object-cover"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-blue-950/30 to-transparent" />
+                  </div>
+                  <div className="relative h-64 w-24 translate-y-3 overflow-hidden rounded-[2.5rem] border-2 border-white shadow-lg shadow-blue-950/10 sm:h-80 sm:w-32 sm:translate-y-4 lg:h-88 lg:w-36">
+                    <Image
+                      src="/images/classroom.jpg"
+                      alt="Fasilitas Belajar SMA Widya Darma"
+                      fill
+                      sizes="(max-width: 640px) 96px, 144px"
+                      className="object-cover"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-blue-950/30 to-transparent" />
+                  </div>
+                </div>
+              </Reveal>
             </div>
           </div>
         </div>
       </section>
 
-      {/* 03 — Fasilitas Sekolah */}
-      <section
-        id="fasilitas"
-        className="school-section bg-white/55 py-16 sm:py-24"
-      >
-        <div className="container-width">
-          <SectionLabel number="03">Fasilitas sekolah</SectionLabel>
-          <h2 className="school-heading mb-10">Lorem ipsum, dolor sit.</h2>
-          <div className="grid gap-6 md:grid-cols-3">
-            {["classroom", "library", "campus"].map((image, index) => (
-              <Reveal key={image}>
-                <div className="relative aspect-[1.2] overflow-hidden rounded-3xl">
-                  <Image
-                    src={`/images/${image}.jpg`}
-                    alt="Foto contoh fasilitas sekolah"
-                    fill
-                    sizes="(max-width: 768px) 90vw, 30vw"
-                    className="object-cover"
-                  />
-                </div>
-                <p className="mt-5 text-xs font-semibold text-primary">
-                  {
-                    ["Ruang belajar", "Perpustakaan", "Lingkungan sekolah"][
-                      index
-                    ]
-                  }
-                </p>
-                <h3 className="mt-2 text-lg font-semibold">
-                  Lorem ipsum dolor sit.
-                </h3>
-                <p className="mt-2 text-xs leading-6 text-muted">
-                  {copy.short}
-                </p>
-              </Reveal>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* 04 — Struktur Organisasi */}
+      {/* 03 — Struktur Organisasi */}
       <section id="struktur-organisasi" className="school-section py-16 sm:py-24">
         <div className="container-width">
-          <SectionLabel number="04">
+          <SectionLabel number="03">
             Struktur organisasi · Pimpinan sekolah
           </SectionLabel>
           <p className="body-copy mb-12 max-w-xl">{copy.body}</p>
@@ -148,10 +252,10 @@ export default function ProfilPage() {
         </div>
       </section>
 
-      {/* 05 — Profil Guru */}
+      {/* 04 — Profil Guru */}
       <section id="guru" className="school-section bg-white/55 py-16 sm:py-24">
         <div className="container-width">
-          <SectionLabel number="05">
+          <SectionLabel number="04">
             Profil guru & tenaga pendidik
           </SectionLabel>
           <p className="body-copy mb-10 max-w-xl">{copy.body}</p>

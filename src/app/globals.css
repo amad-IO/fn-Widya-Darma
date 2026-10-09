@@ -153,6 +153,34 @@ button:disabled {
     padding-inline: 20px;
   }
 }
+/* Navbar transparan di atas hero foto */
+.school-navbar.is-hero {
+  background-color: transparent;
+  border-color: transparent;
+  color: #fff;
+}
+.is-hero .school-navbar-link {
+  color: #ffffffcc;
+}
+.is-hero .school-navbar-link:hover,
+.is-hero .school-navbar-link.is-active {
+  background-color: #ffffff20;
+  color: #fff;
+}
+.is-hero .school-navbar-contact {
+  background-color: #ffffff20;
+  color: #fff;
+  border: 1px solid #ffffff40;
+}
+.is-hero .school-navbar-contact:hover {
+  background-color: #ffffff35;
+}
+.is-hero .school-navbar-menu {
+  border-color: #ffffff40;
+  background-color: #ffffff15;
+  color: #fff;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .school-navbar {
     transition: none;

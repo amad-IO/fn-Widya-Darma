@@ -41,8 +41,8 @@ export default function Navbar() {
     return () => document.body.classList.remove("overflow-hidden");
   }, [open]);
 
-  const mainLinks = navigation.filter((item) => item.href !== "/kontak");
-  const contactLink = navigation.find((item) => item.href === "/kontak");
+  const mainLinks = navigation.filter((item) => item.href !== "/tanya-ai");
+  const aiLink = navigation.find((item) => item.href === "/tanya-ai");
 
   const isLinkActive = (href: string) => {
     if (href === "/") return pathname === "/";
@@ -57,6 +57,9 @@ export default function Navbar() {
     return pathname.startsWith(href);
   };
 
+  // Halaman yang punya hero full-bleed (tidak perlu spacer, navbar transparan)
+  const isHeroPage = pathname === "/profil";
+
   return (
     <>
       <header
@@ -70,6 +73,7 @@ export default function Navbar() {
           className={cn(
             "school-navbar mx-auto flex w-full items-center justify-between gap-4",
             scrolled && "is-scrolled backdrop-blur-xl",
+            isHeroPage && !scrolled && "is-hero",
           )}
         >
           <Link
@@ -102,13 +106,13 @@ export default function Navbar() {
             })}
           </div>
 
-          {contactLink && (
+          {aiLink && (
             <Link
-              href={contactLink.href}
-              aria-current={pathname === contactLink.href ? "page" : undefined}
+              href={aiLink.href}
+              aria-current={pathname === aiLink.href ? "page" : undefined}
               className="school-navbar-contact hidden shrink-0 rounded-full px-5 py-2.5 text-xs font-semibold transition-colors md:inline-flex"
             >
-              {contactLink.label}
+              {aiLink.label}
             </Link>
           )}
 
@@ -123,7 +127,11 @@ export default function Navbar() {
           </button>
         </nav>
       </header>
-      {pathname !== "/" && <div className="h-20" aria-hidden="true" />}
+      {/* Spacer hanya untuk halaman non-hero */}
+      {pathname !== "/" && !isHeroPage && (
+        <div className="h-20" aria-hidden="true" />
+      )}
+
       <dialog
         ref={dialog}
         id="mobile-menu"
