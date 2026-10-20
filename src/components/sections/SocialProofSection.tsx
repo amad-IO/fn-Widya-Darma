@@ -51,7 +51,7 @@ export default function SocialProofSection() {
     >
       <div className="relative mx-auto h-14 w-14 overflow-hidden rounded-full border-[3px] border-white shadow-sm">
         <Image
-          src="/images/portrait.jpg"
+          src="/images/34.webp"
           alt="Lorem ipsum"
           fill
           sizes="56px"

@@ -7,7 +7,7 @@ const features = [
   {
     number: "01",
     title: "Lorem ipsum dolor.",
-    image: "/images/classroom.jpg",
+    image: "/images/31.webp",
     href: "/visi-misi",
     color: "bg-[#dceaff]",
     top: "md:top-28",
@@ -16,7 +16,7 @@ const features = [
   {
     number: "02",
     title: "Consectetur elit.",
-    image: "/images/library.jpg",
+    image: "/images/33.webp",
     href: "/ekstrakurikuler",
     color: "bg-[#cbdfff]",
     top: "md:top-36",
@@ -25,7 +25,7 @@ const features = [
   {
     number: "03",
     title: "Sed do eiusmod.",
-    image: "/images/students.jpg",
+    image: "/images/32.webp",
     href: "/spmb",
     color: "bg-primary text-white",
     top: "md:top-44",

@@ -16,18 +16,18 @@
     #bfdbfe 15%,
     #60a5fa 35%,
     #3b82f6 58%,
-    #1d4ed8 78%,
+    #063b68 78%,
     #0b398d 100%
   );
   box-shadow:
     inset -5px -5px 12px #1e40af55,
     inset 2px 2px 8px #ffffff80,
-    0 12px 30px #2563eb26,
+    0 12px 30px #07528c26,
     0 0 55px #93c5fd33;
   animation: ai-orb-float 6s ease-in-out infinite;
 }
 .ai-heading-accent {
-  background: linear-gradient(110deg, #2563eb, #5089ec);
+  background: linear-gradient(110deg, #07528c, #1680b8);
   background-clip: text;
   -webkit-background-clip: text;
   color: transparent;

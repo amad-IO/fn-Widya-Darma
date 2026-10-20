@@ -28,9 +28,9 @@ export default function EkstrakurikulerPage() {
                   <Image
                     src={
                       [
-                        "/images/students.jpg",
-                        "/images/library.jpg",
-                        "/images/classroom.jpg",
+                        "/images/48.webp",
+                        "/images/39.webp",
+                        "/images/40.webp",
                       ][i % 3]
                     }
                     alt={title}

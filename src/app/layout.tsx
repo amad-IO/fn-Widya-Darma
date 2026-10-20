@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import localFont from "next/font/local";
+import Script from "next/script";
 import "./globals.css";
 
 const jakarta = localFont({
@@ -32,6 +33,21 @@ export default function RootLayout({
           Lewati ke konten
         </a>
         {children}
+        {process.env.NODE_ENV === "development" && (
+          <Script id="figma-capture-preparation" strategy="afterInteractive">{`
+            if (location.hash.includes('figmacapture=')) {
+              const style = document.createElement('style');
+              style.textContent = 'html{scroll-behavior:auto!important}body{min-width:1440px}main div[style*="opacity"]{opacity:1!important;transform:none!important}nextjs-portal{display:none!important}';
+              document.head.appendChild(style);
+            }
+          `}</Script>
+        )}
+        {process.env.NODE_ENV === "development" && (
+          <Script
+            src="https://mcp.figma.com/mcp/html-to-design/capture.js"
+            strategy="afterInteractive"
+          />
+        )}
       </body>
     </html>
   );

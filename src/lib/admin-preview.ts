@@ -83,7 +83,7 @@ export const previewPublications: PreviewPublication[] = [
     category: "Berita",
     status: "Terbit",
     date: "06 Okt 2026",
-    image: "/images/classroom.jpg",
+    image: "/images/31.webp",
     content: lorem,
   },
   {
@@ -92,7 +92,7 @@ export const previewPublications: PreviewPublication[] = [
     category: "Jurnal",
     status: "Dalam tinjauan",
     date: "05 Okt 2026",
-    image: "/images/library.jpg",
+    image: "/images/33.webp",
     content: lorem,
   },
   {
@@ -101,7 +101,7 @@ export const previewPublications: PreviewPublication[] = [
     category: "Karya",
     status: "Draf",
     date: "05 Okt 2026",
-    image: "/images/students.jpg",
+    image: "/images/32.webp",
     content: lorem,
   },
   {
@@ -110,7 +110,7 @@ export const previewPublications: PreviewPublication[] = [
     category: "Prestasi",
     status: "Terbit",
     date: "04 Okt 2026",
-    image: "/images/campus.jpg",
+    image: "/images/14.webp",
     content: lorem,
   },
   {
@@ -119,7 +119,7 @@ export const previewPublications: PreviewPublication[] = [
     category: "Ekstrakurikuler",
     status: "Terbit",
     date: "03 Okt 2026",
-    image: "/images/students.jpg",
+    image: "/images/34.webp",
     content: lorem,
   },
   {
@@ -128,7 +128,7 @@ export const previewPublications: PreviewPublication[] = [
     category: "Berita",
     status: "Draf",
     date: "02 Okt 2026",
-    image: "/images/library.jpg",
+    image: "/images/35.webp",
     content: lorem,
   },
 ];

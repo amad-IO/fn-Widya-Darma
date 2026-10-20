@@ -36,7 +36,7 @@ export default function GallerySection() {
             className="group relative col-span-2 h-64 overflow-hidden rounded-[2rem] sm:h-80 md:col-span-1 md:h-96"
           >
             <Image
-              src="/images/students.jpg"
+              src="/images/05.webp"
               alt="Lorem ipsum dolor sit amet"
               fill
               sizes="(max-width: 768px) 90vw, 550px"
@@ -56,7 +56,7 @@ export default function GallerySection() {
             className="group relative h-52 overflow-hidden rounded-[2rem] md:mt-12 md:h-80"
           >
             <Image
-              src="/images/library.jpg"
+              src="/images/35.webp"
               alt="Consectetur adipiscing elit"
               fill
               sizes="(max-width: 768px) 45vw, 380px"

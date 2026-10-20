@@ -10,7 +10,7 @@ export default function LoginPage() {
     <div className="relative isolate flex min-h-dvh flex-col justify-between overflow-hidden bg-slate-950 px-5 py-6 text-white sm:px-10 lg:px-14">
       {/* Background Image with Soft Blur & Rich Gradient Overlay */}
       <Image
-        src="/images/campus.jpg"
+        src="/images/01.webp"
         alt="Lingkungan SMA Widya Darma"
         fill
         priority

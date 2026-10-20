@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 import Link from "next/link";
+import { HeadCircuitIcon } from "@phosphor-icons/react";
 import { usePathname } from "next/navigation";
 import { navigation } from "@/lib/constants";
 import { cn } from "@/lib/utils";
@@ -58,7 +59,7 @@ export default function Navbar() {
   };
 
   // Halaman yang punya hero full-bleed (tidak perlu spacer, navbar transparan)
-  const isHeroPage = pathname === "/profil";
+  const isHeroPage = pathname === "/profil" || pathname === "/publikasi";
 
   return (
     <>
@@ -110,8 +111,9 @@ export default function Navbar() {
             <Link
               href={aiLink.href}
               aria-current={pathname === aiLink.href ? "page" : undefined}
-              className="school-navbar-contact hidden shrink-0 rounded-full px-5 py-2.5 text-xs font-semibold transition-colors md:inline-flex"
+              className="school-navbar-contact hidden shrink-0 items-center gap-2 rounded-full px-5 py-2.5 text-xs font-semibold transition-colors md:inline-flex"
             >
+              <HeadCircuitIcon size={18} aria-hidden="true" />
               {aiLink.label}
             </Link>
           )}
@@ -164,7 +166,12 @@ export default function Navbar() {
               onClick={() => setOpen(false)}
               className="flex items-center justify-between border-t border-black/5 py-4 text-base font-medium"
             >
-              {item.label}
+              <span className="flex items-center gap-2">
+                {item.href === "/tanya-ai" && (
+                  <HeadCircuitIcon size={18} aria-hidden="true" />
+                )}
+                {item.label}
+              </span>
               <ArrowUpRight className="h-4 w-4 text-primary" />
             </Link>
           ))}

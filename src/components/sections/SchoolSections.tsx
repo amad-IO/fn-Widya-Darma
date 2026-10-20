@@ -72,21 +72,21 @@ export function SchoolIntro({ profile = false }: { profile?: boolean }) {
                   <p className="text-2xl font-bold tracking-tight text-ink sm:text-3xl">
                     A<span className="text-primary">+</span>
                   </p>
-                  <p className="text-[11px] text-muted">Standar Mutu</p>
+                  <p className="text-[11px] text-muted">Akreditasi</p>
                 </div>
                 <div className="h-8 w-px bg-black/10" />
                 <div>
                   <p className="text-2xl font-bold tracking-tight text-ink sm:text-3xl">
-                    15<span className="text-primary">+</span>
+                    25
                   </p>
-                  <p className="text-[11px] text-muted">Ekstrakurikuler</p>
+                  <p className="text-[11px] text-muted">Jumlah Guru</p>
                 </div>
                 <div className="h-8 w-px bg-black/10" />
                 <div>
                   <p className="text-2xl font-bold tracking-tight text-ink sm:text-3xl">
-                    100<span className="text-primary">%</span>
+                    153
                   </p>
-                  <p className="text-[11px] text-muted">Pendidik Kompeten</p>
+                  <p className="text-[11px] text-muted">Jumlah Murid</p>
                 </div>
               </div>
             </Reveal>
@@ -151,21 +151,21 @@ export function SchoolIntro({ profile = false }: { profile?: boolean }) {
                 <p className="text-2xl font-bold tracking-tight text-ink sm:text-3xl">
                   A<span className="text-primary">+</span>
                 </p>
-                <p className="text-[11px] text-muted">Standar Mutu</p>
+                <p className="text-[11px] text-muted">Akreditasi</p>
               </div>
               <div className="h-8 w-px bg-black/10" />
               <div>
                 <p className="text-2xl font-bold tracking-tight text-ink sm:text-3xl">
-                  15<span className="text-primary">+</span>
+                  25
                 </p>
-                <p className="text-[11px] text-muted">Ekstrakurikuler</p>
+                <p className="text-[11px] text-muted">Jumlah Guru</p>
               </div>
               <div className="h-8 w-px bg-black/10" />
               <div>
                 <p className="text-2xl font-bold tracking-tight text-ink sm:text-3xl">
-                  100<span className="text-primary">%</span>
+                  153
                 </p>
-                <p className="text-[11px] text-muted">Pendidik Kompeten</p>
+                <p className="text-[11px] text-muted">Jumlah Murid</p>
               </div>
             </div>
           </Reveal>
@@ -176,7 +176,7 @@ export function SchoolIntro({ profile = false }: { profile?: boolean }) {
             className="group relative min-h-[340px] overflow-hidden rounded-[2rem] border-2 border-white bg-white shadow-[0_12px_30px_-18px_rgba(32,44,69,0.2)] lg:col-span-5"
           >
             <Image
-              src="/images/campus.jpg"
+              src="/images/14.webp"
               alt="Lingkungan SMA Widya Darma"
               fill
               sizes="(max-width: 1024px) 95vw, 40vw"

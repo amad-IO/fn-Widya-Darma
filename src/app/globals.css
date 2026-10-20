@@ -2,8 +2,20 @@
 @theme inline {
   --color-background: #f6f7f9;
   --color-foreground: #24272d;
-  --color-primary: #2563eb;
-  --color-primary-dark: #1d4ed8;
+  /* Palet brand Widya Darma: biru laut dalam dengan aksen biru terang. */
+  --color-primary: #07528c;
+  --color-primary-dark: #063b68;
+  --color-blue-50: #eff7fc;
+  --color-blue-100: #dceefa;
+  --color-blue-200: #b8dcf2;
+  --color-blue-300: #83c1e6;
+  --color-blue-400: #48a0d2;
+  --color-blue-500: #1680b8;
+  --color-blue-600: #0b689f;
+  --color-blue-700: #07528c;
+  --color-blue-800: #064477;
+  --color-blue-900: #063b68;
+  --color-blue-950: #042b4d;
   --color-ink: #24272d;
   --color-muted: #70757f;
   --color-mist: #f3f5f9;
@@ -80,7 +92,7 @@ button:disabled {
   letter-spacing: -0.045em;
 }
 .school-section {
-  border-top: 1px solid #2563eb08;
+  border-top: 1px solid #07528c08;
 }
 .school-navbar {
   max-width: 1280px;
@@ -103,17 +115,17 @@ button:disabled {
   border-color: #ffffff40;
   border-radius: 999px;
   padding: 8px 12px;
-  background-color: #2563ebd1;
+  background: linear-gradient(110deg, #063b5de6, #052f4de6);
   color: #fff;
-  box-shadow: 0 8px 24px -12px #1e3a8a55;
+  box-shadow: 0 8px 24px -12px #042b4d88;
 }
 .school-navbar-link {
   color: #70757f;
 }
 .school-navbar-link:hover,
 .school-navbar-link.is-active {
-  background-color: #2563eb0f;
-  color: #2563eb;
+  background-color: #07528c0f;
+  color: #07528c;
 }
 .is-scrolled .school-navbar-link {
   color: #ffffffe0;
@@ -124,22 +136,22 @@ button:disabled {
   color: #fff;
 }
 .school-navbar-contact {
-  background-color: #2563eb;
+  background-color: #07528c;
   color: #fff;
 }
 .school-navbar-contact:hover {
-  background-color: #1d4ed8;
+  background-color: #063b68;
 }
 .is-scrolled .school-navbar-contact {
   background-color: #fff;
-  color: #2563eb;
+  color: #07528c;
 }
 .is-scrolled .school-navbar-contact:hover {
   background-color: #eff6ff;
 }
 .school-navbar-menu {
-  border-color: #2563eb26;
-  background-color: #2563eb0f;
+  border-color: #07528c26;
+  background-color: #07528c0f;
 }
 .is-scrolled .school-navbar-menu {
   border-color: #ffffff40;
@@ -181,6 +193,14 @@ button:disabled {
   color: #fff;
 }
 
+/* Item aktif memakai kapsul abu-abu muda seperti referensi navbar. */
+.school-navbar-link.is-active,
+.is-scrolled .school-navbar-link.is-active,
+.is-hero .school-navbar-link.is-active {
+  background-color: #edf0f3;
+  color: #07528c;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .school-navbar {
     transition: none;
@@ -208,11 +228,11 @@ button:disabled {
   z-index: -1;
 }
 .hero-highlight {
-  border: 1px solid #2563eb12;
-  background: linear-gradient(135deg, #2563eb0b, #2563eb12);
+  border: 1px solid #07528c12;
+  background: linear-gradient(135deg, #07528c0b, #07528c12);
   box-shadow:
     inset 0 1px 4px #ffffffaa,
-    0 2px 4px -3px #2563eb25;
+    0 2px 4px -3px #07528c25;
 }
 .home-hero {
   --hero-card-height: 240px;
@@ -258,7 +278,7 @@ button:disabled {
 .showcase-card:hover {
   transform: translateY(-7px);
   box-shadow:
-    0 20px 28px -20px #2563eb50,
+    0 20px 28px -20px #07528c50,
     0 4px 8px -5px #202c4525,
     inset 0 1px 12px #fff9;
 }

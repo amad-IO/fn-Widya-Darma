@@ -32,7 +32,7 @@ node node_modules/next/dist/bin/next build --webpack
 | `/guru` | Enam kartu profil guru contoh | SSG |
 | `/spmb` | Jadwal, persyaratan, dokumen, alur, FAQ, WhatsApp | ISR 3600 detik |
 | `/publikasi` | Filter Berita, Jurnal, Karya, Prestasi, Ekstrakurikuler | ISR 600 detik |
-| `/publikasi/[slug]` | Sepuluh halaman detail konten contoh | ISR 600 detik |
+| `/publikasi/[slug]` | Lima belas halaman detail konten contoh | ISR 600 detik |
 | `/kontak` | Kontak sekolah dan tombol WhatsApp | SSG |
 | `/admin/login` | Form username/password dengan validasi input | SSG |
 

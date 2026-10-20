@@ -18,7 +18,7 @@ export default function ProfilPage() {
       <section className="relative flex min-h-[70vh] items-center justify-center overflow-hidden">
         {/* Background foto */}
         <Image
-          src="/images/campus.jpg"
+          src="/images/01.webp"
           alt="Foto kampus SMA Widya Darma"
           fill
           priority
@@ -94,7 +94,7 @@ export default function ProfilPage() {
                 <div className="flex items-center justify-center gap-3 py-4 sm:gap-4">
                   <div className="relative h-64 w-24 overflow-hidden rounded-[2.5rem] border-2 border-white shadow-lg shadow-blue-950/10 sm:h-80 sm:w-32 lg:h-88 lg:w-36">
                     <Image
-                      src="/images/students.jpg"
+                      src="/images/32.webp"
                       alt="Siswa SMA Widya Darma"
                       fill
                       sizes="(max-width: 640px) 96px, 144px"
@@ -104,7 +104,7 @@ export default function ProfilPage() {
                   </div>
                   <div className="relative h-76 w-28 -translate-y-3 overflow-hidden rounded-[2.5rem] border-2 border-white shadow-xl shadow-blue-950/15 sm:h-96 sm:w-36 sm:-translate-y-4 lg:h-[26rem] lg:w-44">
                     <Image
-                      src="/images/campus.jpg"
+                      src="/images/14.webp"
                       alt="Kampus SMA Widya Darma"
                       fill
                       sizes="(max-width: 640px) 112px, 176px"
@@ -114,7 +114,7 @@ export default function ProfilPage() {
                   </div>
                   <div className="relative h-64 w-24 translate-y-3 overflow-hidden rounded-[2.5rem] border-2 border-white shadow-lg shadow-blue-950/10 sm:h-80 sm:w-32 sm:translate-y-4 lg:h-88 lg:w-36">
                     <Image
-                      src="/images/classroom.jpg"
+                      src="/images/31.webp"
                       alt="Kelas SMA Widya Darma"
                       fill
                       sizes="(max-width: 640px) 96px, 144px"
@@ -191,7 +191,7 @@ export default function ProfilPage() {
                 <div className="flex items-center justify-center gap-3 py-4 sm:gap-4">
                   <div className="relative h-64 w-24 overflow-hidden rounded-[2.5rem] border-2 border-white shadow-lg shadow-blue-950/10 sm:h-80 sm:w-32 lg:h-88 lg:w-36">
                     <Image
-                      src="/images/library.jpg"
+                      src="/images/33.webp"
                       alt="Perpustakaan SMA Widya Darma"
                       fill
                       sizes="(max-width: 640px) 96px, 144px"
@@ -201,7 +201,7 @@ export default function ProfilPage() {
                   </div>
                   <div className="relative h-76 w-28 -translate-y-3 overflow-hidden rounded-[2.5rem] border-2 border-white shadow-xl shadow-blue-950/15 sm:h-96 sm:w-36 sm:-translate-y-4 lg:h-[26rem] lg:w-44">
                     <Image
-                      src="/images/students.jpg"
+                      src="/images/34.webp"
                       alt="Aktivitas Siswa SMA Widya Darma"
                       fill
                       sizes="(max-width: 640px) 112px, 176px"
@@ -211,7 +211,7 @@ export default function ProfilPage() {
                   </div>
                   <div className="relative h-64 w-24 translate-y-3 overflow-hidden rounded-[2.5rem] border-2 border-white shadow-lg shadow-blue-950/10 sm:h-80 sm:w-32 sm:translate-y-4 lg:h-88 lg:w-36">
                     <Image
-                      src="/images/classroom.jpg"
+                      src="/images/41.webp"
                       alt="Fasilitas Belajar SMA Widya Darma"
                       fill
                       sizes="(max-width: 640px) 96px, 144px"

@@ -50,12 +50,12 @@ export default function HeroSpotlight({ children }: { children: ReactNode }) {
       >
         <defs>
           <radialGradient id={gradientId}>
-            <stop offset="0%" stopColor="#2563eb" stopOpacity="0.4" />
-            <stop offset="20%" stopColor="#2563eb" stopOpacity="0.37" />
-            <stop offset="40%" stopColor="#2563eb" stopOpacity="0.24" />
-            <stop offset="60%" stopColor="#2563eb" stopOpacity="0.11" />
-            <stop offset="80%" stopColor="#2563eb" stopOpacity="0.025" />
-            <stop offset="100%" stopColor="#2563eb" stopOpacity="0" />
+            <stop offset="0%" stopColor="#07528c" stopOpacity="0.4" />
+            <stop offset="20%" stopColor="#07528c" stopOpacity="0.37" />
+            <stop offset="40%" stopColor="#07528c" stopOpacity="0.24" />
+            <stop offset="60%" stopColor="#07528c" stopOpacity="0.11" />
+            <stop offset="80%" stopColor="#07528c" stopOpacity="0.025" />
+            <stop offset="100%" stopColor="#07528c" stopOpacity="0" />
           </radialGradient>
         </defs>
         <motion.circle

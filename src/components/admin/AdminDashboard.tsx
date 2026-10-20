@@ -109,7 +109,7 @@ export default function AdminDashboard() {
               ...values,
               id: Math.max(...items.map((item) => item.id), 0) + 1,
               date: "06 Okt 2026",
-              image: "/images/classroom.jpg",
+              image: "/images/31.webp",
             },
             ...items,
           ]
@@ -136,7 +136,7 @@ export default function AdminDashboard() {
 
   return (
     <div className="min-h-dvh bg-[#f5f7fb] text-slate-700 lg:pl-60">
-      <aside className="fixed inset-y-0 left-0 z-30 hidden w-60 overflow-y-auto bg-gradient-to-b from-[#142c58] to-[#102447] lg:block">
+      <aside className="fixed inset-y-0 left-0 z-30 hidden w-60 overflow-y-auto bg-gradient-to-b from-[#063b5d] to-[#052f4d] lg:block">
         <AdminSidebar
           section={section}
           publicationCount={publications.length}
@@ -148,7 +148,7 @@ export default function AdminDashboard() {
         ref={mobileDialogRef}
         aria-label="Navigasi dashboard"
         onClose={() => setMobileMenu(false)}
-        className="fixed inset-y-0 left-0 m-0 h-dvh max-h-none w-72 max-w-[85vw] border-0 bg-[#142c58] p-0 backdrop:bg-slate-950/50"
+        className="fixed inset-y-0 left-0 m-0 h-dvh max-h-none w-72 max-w-[85vw] border-0 bg-[#052f4d] p-0 backdrop:bg-slate-950/50"
       >
         <AdminSidebar
           mobile
@@ -432,7 +432,7 @@ export default function AdminDashboard() {
                 <section className={cn(panel, "overflow-hidden")}>
                   <div className="relative h-28">
                     <Image
-                      src="/images/campus.jpg"
+                      src="/images/01.webp"
                       alt="Foto contoh lingkungan sekolah"
                       fill
                       sizes="(min-width: 1280px) 300px, 50vw"
@@ -512,7 +512,7 @@ export default function AdminDashboard() {
                   </h2>
                   <div className="relative mt-5 h-56 overflow-hidden rounded-xl">
                     <Image
-                      src="/images/campus.jpg"
+                      src="/images/14.webp"
                       alt="Foto contoh gedung sekolah"
                       fill
                       sizes="(min-width: 1280px) 600px, 90vw"
@@ -583,7 +583,7 @@ export default function AdminDashboard() {
                     <div className="relative mb-5 aspect-square overflow-hidden rounded-xl bg-blue-50">
                       {index === 0 ? (
                         <Image
-                          src="/images/portrait.jpg"
+                          src="/images/50.webp"
                           alt="Foto contoh guru"
                           fill
                           sizes="(min-width: 1280px) 250px, 50vw"

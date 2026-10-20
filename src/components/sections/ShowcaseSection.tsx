@@ -21,7 +21,7 @@ export default function ShowcaseSection() {
               className="showcase-illustration aspect-[3/4] w-full overflow-hidden rounded-xl"
             >
               <Image
-                src="/images/students.jpg"
+                src="/images/03.webp"
                 alt="Foto kegiatan siswa SMA Widya Darma"
                 fill
                 sizes="(min-width: 1024px) 220px, 224px"
@@ -54,7 +54,7 @@ export default function ShowcaseSection() {
               className="showcase-illustration aspect-[3/4] w-full overflow-hidden rounded-xl"
             >
               <Image
-                src="/images/campus.jpg"
+                src="/images/01.webp"
                 alt="Foto gedung dan fasilitas sekolah"
                 fill
                 sizes="(min-width: 1024px) 220px, 224px"
@@ -88,7 +88,7 @@ export default function ShowcaseSection() {
               className="showcase-illustration aspect-[3/4] w-full overflow-hidden rounded-xl"
             >
               <Image
-                src="/images/classroom.jpg"
+                src="/images/31.webp"
                 alt="Foto ruang kelas dan kegiatan pembelajaran"
                 fill
                 sizes="(min-width: 1024px) 220px, 224px"
