@@ -25,6 +25,8 @@
 .DS_Store
 *.pem
 /AGENTS.md
+/ASSETS.md
+/FRONTEND_GUIDELINES.md
 
 # debug
 npm-debug.log*
