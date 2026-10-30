@@ -1,5 +1,4 @@
 import Image from "next/image";
-import SectionLabel from "@/components/shared/SectionLabel";
 import StaffCard from "@/components/shared/StaffCard";
 import Reveal from "@/components/shared/Reveal";
 import {
@@ -7,7 +6,6 @@ import {
   ContactSection,
 } from "@/components/sections/SchoolSections";
 import { leadership, teachers } from "@/lib/school";
-import { copy } from "@/lib/constants";
 
 export const metadata = { title: "Profil & Visi Misi — SMA Widya Darma" };
 
@@ -226,42 +224,27 @@ export default function ProfilPage() {
         </div>
       </section>
 
-      {/* 03 — Struktur Organisasi */}
-      <section id="struktur-organisasi" className="school-section py-16 sm:py-24">
-        <div className="container-width">
-          <SectionLabel number="03">
-            Struktur organisasi · Pimpinan sekolah
-          </SectionLabel>
-          <p className="body-copy mb-12 max-w-xl">{copy.body}</p>
-          <div className="mx-auto max-w-5xl">
-            <div className="mx-auto max-w-xs">
-              <StaffCard person={leadership[0]} />
-            </div>
-            <div className="mx-auto h-10 w-px bg-blue-200" aria-hidden="true" />
-            <div className="relative grid gap-6 border-l border-blue-200 pl-6 md:grid-cols-3 md:border-l-0 md:border-t md:pl-0 md:pt-10">
-              {leadership.slice(1).map((person) => (
-                <div
-                  key={person.id}
-                  className="relative md:before:absolute md:before:-top-10 md:before:left-1/2 md:before:h-10 md:before:w-px md:before:bg-blue-200"
-                >
-                  <StaffCard person={person} />
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* 04 — Profil Guru */}
+      {/* 03 — Profil Guru */}
       <section id="guru" className="school-section bg-white/55 py-16 sm:py-24">
         <div className="container-width">
-          <SectionLabel number="04">
-            Profil guru & tenaga pendidik
-          </SectionLabel>
-          <p className="body-copy mb-10 max-w-xl">{copy.body}</p>
-          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+          <Reveal className="mx-auto mb-12 max-w-2xl text-center">
+            <p className="mx-auto inline-flex rounded-full border border-slate-300 bg-white/90 px-5 py-2 text-xs font-medium text-ink shadow-sm">
+              Profil Guru
+            </p>
+            <h2 className="mt-5 text-3xl font-semibold leading-tight tracking-tight text-ink sm:text-4xl lg:text-[2.5rem]">
+              Pendidik berdedikasi, membimbing
+              <span className="block text-slate-400">generasi berprestasi</span>
+            </h2>
+            <p className="mt-3 text-sm leading-6 text-muted">
+              Tenaga pendidik profesional dari keluarga SMA Widya Darma.
+            </p>
+          </Reveal>
+          <div className="mx-auto grid max-w-3xl grid-cols-2 gap-4 sm:grid-cols-4">
+            <Reveal>
+              <StaffCard person={leadership[0]} />
+            </Reveal>
             {teachers.map((person, index) => (
-              <Reveal key={person.id} delay={(index % 3) * 0.06}>
+              <Reveal key={person.id} delay={((index + 1) % 4) * 0.06}>
                 <StaffCard person={person} teacher />
               </Reveal>
             ))}

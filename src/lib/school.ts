@@ -3,7 +3,6 @@ import { imageAsset } from "./media";
 
 export const profileLinks = [
   { label: "Profil sekolah", href: "/profil" },
-  { label: "Struktur organisasi", href: "/struktur-organisasi" },
   { label: "Profil guru", href: "/guru" },
 ];
 
@@ -29,7 +28,7 @@ export type Publication = {
   article?: string[];
 };
 const publicationImageIds = [
-  3, 5, 9, 31, 33, 41, 34, 35, 11, 12, 50, 39, 40, 47, 48,
+  3, 5, 9, 31, 33, 41, 34, 35, 11, 36, 50, 39, 40, 47, 48,
 ];
 
 export const publications: Publication[] = publicationCategories
@@ -63,11 +62,12 @@ export const publications: Publication[] = publicationCategories
   }));
 
 export type Staff = { id: string; name: string; role: string; image: string };
+const teacherImages = [50, 34, 22, 23, 25, 18];
 export const teachers: Staff[] = Array.from({ length: 6 }, (_, index) => ({
   id: `guru-${index + 1}`,
   name: ["Lorem Ipsum", "Dolor Sit Amet", "Consectetur Elit"][index % 3],
-  role: ["Lorem ipsum", "Dolor sit amet", "Consectetur elit"][index % 3],
-  image: imageAsset(34),
+  role: ["Wakil Kepala Sekolah", "Guru Matematika", "Guru Bahasa Indonesia", "Guru Biologi", "Guru Fisika", "Guru Ekonomi"][index],
+  image: imageAsset(teacherImages[index % teacherImages.length]),
 }));
 export const leadership: Staff[] = [
   {

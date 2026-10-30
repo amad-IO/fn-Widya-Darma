@@ -10,7 +10,6 @@ export default function Footer() {
         <div className="flex flex-wrap gap-x-6 gap-y-4">
           {[
             { href: "/profil", label: "Profil sekolah" },
-            { href: "/struktur-organisasi", label: "Organisasi" },
             { href: "/guru", label: "Guru" },
             { href: "/spmb", label: "SPMB" },
             { href: "/publikasi", label: "Publikasi & galeri" },

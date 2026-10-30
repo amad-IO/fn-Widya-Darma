@@ -11,23 +11,6 @@ import { copy } from "@/lib/constants";
 import { leadership, teachers, schoolContact } from "@/lib/school";
 
 const sectionClass = "school-section relative py-16 sm:py-24";
-function MoreLink({
-  href,
-  children,
-}: {
-  href: string;
-  children: React.ReactNode;
-}) {
-  return (
-    <Link
-      href={href}
-      className="inline-flex items-center gap-3 text-xs font-semibold text-primary transition hover:gap-5"
-    >
-      {children}
-      <ArrowUpRight className="h-4 w-4" />
-    </Link>
-  );
-}
 
 export function SchoolIntro({ profile = false }: { profile?: boolean }) {
   const pillars = [
@@ -223,26 +206,22 @@ export function StaffPreview() {
   return (
     <section
       className={sectionClass}
-      aria-label="Kepala sekolah dan profil guru"
+      aria-label="Profil guru dan tenaga pendidik"
     >
       <div className="container-width">
-        <Reveal className="mb-10 flex flex-wrap items-end justify-between gap-6">
-          <div>
-            <SectionLabel number="03">
-              Kepala sekolah & profil guru
-            </SectionLabel>
-            <h2 className="school-heading">
-              Lorem ipsum,
-              <br />
-              consectetur elit.
-            </h2>
-          </div>
-          <div className="flex flex-wrap gap-6">
-            <MoreLink href="/struktur-organisasi">Struktur organisasi</MoreLink>
-            <MoreLink href="/guru">Semua guru</MoreLink>
-          </div>
+        <Reveal className="mx-auto mb-12 max-w-2xl text-center">
+          <p className="mx-auto inline-flex rounded-full border border-slate-300 bg-white/90 px-5 py-2 text-xs font-medium text-ink shadow-sm">
+            Profil Guru
+          </p>
+          <h2 className="mt-5 text-3xl font-semibold leading-tight tracking-tight text-ink sm:text-4xl lg:text-[2.5rem]">
+            Pendidik berdedikasi, membimbing
+            <span className="block text-slate-400">generasi berprestasi</span>
+          </h2>
+          <p className="mt-3 text-sm leading-6 text-muted">
+            Tenaga pendidik profesional dari keluarga SMA Widya Darma.
+          </p>
         </Reveal>
-        <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="mx-auto grid max-w-3xl grid-cols-2 gap-4 sm:grid-cols-4">
           <Reveal>
             <StaffCard person={leadership[0]} />
           </Reveal>
@@ -252,6 +231,11 @@ export function StaffPreview() {
             </Reveal>
           ))}
         </div>
+        <Reveal className="mt-10 flex justify-center">
+          <Button asChild className="rounded-full px-6">
+            <Link href="/guru">Lihat semua guru</Link>
+          </Button>
+        </Reveal>
       </div>
     </section>
   );
@@ -264,21 +248,25 @@ export function PublicationPreview() {
       aria-label="Publikasi dan galeri sekolah"
     >
       <div className="container-width">
-        <Reveal className="mb-10 flex flex-wrap items-end justify-between gap-6">
-          <div>
-            <SectionLabel number="04">
-              Publikasi & galeri · Berita, jurnal, karya, prestasi,
-              ekstrakurikuler
-            </SectionLabel>
-            <h2 className="school-heading">
-              Lorem ipsum
-              <br />
-              <span className="text-primary">dolor sit amet.</span>
-            </h2>
-          </div>
-          <MoreLink href="/publikasi">Semua publikasi</MoreLink>
+        <Reveal className="mx-auto mb-12 max-w-2xl text-center">
+          <p className="mx-auto inline-flex rounded-full border border-slate-300 bg-white/90 px-5 py-2 text-xs font-medium text-ink shadow-sm">
+            Publikasi &amp; Galeri
+          </p>
+          <h2 className="mt-5 text-3xl font-semibold leading-tight tracking-tight text-ink sm:text-4xl lg:text-[2.5rem]">
+            Momen belajar, berkarya,
+            <span className="block text-slate-400">dan berprestasi</span>
+          </h2>
+          <p className="mt-3 text-sm leading-6 text-muted">
+            Berita, jurnal, karya, prestasi, dan kegiatan ekstrakurikuler SMA
+            Widya Darma.
+          </p>
         </Reveal>
         <PublicationGrid preview />
+        <Reveal className="mt-10 flex justify-center">
+          <Button asChild className="rounded-full px-6">
+            <Link href="/publikasi">Lihat semua publikasi</Link>
+          </Button>
+        </Reveal>
       </div>
     </section>
   );

@@ -8,26 +8,32 @@ export default function StaffCard({
   person: Staff;
   teacher?: boolean;
 }) {
+  const roleLabel =
+    teacher && !person.role.toLowerCase().startsWith("guru")
+      ? `Guru · ${person.role}`
+      : person.role;
+
   return (
-    <article className="rounded-3xl border border-white bg-white/80 p-5 text-center shadow-sm shadow-blue-950/5">
-      <div className="relative mx-auto h-24 w-24 overflow-hidden rounded-full border-4 border-blue-50">
-        <Image
-          src={person.image}
-          alt={`Foto contoh ${teacher ? "guru" : person.role.toLowerCase()}`}
-          fill
-          sizes="96px"
-          className="object-cover"
-        />
+    <article className="group relative mx-auto aspect-[2/3] w-full max-w-[200px] overflow-hidden rounded-2xl bg-blue-100 shadow-sm shadow-blue-950/10">
+      <Image
+        src={person.image}
+        alt={`${person.name} — ${roleLabel}`}
+        fill
+        sizes="(max-width: 640px) 45vw, 200px"
+        className="object-cover object-top transition-transform duration-500 ease-out group-hover:scale-105"
+      />
+      <div
+        aria-hidden="true"
+        className="absolute inset-0 bg-gradient-to-t from-slate-950/90 via-slate-950/25 to-transparent"
+      />
+      <div className="absolute inset-x-0 bottom-0 p-3.5 text-left text-white sm:p-4">
+        <p className="text-[9px] font-semibold uppercase tracking-wider text-sky-300 sm:text-[10px]">
+          {roleLabel}
+        </p>
+        <h3 className="mt-1 text-sm font-semibold leading-snug tracking-tight text-white sm:text-base">
+          {person.name}
+        </h3>
       </div>
-      <p className="mt-5 text-[10px] font-semibold uppercase tracking-wider text-primary">
-        {teacher ? "Guru · Mata pelajaran" : person.role}
-      </p>
-      <h3 className="mt-2 text-lg font-semibold tracking-tight">
-        {person.name}
-      </h3>
-      <p className="mt-2 text-xs leading-6 text-muted">
-        {teacher ? person.role : "Lorem ipsum dolor sit amet."}
-      </p>
     </article>
   );
 }

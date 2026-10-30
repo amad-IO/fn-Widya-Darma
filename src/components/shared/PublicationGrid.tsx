@@ -3,34 +3,37 @@
 import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
+import { motion, useReducedMotion } from "framer-motion";
 import {
   publications,
   publicationCategories,
   type Publication,
   type PublicationCategory,
 } from "@/lib/school";
-import { ArrowUpRight } from "./Svg";
 import { cn } from "@/lib/utils";
 
 export default function PublicationGrid({
   preview = false,
-  showFilters = true,
+  showFilters = false,
+  limit,
 }: {
   preview?: boolean;
   showFilters?: boolean;
+  limit?: number;
 }) {
   const [category, setCategory] = useState<PublicationCategory | "Semua">(
     "Semua",
   );
-  const filtered = publications.filter(
-    (item) =>
-      !showFilters || category === "Semua" || item.category === category,
-  );
-  const visible = preview ? filtered.slice(0, 3) : filtered;
-  if (!showFilters)
-    return (
-      <PublicationMosaic publications={visible} />
-    );
+  const reduced = useReducedMotion();
+  const ordered =
+    category === "Semua"
+      ? [0, 4, 8, 9, 13, 2, 1, 3, 5, 6, 7, 10, 11, 12, 14]
+          .map((i) => publications[i])
+          .filter(Boolean)
+      : publications.filter((item) => item.category === category);
+  const count = limit ?? (preview ? 3 : 6);
+  const visible = ordered.slice(0, count);
+
   return (
     <div>
       {showFilters && (
@@ -61,37 +64,63 @@ export default function PublicationGrid({
         {showFilters ? ` untuk kategori ${category}` : ""}.
       </p>
       <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-        {visible.map((item) => (
-          <Link
-            key={item.slug}
-            href={`/publikasi/${item.slug}`}
-            className="group rounded-3xl border border-white bg-white/65 p-3 transition duration-500 hover:-translate-y-1 hover:shadow-xl hover:shadow-blue-950/5"
+        {visible.map((item, index) => (
+          <motion.div
+            key={`${category}-${item.slug}`}
+            initial={reduced ? false : "hidden"}
+            whileInView="visible"
+            viewport={{ once: false, amount: 0.15 }}
+            variants={{
+              hidden: {
+                opacity: 0,
+                y: 36,
+                scale: 0.94,
+                transition: { duration: 0.25 },
+              },
+              visible: {
+                opacity: 1,
+                y: 0,
+                scale: 1,
+                transition: {
+                  duration: 1.0,
+                  delay: (index % 3) * 0.14,
+                  ease: [0.16, 1, 0.3, 1],
+                },
+              },
+            }}
           >
-            <div className="relative aspect-[1.5] overflow-hidden rounded-2xl">
-              <Image
-                src={item.image}
-                alt={`Foto contoh untuk kategori ${item.category}`}
-                fill
-                sizes="(max-width: 640px) 90vw, (max-width: 1024px) 45vw, 30vw"
-                className="object-cover transition duration-700 group-hover:scale-105"
-              />
-            </div>
-            <div className="p-4">
-              <p className="mb-4 text-[10px] font-semibold uppercase tracking-widest text-primary">
-                {item.category}
-              </p>
-              <h3 className="text-xl font-semibold leading-7 tracking-tight">
-                {item.title}
-              </h3>
-              <p className="mt-3 line-clamp-2 text-xs leading-6 text-muted">
-                {item.excerpt}
-              </p>
-              <span className="mt-5 flex items-center justify-between text-xs font-medium">
-                Lihat selengkapnya
-                <ArrowUpRight className="h-4 w-4 text-primary transition group-hover:translate-x-1" />
-              </span>
-            </div>
-          </Link>
+            <Link
+              href={`/publikasi/${item.slug}`}
+              aria-label={`${item.category}: ${item.title}`}
+              className="group flex h-full flex-col rounded-3xl bg-white p-3.5 shadow-sm shadow-blue-950/5 transition duration-500 hover:-translate-y-1.5 hover:shadow-xl hover:shadow-blue-950/10"
+            >
+              <div className="relative aspect-[16/10] w-full overflow-hidden rounded-2xl bg-blue-50">
+                <Image
+                  src={item.image}
+                  alt={`${item.title} — kategori ${item.category}`}
+                  fill
+                  sizes="(max-width: 640px) 90vw, (max-width: 1024px) 45vw, 30vw"
+                  className="scale-[1.04] object-cover transition-transform duration-500 ease-out group-hover:scale-100"
+                />
+              </div>
+              <div className="flex flex-1 flex-col justify-between p-4 sm:p-5">
+                <div>
+                  <div className="mb-2.5 flex items-center justify-between gap-2 text-[11px] text-muted">
+                    <span className="font-semibold uppercase tracking-wider text-primary">
+                      {item.category}
+                    </span>
+                    {item.activityDate && <span>{item.activityDate}</span>}
+                  </div>
+                  <h3 className="text-lg font-semibold leading-snug tracking-tight text-ink transition-colors group-hover:text-primary sm:text-xl">
+                    {item.title}
+                  </h3>
+                  <p className="mt-2.5 line-clamp-3 text-xs leading-6 text-muted sm:text-sm">
+                    {item.excerpt}
+                  </p>
+                </div>
+              </div>
+            </Link>
+          </motion.div>
         ))}
       </div>
     </div>
@@ -109,11 +138,12 @@ const mosaicLanes = [
   { items: [12, 13], offset: "lg:mt-[54px]", shape: "lg:aspect-[7/10]" },
 ] as const;
 
-function PublicationMosaic({
-  publications: items,
+export function PublicationMosaic({
+  publications: items = publications,
 }: {
-  publications: Publication[];
+  publications?: Publication[];
 }) {
+  const reduced = useReducedMotion();
   const mobileShapes = [
     "aspect-[4/5]",
     "aspect-square",
@@ -124,7 +154,28 @@ function PublicationMosaic({
 
   return (
     <div className="relative mx-auto min-h-[620px] max-w-[1480px] lg:min-h-[650px]">
-      <header className="col-span-2 mb-8 text-center lg:absolute lg:left-1/4 lg:top-[390px] lg:z-10 lg:mb-0 lg:w-1/2 lg:px-8">
+      <motion.header
+        initial={reduced ? false : "hidden"}
+        whileInView="visible"
+        viewport={{ once: false, amount: 0.2 }}
+        variants={{
+          hidden: {
+            opacity: 0,
+            y: 28,
+            transition: { duration: 0.25 },
+          },
+          visible: {
+            opacity: 1,
+            y: 0,
+            transition: {
+              duration: 1.05,
+              delay: 0.3,
+              ease: [0.16, 1, 0.3, 1],
+            },
+          },
+        }}
+        className="col-span-2 mb-8 text-center lg:absolute lg:left-1/4 lg:top-[390px] lg:z-10 lg:mb-0 lg:w-1/2 lg:px-8"
+      >
         <p className="mx-auto inline-flex rounded-full border border-slate-300 bg-white/90 px-5 py-2 text-xs font-medium text-ink shadow-sm">
           Publikasi & Galeri
         </p>
@@ -135,7 +186,7 @@ function PublicationMosaic({
         <p className="mt-3 text-sm leading-6 text-muted">
           Cerita dari keluarga SMA Widya Darma.
         </p>
-      </header>
+      </motion.header>
 
       <div className="grid grid-cols-2 gap-4 lg:grid-cols-8 lg:gap-5">
         {mosaicLanes.map((lane, laneIndex) => (
@@ -153,30 +204,58 @@ function PublicationMosaic({
               ][
                 (laneIndex + photoIndex) % 3
               ];
+              const centerOffset = Math.abs(laneIndex - 3.5) - 0.5;
+              const delay = centerOffset * 0.12 + photoIndex * 0.14;
 
               return (
-                <Link
+                <motion.div
                   key={`${laneIndex}-${photoIndex}-${item.slug}`}
-                  href={`/publikasi/${item.slug}`}
-                  aria-label={`Buka publikasi: ${item.title}`}
-                  className={cn(
-                    "group relative block overflow-hidden rounded-[1.35rem] bg-blue-50 outline-offset-4 focus-visible:outline-2 focus-visible:outline-primary",
-                    mobileShapes[(laneIndex + photoIndex) % mobileShapes.length],
-                    lane.shape,
-                  )}
+                  initial={reduced ? false : "hidden"}
+                  whileInView="visible"
+                  viewport={{ once: false, amount: 0.12 }}
+                  variants={{
+                    hidden: {
+                      opacity: 0,
+                      y: 40,
+                      scale: 0.9,
+                      transition: { duration: 0.25 },
+                    },
+                    visible: {
+                      opacity: 1,
+                      y: 0,
+                      scale: 1,
+                      transition: {
+                        duration: 1.1,
+                        delay,
+                        ease: [0.16, 1, 0.3, 1],
+                      },
+                    },
+                  }}
                 >
-                  <Image
-                    src={item.coverImage || item.image}
-                    alt={item.title}
-                    fill
-                    sizes="(max-width: 1023px) 88vw, 28vw"
-                    quality={85}
+                  <Link
+                    href={`/publikasi/${item.slug}`}
+                    aria-label={`Buka publikasi: ${item.title}`}
                     className={cn(
-                      "object-cover transition-transform duration-500 group-hover:scale-[1.02] motion-reduce:transition-none",
-                      cropClass,
+                      "group relative block w-full overflow-hidden rounded-[1.35rem] bg-blue-50 outline-offset-4 transition-transform duration-500 ease-out hover:scale-[0.97] focus-visible:outline-2 focus-visible:outline-primary motion-reduce:transition-none",
+                      mobileShapes[
+                        (laneIndex + photoIndex) % mobileShapes.length
+                      ],
+                      lane.shape,
                     )}
-                  />
-                </Link>
+                  >
+                    <Image
+                      src={item.coverImage || item.image}
+                      alt={item.title}
+                      fill
+                      sizes="(max-width: 1023px) 88vw, 28vw"
+                      quality={85}
+                      className={cn(
+                        "scale-[1.05] object-cover transition-transform duration-500 ease-out group-hover:scale-100 motion-reduce:transition-none",
+                        cropClass,
+                      )}
+                    />
+                  </Link>
+                </motion.div>
               );
             })}
           </div>
@@ -185,3 +264,4 @@ function PublicationMosaic({
     </div>
   );
 }
+
