@@ -59,7 +59,10 @@ export default function Navbar() {
   };
 
   // Halaman yang punya hero full-bleed (tidak perlu spacer, navbar transparan)
-  const isHeroPage = pathname === "/profil" || pathname === "/publikasi";
+  const isHeroPage =
+    pathname === "/profil" ||
+    pathname === "/publikasi" ||
+    pathname === "/guru";
 
   return (
     <>
@@ -91,6 +94,65 @@ export default function Navbar() {
           <div className="hidden items-center gap-1 md:flex">
             {mainLinks.map((item) => {
               const active = isLinkActive(item.href);
+
+              if (item.href === "/profil") {
+                return (
+                  <div key={item.href} className="group/profil relative">
+                    <Link
+                      href={item.href}
+                      aria-current={active ? "page" : undefined}
+                      className={cn(
+                        "school-navbar-link relative inline-flex items-center gap-1.5 whitespace-nowrap rounded-full px-3 py-2 text-xs font-medium transition-colors",
+                        active && "is-active",
+                      )}
+                    >
+                      {item.label}
+                      <svg
+                        viewBox="0 0 12 12"
+                        fill="none"
+                        aria-hidden="true"
+                        className="h-3 w-3 transition-transform duration-200 group-hover/profil:rotate-180"
+                      >
+                        <path
+                          d="M2.5 4.5L6 8L9.5 4.5"
+                          stroke="currentColor"
+                          strokeWidth="1.5"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                        />
+                      </svg>
+                    </Link>
+
+                    <div className="invisible absolute left-1/2 top-full z-50 -translate-x-1/2 translate-y-1 pt-2 opacity-0 transition-all duration-200 group-hover/profil:visible group-hover/profil:translate-y-0 group-hover/profil:opacity-100 group-focus-within/profil:visible group-focus-within/profil:translate-y-0 group-focus-within/profil:opacity-100">
+                      <div className="min-w-[180px] rounded-2xl border border-slate-200/80 bg-white/95 p-1.5 text-ink shadow-lg shadow-blue-950/15 backdrop-blur-md">
+                        <Link
+                          href="/profil"
+                          className={cn(
+                            "flex items-center justify-between rounded-xl px-3.5 py-2.5 text-xs font-medium transition-colors hover:bg-blue-50 hover:text-primary",
+                            pathname === "/profil"
+                              ? "bg-blue-50 font-semibold text-primary"
+                              : "text-ink",
+                          )}
+                        >
+                          Profil Sekolah
+                        </Link>
+                        <Link
+                          href="/guru"
+                          className={cn(
+                            "mt-0.5 flex items-center justify-between rounded-xl px-3.5 py-2.5 text-xs font-medium transition-colors hover:bg-blue-50 hover:text-primary",
+                            pathname.startsWith("/guru")
+                              ? "bg-blue-50 font-semibold text-primary"
+                              : "text-ink",
+                          )}
+                        >
+                          Profil Guru
+                        </Link>
+                      </div>
+                    </div>
+                  </div>
+                );
+              }
+
               return (
                 <Link
                   key={item.href}
@@ -160,20 +222,31 @@ export default function Navbar() {
         </div>
         <div className="flex flex-col">
           {navigation.map((item) => (
-            <Link
-              key={item.href}
-              href={item.href}
-              onClick={() => setOpen(false)}
-              className="flex items-center justify-between border-t border-black/5 py-4 text-base font-medium"
-            >
-              <span className="flex items-center gap-2">
-                {item.href === "/tanya-ai" && (
-                  <HeadCircuitIcon size={18} aria-hidden="true" />
-                )}
-                {item.label}
-              </span>
-              <ArrowUpRight className="h-4 w-4 text-primary" />
-            </Link>
+            <div key={item.href} className="flex flex-col">
+              <Link
+                href={item.href}
+                onClick={() => setOpen(false)}
+                className="flex items-center justify-between border-t border-black/5 py-4 text-base font-medium"
+              >
+                <span className="flex items-center gap-2">
+                  {item.href === "/tanya-ai" && (
+                    <HeadCircuitIcon size={18} aria-hidden="true" />
+                  )}
+                  {item.label}
+                </span>
+                <ArrowUpRight className="h-4 w-4 text-primary" />
+              </Link>
+              {item.href === "/profil" && (
+                <Link
+                  href="/guru"
+                  onClick={() => setOpen(false)}
+                  className="flex items-center justify-between border-t border-black/5 py-3.5 pl-4 text-sm font-medium text-muted hover:text-primary"
+                >
+                  <span>↳ Profil Guru</span>
+                  <ArrowUpRight className="h-4 w-4 text-primary" />
+                </Link>
+              )}
+            </div>
           ))}
         </div>
       </dialog>

@@ -1,11 +1,7 @@
 import Image from "next/image";
-import StaffCard from "@/components/shared/StaffCard";
 import Reveal from "@/components/shared/Reveal";
-import {
-  SchoolIntro,
-  ContactSection,
-} from "@/components/sections/SchoolSections";
-import { leadership, teachers } from "@/lib/school";
+import { SchoolIntro } from "@/components/sections/SchoolSections";
+import StaffSection from "@/components/sections/StaffSection";
 
 export const metadata = { title: "Profil & Visi Misi — SMA Widya Darma" };
 
@@ -89,34 +85,37 @@ export default function ProfilPage() {
             <div className="grid items-center gap-12 lg:grid-cols-12 lg:gap-16">
               {/* Kiri: 3 Kartu Foto Vertikal */}
               <Reveal className="flex justify-center lg:col-span-6">
-                <div className="flex items-center justify-center gap-3 py-4 sm:gap-4">
-                  <div className="relative h-64 w-24 overflow-hidden rounded-[2.5rem] border-2 border-white shadow-lg shadow-blue-950/10 sm:h-80 sm:w-32 lg:h-88 lg:w-36">
+                <div className="flex items-center justify-center gap-2.5 py-4 sm:gap-3.5">
+                  <div className="relative h-60 w-28 overflow-hidden rounded-[2rem] border-2 border-white shadow-lg shadow-blue-950/10 sm:h-72 sm:w-36 lg:h-80 lg:w-44">
                     <Image
                       src="/images/32.webp"
                       alt="Siswa SMA Widya Darma"
                       fill
-                      sizes="(max-width: 640px) 96px, 144px"
-                      className="object-cover"
+                      quality={95}
+                      sizes="(max-width: 640px) 240px, (max-width: 1024px) 360px, 480px"
+                      className="object-cover object-[35%_20%]"
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-blue-950/30 to-transparent" />
                   </div>
-                  <div className="relative h-76 w-28 -translate-y-3 overflow-hidden rounded-[2.5rem] border-2 border-white shadow-xl shadow-blue-950/15 sm:h-96 sm:w-36 sm:-translate-y-4 lg:h-[26rem] lg:w-44">
+                  <div className="relative h-72 w-32 -translate-y-3 overflow-hidden rounded-[2.2rem] border-2 border-white shadow-xl shadow-blue-950/15 sm:h-84 sm:w-44 sm:-translate-y-4 lg:h-[23rem] lg:w-52">
                     <Image
                       src="/images/14.webp"
                       alt="Kampus SMA Widya Darma"
                       fill
-                      sizes="(max-width: 640px) 112px, 176px"
-                      className="object-cover"
+                      quality={95}
+                      sizes="(max-width: 640px) 240px, (max-width: 1024px) 360px, 480px"
+                      className="object-cover object-[50%_65%]"
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-blue-950/30 to-transparent" />
                   </div>
-                  <div className="relative h-64 w-24 translate-y-3 overflow-hidden rounded-[2.5rem] border-2 border-white shadow-lg shadow-blue-950/10 sm:h-80 sm:w-32 sm:translate-y-4 lg:h-88 lg:w-36">
+                  <div className="relative h-60 w-28 translate-y-3 overflow-hidden rounded-[2rem] border-2 border-white shadow-lg shadow-blue-950/10 sm:h-72 sm:w-36 sm:translate-y-4 lg:h-80 lg:w-44">
                     <Image
                       src="/images/31.webp"
                       alt="Kelas SMA Widya Darma"
                       fill
-                      sizes="(max-width: 640px) 96px, 144px"
-                      className="object-cover"
+                      quality={95}
+                      sizes="(max-width: 640px) 240px, (max-width: 1024px) 360px, 480px"
+                      className="object-cover object-[30%_25%]"
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-blue-950/30 to-transparent" />
                   </div>
@@ -186,34 +185,37 @@ export default function ProfilPage() {
 
               {/* Kanan: 3 Kartu Foto Vertikal */}
               <Reveal delay={0.08} className="order-1 flex justify-center lg:order-2 lg:col-span-6">
-                <div className="flex items-center justify-center gap-3 py-4 sm:gap-4">
-                  <div className="relative h-64 w-24 overflow-hidden rounded-[2.5rem] border-2 border-white shadow-lg shadow-blue-950/10 sm:h-80 sm:w-32 lg:h-88 lg:w-36">
+                <div className="flex items-center justify-center gap-2.5 py-4 sm:gap-3.5">
+                  <div className="relative h-60 w-28 overflow-hidden rounded-[2rem] border-2 border-white shadow-lg shadow-blue-950/10 sm:h-72 sm:w-36 lg:h-80 lg:w-44">
                     <Image
                       src="/images/33.webp"
                       alt="Perpustakaan SMA Widya Darma"
                       fill
-                      sizes="(max-width: 640px) 96px, 144px"
-                      className="object-cover"
+                      quality={95}
+                      sizes="(max-width: 640px) 240px, (max-width: 1024px) 360px, 480px"
+                      className="object-cover object-[50%_25%]"
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-blue-950/30 to-transparent" />
                   </div>
-                  <div className="relative h-76 w-28 -translate-y-3 overflow-hidden rounded-[2.5rem] border-2 border-white shadow-xl shadow-blue-950/15 sm:h-96 sm:w-36 sm:-translate-y-4 lg:h-[26rem] lg:w-44">
+                  <div className="relative h-72 w-32 -translate-y-3 overflow-hidden rounded-[2.2rem] border-2 border-white shadow-xl shadow-blue-950/15 sm:h-84 sm:w-44 sm:-translate-y-4 lg:h-[23rem] lg:w-52">
                     <Image
                       src="/images/34.webp"
                       alt="Aktivitas Siswa SMA Widya Darma"
                       fill
-                      sizes="(max-width: 640px) 112px, 176px"
-                      className="object-cover"
+                      quality={95}
+                      sizes="(max-width: 640px) 240px, (max-width: 1024px) 360px, 480px"
+                      className="object-cover object-[70%_25%]"
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-blue-950/30 to-transparent" />
                   </div>
-                  <div className="relative h-64 w-24 translate-y-3 overflow-hidden rounded-[2.5rem] border-2 border-white shadow-lg shadow-blue-950/10 sm:h-80 sm:w-32 sm:translate-y-4 lg:h-88 lg:w-36">
+                  <div className="relative h-60 w-28 translate-y-3 overflow-hidden rounded-[2rem] border-2 border-white shadow-lg shadow-blue-950/10 sm:h-72 sm:w-36 sm:translate-y-4 lg:h-80 lg:w-44">
                     <Image
                       src="/images/41.webp"
                       alt="Fasilitas Belajar SMA Widya Darma"
                       fill
-                      sizes="(max-width: 640px) 96px, 144px"
-                      className="object-cover"
+                      quality={95}
+                      sizes="(max-width: 640px) 240px, (max-width: 1024px) 360px, 480px"
+                      className="object-cover object-[65%_35%]"
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-blue-950/30 to-transparent" />
                   </div>
@@ -225,34 +227,13 @@ export default function ProfilPage() {
       </section>
 
       {/* 03 — Profil Guru */}
-      <section id="guru" className="school-section bg-white/55 py-16 sm:py-24">
-        <div className="container-width">
-          <Reveal className="mx-auto mb-12 max-w-2xl text-center">
-            <p className="mx-auto inline-flex rounded-full border border-slate-300 bg-white/90 px-5 py-2 text-xs font-medium text-ink shadow-sm">
-              Profil Guru
-            </p>
-            <h2 className="mt-5 text-3xl font-semibold leading-tight tracking-tight text-ink sm:text-4xl lg:text-[2.5rem]">
-              Pendidik berdedikasi, membimbing
-              <span className="block text-slate-400">generasi berprestasi</span>
-            </h2>
-            <p className="mt-3 text-sm leading-6 text-muted">
-              Tenaga pendidik profesional dari keluarga SMA Widya Darma.
-            </p>
-          </Reveal>
-          <div className="mx-auto grid max-w-3xl grid-cols-2 gap-4 sm:grid-cols-4">
-            <Reveal>
-              <StaffCard person={leadership[0]} />
-            </Reveal>
-            {teachers.map((person, index) => (
-              <Reveal key={person.id} delay={((index + 1) % 4) * 0.06}>
-                <StaffCard person={person} teacher />
-              </Reveal>
-            ))}
-          </div>
-        </div>
-      </section>
+      <StaffSection
+        id="guru"
+        limit={7}
+        showButton
+        className="school-section bg-white/55 py-16 sm:py-24"
+      />
 
-      <ContactSection />
     </>
   );
 }

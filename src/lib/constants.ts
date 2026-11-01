@@ -1,4 +1,4 @@
-import type { Article, GalleryImage } from "@/types";
+                                                                                                                                import type { Article, GalleryImage } from "@/types";
 import { imageAsset } from "./media";
 export const copy = {
   short: "Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
@@ -9,7 +9,7 @@ export const navigation = [
   { label: "Beranda", href: "/" },
   { label: "Profil", href: "/profil" },
   { label: "SPMB", href: "/spmb" },
-  { label: "Publikasi & Galeri", href: "/publikasi" },
+  { label: "Galeri Kegiatan", href: "/publikasi" },
   { label: "Tanya AI", href: "/tanya-ai" },
 ];
 export const articles: Article[] = [

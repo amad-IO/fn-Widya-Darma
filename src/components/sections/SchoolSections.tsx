@@ -2,13 +2,11 @@ import Image from "next/image";
 import Link from "next/link";
 import Reveal from "@/components/shared/Reveal";
 import SectionLabel from "@/components/shared/SectionLabel";
-import StaffCard from "@/components/shared/StaffCard";
 import PublicationGrid from "@/components/shared/PublicationGrid";
 import WhatsAppButton from "@/components/shared/WhatsAppButton";
 import { ArrowUpRight } from "@/components/shared/Svg";
 import { Button } from "@/components/ui/button";
 import { copy } from "@/lib/constants";
-import { leadership, teachers, schoolContact } from "@/lib/school";
 
 const sectionClass = "school-section relative py-16 sm:py-24";
 
@@ -202,45 +200,6 @@ export function SchoolIntro({ profile = false }: { profile?: boolean }) {
   );
 }
 
-export function StaffPreview() {
-  return (
-    <section
-      className={sectionClass}
-      aria-label="Profil guru dan tenaga pendidik"
-    >
-      <div className="container-width">
-        <Reveal className="mx-auto mb-12 max-w-2xl text-center">
-          <p className="mx-auto inline-flex rounded-full border border-slate-300 bg-white/90 px-5 py-2 text-xs font-medium text-ink shadow-sm">
-            Profil Guru
-          </p>
-          <h2 className="mt-5 text-3xl font-semibold leading-tight tracking-tight text-ink sm:text-4xl lg:text-[2.5rem]">
-            Pendidik berdedikasi, membimbing
-            <span className="block text-slate-400">generasi berprestasi</span>
-          </h2>
-          <p className="mt-3 text-sm leading-6 text-muted">
-            Tenaga pendidik profesional dari keluarga SMA Widya Darma.
-          </p>
-        </Reveal>
-        <div className="mx-auto grid max-w-3xl grid-cols-2 gap-4 sm:grid-cols-4">
-          <Reveal>
-            <StaffCard person={leadership[0]} />
-          </Reveal>
-          {teachers.slice(0, 3).map((person, index) => (
-            <Reveal key={person.id} delay={(index + 1) * 0.06}>
-              <StaffCard person={person} teacher />
-            </Reveal>
-          ))}
-        </div>
-        <Reveal className="mt-10 flex justify-center">
-          <Button asChild className="rounded-full px-6">
-            <Link href="/guru">Lihat semua guru</Link>
-          </Button>
-        </Reveal>
-      </div>
-    </section>
-  );
-}
-
 export function PublicationPreview() {
   return (
     <section
@@ -321,65 +280,3 @@ export function SpmbPreview() {
   );
 }
 
-export function ContactSection({ page = false }: { page?: boolean }) {
-  return (
-    <section
-      id="kontak"
-      className={`${sectionClass} bg-white/55`}
-      aria-label="Kontak sekolah dan WhatsApp"
-    >
-      <div className="container-width grid gap-10 lg:grid-cols-2">
-        <Reveal>
-          <SectionLabel number={page ? "01" : "06"}>
-            Kontak sekolah · Pertanyaan lebih lanjut
-          </SectionLabel>
-          <h2 className="school-heading">
-            Lorem ipsum
-            <br />
-            <span className="text-primary">dolor sit amet?</span>
-          </h2>
-          <p className="body-copy mt-5 max-w-lg">{copy.body}</p>
-          <div className="mt-7">
-            <WhatsAppButton />
-          </div>
-        </Reveal>
-        <Reveal
-          delay={0.1}
-          className="rounded-3xl border border-blue-100 bg-white p-7 sm:p-9"
-        >
-          <div className="space-y-6">
-            {[
-              {
-                label: "Alamat sekolah",
-                value:
-                  "Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
-              },
-              {
-                label: "Email & media sosial",
-                value: "Lorem ipsum dolor sit amet.",
-              },
-              {
-                label: schoolContact.whatsappUrl
-                  ? "WhatsApp sekolah"
-                  : "WhatsApp · Nomor contoh",
-                value: schoolContact.whatsappDisplay,
-              },
-            ].map((item) => (
-              <div
-                key={item.label}
-                className="border-b border-blue-50 pb-5 last:border-0 last:pb-0"
-              >
-                <p className="text-[10px] font-semibold uppercase tracking-widest text-primary">
-                  {item.label}
-                </p>
-                <p className="mt-3 text-sm leading-6 text-muted">
-                  {item.value}
-                </p>
-              </div>
-            ))}
-          </div>
-        </Reveal>
-      </div>
-    </section>
-  );
-}

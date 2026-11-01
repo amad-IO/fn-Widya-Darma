@@ -24,6 +24,7 @@ export default function ShowcaseSection() {
                 src="/images/03.webp"
                 alt="Foto kegiatan siswa SMA Widya Darma"
                 fill
+                quality={100}
                 sizes="(min-width: 1024px) 220px, 224px"
                 className="object-cover image-zoom"
                 priority
@@ -57,6 +58,7 @@ export default function ShowcaseSection() {
                 src="/images/01.webp"
                 alt="Foto gedung dan fasilitas sekolah"
                 fill
+                quality={100}
                 sizes="(min-width: 1024px) 220px, 224px"
                 className="object-cover image-zoom"
                 priority
@@ -91,6 +93,7 @@ export default function ShowcaseSection() {
                 src="/images/31.webp"
                 alt="Foto ruang kelas dan kegiatan pembelajaran"
                 fill
+                quality={100}
                 sizes="(min-width: 1024px) 220px, 224px"
                 className="object-cover image-zoom"
               />

@@ -14,25 +14,36 @@ export default function StaffCard({
       : person.role;
 
   return (
-    <article className="group relative mx-auto aspect-[2/3] w-full max-w-[200px] overflow-hidden rounded-2xl bg-blue-100 shadow-sm shadow-blue-950/10">
-      <Image
-        src={person.image}
-        alt={`${person.name} — ${roleLabel}`}
-        fill
-        sizes="(max-width: 640px) 45vw, 200px"
-        className="object-cover object-top transition-transform duration-500 ease-out group-hover:scale-105"
-      />
+    <article className="group relative mx-auto flex h-full w-full max-w-[190px] flex-col px-3 pb-3.5 text-left">
+      {/* Card putih di bagian bawah (pedestal) */}
       <div
         aria-hidden="true"
-        className="absolute inset-0 bg-gradient-to-t from-slate-950/90 via-slate-950/25 to-transparent"
+        className="pointer-events-none absolute inset-x-0 bottom-0 top-[38%] rounded-[24px] border border-slate-200/85 bg-white shadow-[0_12px_28px_-16px_rgba(32,44,69,0.22)]"
       />
-      <div className="absolute inset-x-0 bottom-0 p-3.5 text-left text-white sm:p-4">
-        <p className="text-[9px] font-semibold uppercase tracking-wider text-sky-300 sm:text-[10px]">
-          {roleLabel}
-        </p>
-        <h3 className="mt-1 text-sm font-semibold leading-snug tracking-tight text-white sm:text-base">
+
+      {/* Foto Signature Leaf yang menonjol ke atas */}
+      <div className="relative z-10 aspect-[4/4.5] w-full overflow-hidden rounded-[24px_0_24px_0] bg-gradient-to-tr from-blue-100 to-blue-50 shadow-[0_10px_24px_-14px_rgba(32,44,69,0.28)] ring-1 ring-slate-900/5 transition-transform duration-300 ease-out group-hover:scale-[1.04]">
+        <Image
+          src={person.image}
+          alt={`${person.name} — ${roleLabel}`}
+          fill
+          sizes="(max-width: 640px) 42vw, 190px"
+          className="object-cover object-top"
+        />
+        <div
+          aria-hidden="true"
+          className="pointer-events-none absolute inset-0 bg-gradient-to-t from-blue-950/15 via-transparent to-transparent"
+        />
+      </div>
+
+      {/* Informasi nama & jabatan di dalam area card putih */}
+      <div className="relative z-10 mt-3 border-l-2 border-primary pl-2.5">
+        <h3 className="text-[13px] font-bold leading-snug tracking-tight text-ink sm:text-sm">
           {person.name}
         </h3>
+        <p className="mt-0.5 text-[11px] font-medium leading-snug text-primary">
+          {roleLabel}
+        </p>
       </div>
     </article>
   );

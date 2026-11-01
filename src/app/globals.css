@@ -412,6 +412,30 @@ button:disabled {
     transform: scale(1);
   }
 }
+@keyframes marquee-scroll {
+  from {
+    transform: translate3d(0, 0, 0);
+  }
+  to {
+    transform: translate3d(-50%, 0, 0);
+  }
+}
+.staff-marquee-track {
+  display: flex;
+  width: max-content;
+  animation-name: marquee-scroll;
+  animation-timing-function: linear;
+  animation-iteration-count: infinite;
+  will-change: transform;
+}
+.staff-marquee-track:hover {
+  animation-play-state: paused;
+}
+@media (hover: none) {
+  .staff-marquee-track:active {
+    animation-play-state: paused;
+  }
+}
 @media (prefers-reduced-motion: reduce) {
   html {
     scroll-behavior: auto;

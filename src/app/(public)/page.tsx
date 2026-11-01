@@ -1,20 +1,16 @@
 import HeroSection from "@/components/sections/HeroSection";
 import {
   SchoolIntro,
-  StaffPreview,
   PublicationPreview,
-  SpmbPreview,
-  ContactSection,
 } from "@/components/sections/SchoolSections";
+import StaffSection from "@/components/sections/StaffSection";
 export default function Home() {
   return (
     <>
       <HeroSection />
       <SchoolIntro />
-      <StaffPreview />
+      <StaffSection showPrincipalWelcome showButton limit={5} />
       <PublicationPreview />
-      <SpmbPreview />
-      <ContactSection />
     </>
   );
 }

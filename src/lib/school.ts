@@ -61,37 +61,103 @@ export const publications: Publication[] = publicationCategories
     ],
   }));
 
-export type Staff = { id: string; name: string; role: string; image: string };
+export type Staff = {
+  id: string;
+  name: string;
+  role: string;
+  image: string;
+  badge?: string;
+  department?: string;
+  alumni?: string;
+  experience?: string;
+};
+
 const teacherImages = [50, 34, 22, 23, 25, 18];
+
 export const teachers: Staff[] = Array.from({ length: 6 }, (_, index) => ({
   id: `guru-${index + 1}`,
-  name: ["Lorem Ipsum", "Dolor Sit Amet", "Consectetur Elit"][index % 3],
-  role: ["Wakil Kepala Sekolah", "Guru Matematika", "Guru Bahasa Indonesia", "Guru Biologi", "Guru Fisika", "Guru Ekonomi"][index],
+  name: [
+    "Lorem Ipsum, M.Pd.",
+    "Dolor Sit Amet, S.Pd.",
+    "Consectetur Elit, S.Si.",
+  ][index % 3],
+  role: [
+    "Wakil Kepala Sekolah",
+    "Guru Matematika",
+    "Guru Bahasa Indonesia",
+    "Guru Biologi",
+    "Guru Fisika",
+    "Guru Ekonomi",
+  ][index],
+  badge: [
+    "Wakasek Kurikulum",
+    "Guru Produktif",
+    "Guru Mapel",
+    "Guru Sains",
+    "Guru Sains",
+    "Tenaga Kependidikan",
+  ][index],
+  department: [
+    "Manajemen & Kurikulum",
+    "Bidang Studi Matematika",
+    "Bidang Studi Bahasa & Sastra",
+    "Bidang Studi Biologi",
+    "Bidang Studi Fisika",
+    "Bidang Studi Ekonomi & Administrasi",
+  ][index],
+  alumni: [
+    "Alumni S2 Universitas Lorem Ipsum",
+    "Alumni S1 Universitas Dolor Sit Amet",
+    "Alumni S1 Institut Consectetur Elit",
+  ][index % 3],
+  experience:
+    "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua dalam dunia pendidikan.",
   image: imageAsset(teacherImages[index % teacherImages.length]),
 }));
+
 export const leadership: Staff[] = [
   {
     id: "kepala",
-    name: "Lorem Ipsum",
+    name: "Lorem Ipsum, M.Pd.",
     role: "Kepala sekolah",
+    badge: "Kepala Sekolah",
+    department: "Pimpinan & Manajemen Sekolah",
+    alumni: "Alumni S2 Universitas Lorem Ipsum",
+    experience:
+      "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Berpengalaman memimpin pengembangan akademik dan karakter siswa.",
     image: imageAsset(2),
   },
   {
     id: "kurikulum",
-    name: "Dolor Sit Amet",
+    name: "Dolor Sit Amet, M.Pd.",
     role: "Wakil kepala sekolah · Kurikulum",
+    badge: "Wakasek Kurikulum",
+    department: "Bidang Studi Matematika",
+    alumni: "Alumni S2 Universitas Dolor Sit Amet",
+    experience:
+      "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.",
     image: imageAsset(50),
   },
   {
     id: "kesiswaan",
-    name: "Consectetur Elit",
+    name: "Consectetur Elit, S.Pd.",
     role: "Wakil kepala sekolah · Kesiswaan",
+    badge: "Wakasek Kesiswaan",
+    department: "Pembinaan Karakter & Ekstrakurikuler",
+    alumni: "Alumni S1 Universitas Consectetur Elit",
+    experience:
+      "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris.",
     image: imageAsset(34),
   },
   {
     id: "sarana",
-    name: "Lorem Ipsum",
+    name: "Lorem Ipsum, S.AP.",
     role: "Wakil kepala sekolah · Sarana dan prasarana",
+    badge: "Tenaga Kependidikan",
+    department: "Administrasi & Sarana Prasarana",
+    alumni: "Alumni S1 Institut Lorem Ipsum",
+    experience:
+      "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum.",
     image: imageAsset(11),
   },
 ];
