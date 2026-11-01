@@ -53,10 +53,10 @@ export default function HeroSpotlight({ children }: { children: ReactNode }) {
           fill
           priority
           sizes="100vw"
-          className="object-cover object-center grayscale opacity-30 contrast-105"
+          className="object-cover object-center grayscale opacity-45 contrast-105"
         />
         {/* Lapisan abu-abu putih transparan + gradasi halus menyatu ke section bawah */}
-        <div className="absolute inset-0 bg-gradient-to-b from-[#f6f7f9]/75 via-white/65 to-[#f6f7f9]" />
+        <div className="absolute inset-0 bg-gradient-to-b from-[#f6f7f9]/55 via-white/50 to-[#f6f7f9]/95" />
       </div>
 
       <svg

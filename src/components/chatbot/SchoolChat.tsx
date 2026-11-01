@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useRef } from "react";
 import { useForm } from "react-hook-form";
@@ -41,8 +42,24 @@ export default function SchoolChat() {
   return (
     <section
       aria-labelledby="ai-heading"
-      className="ai-workspace relative px-6 sm:px-10"
+      className="ai-workspace relative isolate overflow-hidden px-6 sm:px-10"
     >
+      {/* Background foto abu-abu putih & transparan (berbeda dari Beranda) */}
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-0 -z-10"
+      >
+        <Image
+          src="/images/31.webp"
+          alt=""
+          fill
+          priority
+          sizes="100vw"
+          className="object-cover object-center grayscale opacity-45 contrast-105"
+        />
+        <div className="absolute inset-0 bg-gradient-to-b from-[#f6f7f9]/55 via-white/50 to-[#f6f7f9]/95" />
+      </div>
+
       <div className="mx-auto flex h-full w-full max-w-6xl flex-1 flex-col">
         <div
           className={cn(

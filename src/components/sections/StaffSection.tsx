@@ -38,15 +38,19 @@ export default function StaffSection({
       aria-label="Profil guru dan tenaga pendidik"
     >
       <div className="container-width">
-        <Reveal className="mx-auto mb-10 max-w-2xl text-center">
-          <p className="mx-auto inline-flex rounded-full border border-slate-300 bg-white/90 px-5 py-2 text-xs font-medium text-ink shadow-sm">
+        <Reveal className="mx-auto mb-12 max-w-4xl text-center sm:mb-16 lg:max-w-5xl">
+          <p className="mx-auto inline-flex rounded-full border border-slate-300 bg-white/95 px-6 py-2.5 text-xs font-semibold text-ink shadow-sm sm:text-sm">
             Profil Guru
           </p>
-          <h2 className="mt-5 text-3xl font-semibold leading-tight tracking-tight text-ink sm:text-4xl lg:text-[2.5rem]">
-            Pendidik berdedikasi, membimbing
-            <span className="block text-slate-400">generasi berprestasi</span>
+          <h2 className="mt-6 text-3xl font-bold leading-[1.18] tracking-tight text-ink sm:text-4xl md:text-5xl lg:text-[3.25rem]">
+            <span className="block sm:whitespace-nowrap">
+              Pendidik berdedikasi, membimbing
+            </span>
+            <span className="block font-semibold text-slate-400">
+              generasi berprestasi
+            </span>
           </h2>
-          <p className="mt-3 text-sm leading-6 text-muted">
+          <p className="mt-4 text-base leading-relaxed text-muted sm:text-lg">
             Tenaga pendidik profesional dari keluarga SMA Widya Darma.
           </p>
         </Reveal>

@@ -1,12 +1,17 @@
 .site-shell:has(.ai-workspace) {
-  background: #fdfefe;
+  background: #f6f7f9;
 }
 
 .ai-workspace {
   display: flex;
-  min-height: calc(100svh - 5rem);
-  background:
-    radial-gradient(ellipse at 50% 40%, #eff5ff70 0%, #ffffff00 55%), #fdfefe;
+  margin-top: -5rem;
+  padding-top: 5rem;
+  min-height: 100svh;
+  background: radial-gradient(
+    ellipse at 50% 40%,
+    #eff5ff70 0%,
+    #ffffff00 55%
+  );
 }
 .ai-orb {
   border-radius: 50%;
