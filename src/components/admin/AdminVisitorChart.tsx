@@ -239,7 +239,7 @@ export default function AdminVisitorChart() {
             </span>
             <div className="mt-1 flex items-baseline gap-1.5">
               <span className="text-lg font-bold text-slate-900 tabular-nums">
-                {totalVisitors.toLocaleString()}
+                {totalVisitors.toLocaleString("id-ID")}
               </span>
               <span className="text-[10px] font-bold text-emerald-600">
                 ↑ 18.2%
@@ -256,7 +256,7 @@ export default function AdminVisitorChart() {
             </span>
             <div className="mt-1 flex items-baseline gap-1.5">
               <span className="text-lg font-bold text-slate-900 tabular-nums">
-                {totalPageviews.toLocaleString()}
+                {totalPageviews.toLocaleString("id-ID")}
               </span>
               <span className="text-[10px] font-medium text-slate-500">
                 views
