@@ -1,61 +1,58 @@
 "use client";
 
-import React, { useState, useEffect, useRef } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import Image from "next/image";
-import Link from "next/link";
-import {
-  SpmbInfo,
-  SpmbWave,
-  SpmbStep,
-} from "@/types/spmb";
-import {
-  getStoredSpmbInfo,
-  saveStoredSpmbInfo,
-} from "@/lib/spmb-data";
+import { SpmbInfo, SpmbStep, SpmbWave } from "@/types/spmb";
+import { getStoredSpmbInfo, saveStoredSpmbInfo } from "@/lib/spmb-data";
 import { cn } from "@/lib/utils";
 
 interface AdminSpmbSectionProps {
-  onNotify?: (msg: string) => void;
+  onNotify?: (message: string) => void;
 }
 
 type SpmbTab = "umum" | "gelombang" | "syarat-alur" | "brosur";
+
+const tabs: { id: SpmbTab; label: string }[] = [
+  { id: "umum", label: "Informasi pokok" },
+  { id: "gelombang", label: "Jadwal gelombang" },
+  { id: "syarat-alur", label: "Syarat & alur" },
+  { id: "brosur", label: "Brosur resmi" },
+];
+
+const fieldClass =
+  "w-full rounded-lg border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-800 outline-none transition placeholder:text-slate-400 focus:border-[#31529a] focus:ring-2 focus:ring-[#31529a]/10";
 
 export default function AdminSpmbSection({ onNotify }: AdminSpmbSectionProps) {
   const [data, setData] = useState<SpmbInfo>(getStoredSpmbInfo());
   const [activeTab, setActiveTab] = useState<SpmbTab>("umum");
   const [isSaved, setIsSaved] = useState(false);
   const [previewBrochureOpen, setPreviewBrochureOpen] = useState(false);
+  const [editingWaveIndex, setEditingWaveIndex] = useState<number | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     setData(getStoredSpmbInfo());
 
-    const handleUpdate = (e: Event) => {
-      const customEvent = e as CustomEvent<SpmbInfo>;
-      if (customEvent.detail) {
-        setData(customEvent.detail);
-      }
+    const handleUpdate = (event: Event) => {
+      const nextData = (event as CustomEvent<SpmbInfo>).detail;
+      if (nextData) setData(nextData);
     };
 
     window.addEventListener("widya_darma_spmb_updated", handleUpdate);
-    return () => {
+    return () =>
       window.removeEventListener("widya_darma_spmb_updated", handleUpdate);
-    };
   }, []);
 
   const handleSave = () => {
     saveStoredSpmbInfo(data);
     setIsSaved(true);
-    if (onNotify) {
-      onNotify("Informasi SPMB, Jadwal, Persyaratan & Brosur berhasil disimpan.");
-    }
+    onNotify?.("Pengaturan SPMB berhasil disimpan.");
     setTimeout(() => setIsSaved(false), 3000);
   };
 
-  const handleBrochureUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
+  const handleBrochureUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
     if (!file) return;
-
     if (file.size > 5 * 1024 * 1024) {
       alert("Ukuran file maksimal 5MB");
       return;
@@ -63,18 +60,15 @@ export default function AdminSpmbSection({ onNotify }: AdminSpmbSectionProps) {
 
     const reader = new FileReader();
     reader.onloadend = () => {
-      const result = reader.result as string;
       const updated: SpmbInfo = {
         ...data,
-        brochureUrl: result,
+        brochureUrl: reader.result as string,
         brochureFileName: file.name,
         brochureUploadedAt: new Date().toISOString().split("T")[0],
       };
       setData(updated);
       saveStoredSpmbInfo(updated);
-      if (onNotify) {
-        onNotify(`Brosur SPMB "${file.name}" berhasil diunggah.`);
-      }
+      onNotify?.(`Brosur SPMB "${file.name}" berhasil diunggah.`);
     };
     reader.readAsDataURL(file);
   };
@@ -88,16 +82,13 @@ export default function AdminSpmbSection({ onNotify }: AdminSpmbSectionProps) {
     };
     setData(updated);
     saveStoredSpmbInfo(updated);
-    if (onNotify) {
-      onNotify("Brosur dikembalikan ke versi resmi default.");
-    }
+    onNotify?.("Brosur dikembalikan ke versi resmi default.");
   };
 
-  // Wave Helpers
-  const handleUpdateWave = (index: number, updatedFields: Partial<SpmbWave>) => {
-    const newWaves = [...data.waves];
-    newWaves[index] = { ...newWaves[index], ...updatedFields };
-    setData({ ...data, waves: newWaves });
+  const handleUpdateWave = (index: number, fields: Partial<SpmbWave>) => {
+    const waves = [...data.waves];
+    waves[index] = { ...waves[index], ...fields };
+    setData({ ...data, waves });
   };
 
   const handleAddWave = () => {
@@ -110,576 +101,415 @@ export default function AdminSpmbSection({ onNotify }: AdminSpmbSectionProps) {
       discount: "Reguler",
     };
     setData({ ...data, waves: [...data.waves, newWave] });
+    setEditingWaveIndex(data.waves.length);
   };
 
   const handleDeleteWave = (id: string) => {
     if (confirm("Hapus gelombang pendaftaran ini?")) {
-      setData({ ...data, waves: data.waves.filter((w) => w.id !== id) });
+      setData({ ...data, waves: data.waves.filter((wave) => wave.id !== id) });
+      setEditingWaveIndex(null);
     }
   };
 
-  // Requirement Helpers
-  const handleUpdateReq = (index: number, val: string) => {
-    const newReqs = [...data.requirements];
-    newReqs[index] = val;
-    setData({ ...data, requirements: newReqs });
+  const handleUpdateReq = (index: number, value: string) => {
+    const requirements = [...data.requirements];
+    requirements[index] = value;
+    setData({ ...data, requirements });
   };
 
-  const handleAddReq = () => {
+  const handleAddReq = () =>
     setData({
       ...data,
       requirements: [...data.requirements, "Dokumen persyaratan tambahan baru"],
     });
-  };
 
-  const handleDeleteReq = (index: number) => {
+  const handleDeleteReq = (index: number) =>
     setData({
       ...data,
-      requirements: data.requirements.filter((_, i) => i !== index),
+      requirements: data.requirements.filter(
+        (_, itemIndex) => itemIndex !== index,
+      ),
     });
+
+  const handleUpdateStep = (
+    index: number,
+    field: keyof SpmbStep,
+    value: string | number,
+  ) => {
+    const steps = [...data.steps];
+    steps[index] = { ...steps[index], [field]: value };
+    setData({ ...data, steps });
   };
 
-  // Step Helpers
-  const handleUpdateStep = (index: number, field: keyof SpmbStep, val: any) => {
-    const newSteps = [...data.steps];
-    newSteps[index] = { ...newSteps[index], [field]: val };
-    setData({ ...data, steps: newSteps });
-  };
-
-  const tabs: { id: SpmbTab; label: string; count?: number }[] = [
-    { id: "umum", label: "Informasi Umum & Kontak" },
-    { id: "gelombang", label: "Jadwal Gelombang" },
-    { id: "syarat-alur", label: "Syarat & Alur Pendaftaran" },
-    { id: "brosur", label: "Brosur Resmi SPMB" },
-  ];
+  const editingWave =
+    editingWaveIndex === null ? null : data.waves[editingWaveIndex];
 
   return (
-    <div className="space-y-5">
-      {/* 1. Header Bar Bersih */}
-      <div className="overflow-hidden rounded-xl border border-slate-300 bg-white shadow-xs">
-        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 bg-[#e6e8ec] px-4 py-3 sm:px-6">
-          <div className="flex items-center gap-2.5">
-            <span className="flex h-3.5 w-3.5 rounded-full bg-slate-900" />
-            <h2 className="text-sm sm:text-base font-bold text-slate-900 tracking-tight">
-              Pengelolaan SPMB & Brosur {data.academicYear}
-            </h2>
-            <span
-              className={cn(
-                "ml-2 rounded-full px-2.5 py-0.5 text-[11px] font-bold",
-                data.status === "Buka"
-                  ? "bg-emerald-100 text-emerald-800"
-                  : data.status === "Segera Dibuka"
-                  ? "bg-amber-100 text-amber-800"
-                  : "bg-rose-100 text-rose-800"
-              )}
-            >
-              Status: {data.status}
-            </span>
-          </div>
-
-          <div className="flex items-center gap-2 self-end sm:self-auto">
-            <Link
-              href="/spmb"
-              target="_blank"
-              className="inline-flex items-center gap-1.5 rounded-md border border-slate-300 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 shadow-2xs hover:bg-slate-50 transition"
-              title="Buka halaman publik SPMB di tab baru"
-            >
-              <span>Lihat Halaman Publik</span>
-              <span className="text-slate-400">↗</span>
-            </Link>
-
-            <button
-              type="button"
-              onClick={handleSave}
-              className={cn(
-                "inline-flex items-center gap-1.5 rounded-md px-4 py-1.5 text-xs font-bold text-white shadow-xs transition",
-                isSaved
-                  ? "bg-emerald-600 hover:bg-emerald-700"
-                  : "bg-[#2563eb] hover:bg-[#1d4ed8]"
-              )}
-            >
-              {isSaved ? (
-                <>
-                  <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
-                    <path strokeLinecap="round" strokeLinejoin="round" d="m5 13 4 4L19 7" />
-                  </svg>
-                  <span>Tersimpan!</span>
-                </>
-              ) : (
-                <>
-                  <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M8 7H5a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3m-1 4-4 4m0 0-4-4m4 4V3" />
-                  </svg>
-                  <span>Simpan Perubahan</span>
-                </>
-              )}
-            </button>
-          </div>
-        </div>
-
-        {/* 2. TAB NAVIGASI */}
-        <div className="flex items-center gap-1.5 overflow-x-auto bg-slate-50/80 px-4 py-2 sm:px-6 border-t border-slate-200">
+    <section className="space-y-5">
+      <header className="space-y-3">
+        <nav
+          aria-label="Bagian pengelolaan SPMB"
+          className="grid grid-cols-2 gap-1.5 rounded-2xl bg-gradient-to-r from-[#07528c] via-[#0b639f] to-[#07528c] p-1.5 shadow-sm sm:grid-cols-4"
+        >
           {tabs.map((tab) => (
             <button
               key={tab.id}
               type="button"
               onClick={() => setActiveTab(tab.id)}
               className={cn(
-                "inline-flex items-center gap-2 rounded-lg px-3.5 py-2 text-xs font-semibold transition whitespace-nowrap",
+                "rounded-xl px-3 py-2.5 text-sm font-semibold transition",
                 activeTab === tab.id
-                  ? "bg-[#142c58] text-white shadow-xs"
-                  : "text-slate-600 hover:bg-slate-200/70 hover:text-slate-900"
+                  ? "bg-white text-[#31529a] shadow-sm"
+                  : "text-white/80 hover:bg-white/12 hover:text-white",
               )}
             >
-              <span>{tab.label}</span>
-              {tab.count !== undefined && (
-                <span
-                  className={cn(
-                    "rounded-full px-1.5 py-0.2 text-[10px] font-bold",
-                    activeTab === tab.id
-                      ? "bg-white/20 text-white"
-                      : "bg-slate-200 text-slate-700"
-                  )}
-                >
-                  {tab.count}
-                </span>
-              )}
+              {tab.label}
             </button>
           ))}
-        </div>
-      </div>
+        </nav>
+      </header>
 
-      {/* 3. KONTEN TAB */}
-
-      {/* TAB 1: INFORMASI UMUM & KONTAK */}
       {activeTab === "umum" && (
-        <div className="rounded-xl border border-slate-200 bg-white p-5 sm:p-6 shadow-xs space-y-5">
-          {/* Header Kartu Terpadu */}
-          <div className="border-b border-slate-100 pb-3 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-            <div>
-              <h3 className="text-sm font-bold text-slate-900 uppercase tracking-wider">
-                Informasi Pokok & Kontak SPMB
-              </h3>
-              <p className="text-xs text-slate-500 mt-0.5">
-                Pengaturan tahun ajaran, status penerimaan, biaya, dan kanal komunikasi resmi panitia.
-              </p>
-            </div>
+        <div className="rounded-xl border border-slate-200 bg-white p-5 sm:p-7">
+          <div className="mb-6">
+            <h3 className="text-base font-semibold text-slate-900">
+              Informasi pokok & kontak
+            </h3>
+            <p className="mt-1 text-sm text-slate-500">
+              Pengaturan yang akan tampil di halaman pendaftaran publik.
+            </p>
           </div>
 
-          {/* Form Berurutan ke Bawah */}
-          <div className="space-y-4">
+          <div className="max-w-3xl space-y-5">
             <div>
-              <label className="block text-xs font-bold text-slate-700 mb-1.5">
-                Tahun Pelajaran
+              <label className="mb-1.5 block text-sm font-medium text-slate-700">
+                Tahun pelajaran
               </label>
               <input
                 type="text"
                 value={data.academicYear}
-                onChange={(e) =>
-                  setData({ ...data, academicYear: e.target.value })
+                onChange={(event) =>
+                  setData({ ...data, academicYear: event.target.value })
                 }
                 placeholder="2026/2027"
-                className="w-full rounded-lg border border-slate-300 bg-slate-50 px-3.5 py-2 text-xs text-slate-800 outline-none focus:border-[#2563eb] focus:bg-white transition"
+                className={fieldClass}
               />
             </div>
-
             <div>
-              <label className="block text-xs font-bold text-slate-700 mb-1.5">
-                Status Penerimaan
+              <label className="mb-1.5 block text-sm font-medium text-slate-700">
+                Status penerimaan
               </label>
               <select
                 value={data.status}
-                onChange={(e) =>
+                onChange={(event) =>
                   setData({
                     ...data,
-                    status: e.target.value as "Buka" | "Segera Dibuka" | "Ditutup",
+                    status: event.target.value as SpmbInfo["status"],
                   })
                 }
-                className="w-full rounded-lg border border-slate-300 bg-slate-50 px-3.5 py-2 text-xs text-slate-800 outline-none focus:border-[#2563eb] focus:bg-white transition"
+                className={fieldClass}
               >
-                <option value="Buka">Buka (Pendaftaran Aktif)</option>
-                <option value="Segera Dibuka">Segera Dibuka</option>
+                <option value="Buka">Buka (pendaftaran aktif)</option>
+                <option value="Segera Dibuka">Segera dibuka</option>
                 <option value="Ditutup">Ditutup</option>
               </select>
             </div>
-
             <div>
-              <label className="block text-xs font-bold text-slate-700 mb-1.5">
-                Biaya Formulir
-              </label>
-              <input
-                type="text"
-                value={data.registrationFee}
-                onChange={(e) =>
-                  setData({ ...data, registrationFee: e.target.value })
-                }
-                placeholder="Rp 250.000"
-                className="w-full rounded-lg border border-slate-300 bg-slate-50 px-3.5 py-2 text-xs text-slate-800 outline-none focus:border-[#2563eb] focus:bg-white transition"
-              />
-            </div>
-
-            <div>
-              <label className="block text-xs font-bold text-slate-700 mb-1.5">
-                Judul Headline Banner
+              <label className="mb-1.5 block text-sm font-medium text-slate-700">
+                Judul utama
               </label>
               <input
                 type="text"
                 value={data.headline}
-                onChange={(e) =>
-                  setData({ ...data, headline: e.target.value })
+                onChange={(event) =>
+                  setData({ ...data, headline: event.target.value })
                 }
                 placeholder="Penerimaan Siswa Baru (SPMB)"
-                className="w-full rounded-lg border border-slate-300 bg-slate-50 px-3.5 py-2 text-xs text-slate-800 outline-none focus:border-[#2563eb] focus:bg-white transition"
+                className={fieldClass}
               />
             </div>
-
             <div>
-              <label className="block text-xs font-bold text-slate-700 mb-1.5">
-                Slogan / Sambutan
+              <label className="mb-1.5 block text-sm font-medium text-slate-700">
+                Slogan / sambutan
               </label>
               <input
                 type="text"
                 value={data.subheadline}
-                onChange={(e) =>
-                  setData({ ...data, subheadline: e.target.value })
+                onChange={(event) =>
+                  setData({ ...data, subheadline: event.target.value })
                 }
                 placeholder="Bergabunglah bersama keluarga besar SMA Widya Darma"
-                className="w-full rounded-lg border border-slate-300 bg-slate-50 px-3.5 py-2 text-xs text-slate-800 outline-none focus:border-[#2563eb] focus:bg-white transition"
+                className={fieldClass}
               />
             </div>
-
             <div>
-              <label className="block text-xs font-bold text-slate-700 mb-1.5">
-                WhatsApp Hotline Panitia
+              <label className="mb-1.5 block text-sm font-medium text-slate-700">
+                Biaya formulir
               </label>
               <input
                 type="text"
-                value={data.contactPhone}
-                onChange={(e) =>
-                  setData({ ...data, contactPhone: e.target.value })
+                value={data.registrationFee}
+                onChange={(event) =>
+                  setData({ ...data, registrationFee: event.target.value })
                 }
-                placeholder="+62 812-3456-7890"
-                className="w-full rounded-lg border border-slate-300 bg-slate-50 px-3.5 py-2 text-xs text-slate-800 outline-none focus:border-[#2563eb] focus:bg-white transition"
+                placeholder="Rp 250.000"
+                className={fieldClass}
               />
             </div>
-
+            <div className="border-t border-slate-100 pt-5">
+              <label className="mb-1.5 block text-sm font-medium text-slate-700">
+                WhatsApp panitia
+              </label>
+              <input
+                type="tel"
+                value={data.contactPhone}
+                onChange={(event) =>
+                  setData({ ...data, contactPhone: event.target.value })
+                }
+                placeholder="+62 812-3456-7890"
+                className={fieldClass}
+              />
+            </div>
             <div>
-              <label className="block text-xs font-bold text-slate-700 mb-1.5">
-                Email Resmi SPMB
+              <label className="mb-1.5 block text-sm font-medium text-slate-700">
+                Email informasi SPMB
               </label>
               <input
                 type="email"
                 value={data.contactEmail}
-                onChange={(e) =>
-                  setData({ ...data, contactEmail: e.target.value })
+                onChange={(event) =>
+                  setData({ ...data, contactEmail: event.target.value })
                 }
                 placeholder="spmb@widyadarma.sch.id"
-                className="w-full rounded-lg border border-slate-300 bg-slate-50 px-3.5 py-2 text-xs text-slate-800 outline-none focus:border-[#2563eb] focus:bg-white transition"
+                className={fieldClass}
               />
             </div>
           </div>
         </div>
       )}
 
-      {/* TAB 2: JADWAL GELOMBANG */}
       {activeTab === "gelombang" && (
-        <div className="rounded-xl border border-slate-200 bg-white p-5 sm:p-6 shadow-xs space-y-5">
-          <div className="border-b border-slate-100 pb-3">
-            <h3 className="text-sm font-bold text-slate-900 uppercase tracking-wider">
-              Jadwal Gelombang Pendaftaran
-            </h3>
-            <p className="text-xs text-slate-500 mt-0.5">
-              Atur nama gelombang, periode pendaftaran, status, kuota siswa, serta penawaran beasiswa.
-            </p>
+        <div className="rounded-xl border border-slate-200 bg-white">
+          <div className="flex flex-col gap-3 border-b border-slate-100 px-5 py-5 sm:flex-row sm:items-center sm:justify-between sm:px-7">
+            <div>
+              <h3 className="text-base font-semibold text-slate-900">
+                Jadwal gelombang
+              </h3>
+              <p className="mt-1 text-sm text-slate-500">
+                Tampilkan ringkasan terlebih dahulu; buka detail hanya saat
+                ingin mengubahnya.
+              </p>
+            </div>
+            <button
+              type="button"
+              onClick={handleAddWave}
+              className="self-start rounded-lg bg-[#31529a] px-3.5 py-2 text-sm font-semibold text-white transition hover:bg-[#26437f] sm:self-auto"
+            >
+              + Tambah gelombang
+            </button>
           </div>
 
-          {/* Form 1 Gelombang Berurutan ke Bawah */}
-          {(() => {
-            const wave = data.waves[0] || {
-              id: "wave-1",
-              name: "Gelombang 1 (Early Bird)",
-              period: "01 Oktober - 31 Desember 2026",
-              status: "Aktif",
-              quota: "120 Kursi",
-              discount: "Diskon Biaya Masuk 20% + Bebas Biaya Formulir",
-            };
-
-            return (
-              <div className="space-y-4">
-                <div>
-                  <label className="block text-xs font-bold text-slate-700 mb-1.5">
-                    Nama Gelombang
-                  </label>
-                  <input
-                    type="text"
-                    value={wave.name}
-                    onChange={(e) =>
-                      handleUpdateWave(0, { name: e.target.value })
-                    }
-                    placeholder="Contoh: Gelombang 1 (Early Bird)"
-                    className="w-full rounded-lg border border-slate-300 bg-slate-50 px-3.5 py-2 text-xs text-slate-800 outline-none focus:border-[#2563eb] focus:bg-white transition"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-xs font-bold text-slate-700 mb-1.5">
-                    Periode Pendaftaran
-                  </label>
-                  <input
-                    type="text"
-                    value={wave.period}
-                    onChange={(e) =>
-                      handleUpdateWave(0, { period: e.target.value })
-                    }
-                    placeholder="Contoh: 01 Oktober - 31 Desember 2026"
-                    className="w-full rounded-lg border border-slate-300 bg-slate-50 px-3.5 py-2 text-xs text-slate-800 outline-none focus:border-[#2563eb] focus:bg-white transition"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-xs font-bold text-slate-700 mb-1.5">
-                    Status Pendaftaran
-                  </label>
-                  <select
-                    value={wave.status}
-                    onChange={(e) =>
-                      handleUpdateWave(0, {
-                        status: e.target.value as "Aktif" | "Segera Dibuka" | "Ditutup",
-                      })
-                    }
-                    className="w-full rounded-lg border border-slate-300 bg-slate-50 px-3.5 py-2 text-xs text-slate-800 outline-none focus:border-[#2563eb] focus:bg-white transition"
+          <div className="overflow-x-auto">
+            <table className="min-w-full text-left text-sm">
+              <thead className="bg-slate-50 text-xs font-semibold uppercase tracking-wide text-slate-500">
+                <tr>
+                  <th className="px-5 py-3.5 sm:px-7">Gelombang</th>
+                  <th className="px-5 py-3.5">Periode</th>
+                  <th className="px-5 py-3.5">Status</th>
+                  <th className="px-5 py-3.5">Kuota</th>
+                  <th className="px-5 py-3.5 text-right sm:px-7"> </th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-100">
+                {data.waves.map((wave, index) => (
+                  <tr
+                    key={wave.id || index}
+                    className="transition hover:bg-slate-50/70"
                   >
-                    <option value="Aktif">Aktif</option>
-                    <option value="Segera Dibuka">Segera Dibuka</option>
-                    <option value="Ditutup">Ditutup</option>
-                  </select>
-                </div>
-
-                <div>
-                  <label className="block text-xs font-bold text-slate-700 mb-1.5">
-                    Kuota Kursi
-                  </label>
-                  <input
-                    type="text"
-                    value={wave.quota}
-                    onChange={(e) =>
-                      handleUpdateWave(0, { quota: e.target.value })
-                    }
-                    placeholder="Contoh: 120 Kursi"
-                    className="w-full rounded-lg border border-slate-300 bg-slate-50 px-3.5 py-2 text-xs text-slate-800 outline-none focus:border-[#2563eb] focus:bg-white transition"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-xs font-bold text-slate-700 mb-1.5">
-                    Penawaran / Beasiswa
-                  </label>
-                  <input
-                    type="text"
-                    value={wave.discount || ""}
-                    onChange={(e) =>
-                      handleUpdateWave(0, { discount: e.target.value })
-                    }
-                    placeholder="Contoh: Diskon Biaya Masuk 20% + Bebas Biaya Formulir"
-                    className="w-full rounded-lg border border-slate-300 bg-slate-50 px-3.5 py-2 text-xs text-slate-800 outline-none focus:border-[#2563eb] focus:bg-white transition"
-                  />
-                </div>
-              </div>
-            );
-          })()}
+                    <td className="px-5 py-4 font-medium text-slate-900 sm:px-7">
+                      {wave.name}
+                    </td>
+                    <td className="px-5 py-4 text-slate-600">{wave.period}</td>
+                    <td className="px-5 py-4">
+                      <span
+                        className={cn(
+                          "rounded-full px-2.5 py-1 text-xs font-medium",
+                          wave.status === "Aktif"
+                            ? "bg-emerald-50 text-emerald-700"
+                            : wave.status === "Segera Dibuka"
+                              ? "bg-amber-50 text-amber-700"
+                              : "bg-slate-100 text-slate-600",
+                        )}
+                      >
+                        {wave.status}
+                      </span>
+                    </td>
+                    <td className="px-5 py-4 text-slate-600">{wave.quota}</td>
+                    <td className="px-5 py-4 text-right sm:px-7">
+                      <button
+                        type="button"
+                        onClick={() => setEditingWaveIndex(index)}
+                        className="rounded-lg px-3 py-1.5 text-sm font-semibold text-[#31529a] transition hover:bg-blue-50"
+                      >
+                        Edit
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         </div>
       )}
 
-      {/* TAB 3: SYARAT & ALUR PENDAFTARAN */}
       {activeTab === "syarat-alur" && (
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
-          {/* Sub-Card 1: Persyaratan Calon Siswa */}
-          <div className="rounded-xl border border-slate-200 bg-white p-5 sm:p-6 shadow-xs space-y-4">
-            <div className="flex items-center justify-between border-b border-slate-100 pb-3">
-              <div>
-                <h3 className="text-sm font-bold text-slate-900 uppercase tracking-wider">
-                  Persyaratan Berkas ({data.requirements.length})
-                </h3>
-                <p className="text-xs text-slate-500 mt-0.5">
-                  Daftar dokumen yang wajib disiapkan oleh calon siswa.
-                </p>
-              </div>
-              <button
-                type="button"
-                onClick={handleAddReq}
-                className="inline-flex items-center gap-1 rounded-lg bg-[#2563eb] px-3 py-1.5 text-xs font-bold text-white shadow-2xs hover:bg-[#1d4ed8] transition"
-              >
-                + Tambah Syarat
-              </button>
-            </div>
-
-            <div className="space-y-2.5">
-              {data.requirements.map((req, idx) => (
-                <div key={idx} className="flex items-center gap-2 group">
-                  <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-slate-100 text-xs font-bold text-slate-600">
-                    {idx + 1}
-                  </span>
-                  <input
-                    type="text"
-                    value={req}
-                    onChange={(e) => handleUpdateReq(idx, e.target.value)}
-                    className="flex-1 rounded-lg border border-slate-300 bg-slate-50/70 px-3 py-2 text-xs text-slate-800 outline-none focus:border-[#2563eb] focus:bg-white transition"
-                  />
-                  <button
-                    type="button"
-                    onClick={() => handleDeleteReq(idx)}
-                    className="p-1.5 text-slate-300 hover:text-rose-600 hover:bg-rose-50 rounded transition text-xs"
-                    title="Hapus Persyaratan"
-                  >
-                    ✕
-                  </button>
+        <div className="rounded-xl border border-slate-200 bg-white p-5 sm:p-7">
+          <div className="grid gap-8 xl:grid-cols-2 xl:gap-10">
+            <section>
+              <div className="flex items-start justify-between gap-4 border-b border-slate-100 pb-4">
+                <div>
+                  <h3 className="text-base font-semibold text-slate-900">
+                    Persyaratan berkas
+                  </h3>
+                  <p className="mt-1 text-sm text-slate-500">
+                    Dokumen yang perlu dibawa calon siswa.
+                  </p>
                 </div>
-              ))}
-            </div>
-          </div>
-
-          {/* Sub-Card 2: Alur Tahapan Pendaftaran */}
-          <div className="rounded-xl border border-slate-200 bg-white p-5 sm:p-6 shadow-xs space-y-4">
-            <div className="border-b border-slate-100 pb-3">
-              <h3 className="text-sm font-bold text-slate-900 uppercase tracking-wider">
-                Alur Tahapan Pendaftaran ({data.steps.length} Langkah)
-              </h3>
-              <p className="text-xs text-slate-500 mt-0.5">
-                Alur seleksi yang akan dilalui oleh calon siswa hingga resmi diterima.
-              </p>
-            </div>
-
-            <div className="space-y-3">
-              {data.steps.map((st, idx) => (
-                <div
-                  key={st.step}
-                  className="rounded-xl border border-slate-200 bg-slate-50/60 p-3.5 space-y-2 hover:bg-white hover:border-slate-300 transition"
+                <button
+                  type="button"
+                  onClick={handleAddReq}
+                  className="shrink-0 rounded-lg border border-slate-200 px-3 py-1.5 text-sm font-semibold text-[#31529a] transition hover:bg-blue-50"
                 >
-                  <div className="flex items-center gap-2">
-                    <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-[#142c58] text-[10px] font-bold text-white">
-                      {st.step}
+                  + Tambah
+                </button>
+              </div>
+              <ol className="mt-3 divide-y divide-slate-100">
+                {data.requirements.map((requirement, index) => (
+                  <li key={index} className="flex items-center gap-3 py-3">
+                    <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-blue-50 text-xs font-semibold text-[#31529a]">
+                      {index + 1}
                     </span>
                     <input
                       type="text"
-                      value={st.title}
-                      onChange={(e) =>
-                        handleUpdateStep(idx, "title", e.target.value)
+                      value={requirement}
+                      onChange={(event) =>
+                        handleUpdateReq(index, event.target.value)
                       }
-                      placeholder="Judul Tahapan..."
-                      className="flex-1 rounded-md border border-slate-300 bg-white px-2.5 py-1 text-xs font-bold text-slate-800 outline-none focus:border-[#2563eb] transition"
+                      className="min-w-0 flex-1 border-0 bg-transparent px-0 py-1 text-sm text-slate-800 outline-none focus:ring-0"
                     />
-                  </div>
-                  <textarea
-                    rows={2}
-                    value={st.description}
-                    onChange={(e) =>
-                      handleUpdateStep(idx, "description", e.target.value)
-                    }
-                    placeholder="Deskripsi langkah..."
-                    className="w-full rounded-md border border-slate-200 bg-white px-3 py-1.5 text-xs text-slate-600 outline-none focus:border-[#2563eb] transition resize-none"
-                  />
-                </div>
-              ))}
-            </div>
+                    <button
+                      type="button"
+                      onClick={() => handleDeleteReq(index)}
+                      aria-label="Hapus persyaratan"
+                      className="rounded-md p-1.5 text-slate-400 transition hover:bg-rose-50 hover:text-rose-600"
+                    >
+                      ×
+                    </button>
+                  </li>
+                ))}
+              </ol>
+            </section>
+
+            <section>
+              <div className="border-b border-slate-100 pb-4">
+                <h3 className="text-base font-semibold text-slate-900">
+                  Alur pendaftaran
+                </h3>
+                <p className="mt-1 text-sm text-slate-500">
+                  Urutan yang ditampilkan kepada calon siswa.
+                </p>
+              </div>
+              <ol className="mt-3 divide-y divide-slate-100">
+                {data.steps.map((step, index) => (
+                  <li key={step.step} className="flex gap-3 py-3.5">
+                    <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-[#31529a] text-xs font-semibold text-white">
+                      {step.step}
+                    </span>
+                    <div className="min-w-0 flex-1">
+                      <input
+                        type="text"
+                        value={step.title}
+                        onChange={(event) =>
+                          handleUpdateStep(index, "title", event.target.value)
+                        }
+                        placeholder="Judul tahapan"
+                        className="w-full border-0 bg-transparent p-0 text-sm font-semibold text-slate-800 outline-none focus:ring-0"
+                      />
+                      <textarea
+                        rows={2}
+                        value={step.description}
+                        onChange={(event) =>
+                          handleUpdateStep(
+                            index,
+                            "description",
+                            event.target.value,
+                          )
+                        }
+                        placeholder="Keterangan tahapan"
+                        className="mt-1 w-full resize-none border-0 bg-transparent p-0 text-sm leading-6 text-slate-500 outline-none focus:ring-0"
+                      />
+                    </div>
+                  </li>
+                ))}
+              </ol>
+            </section>
           </div>
         </div>
       )}
 
-      {/* TAB 4: BROSUR RESMI SPMB */}
       {activeTab === "brosur" && (
-        <div className="rounded-xl border border-slate-200 bg-white p-5 sm:p-6 shadow-xs space-y-6">
-          <div className="border-b border-slate-100 pb-3 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-            <div>
-              <h3 className="text-sm font-bold text-slate-900 uppercase tracking-wider">
-                Brosur Resmi SPMB {data.academicYear}
-              </h3>
-              <p className="text-xs text-slate-500 mt-0.5">
-                Brosur ini ditampilkan di halaman publik SPMB dan dapat diunduh oleh calon siswa atau orang tua.
-              </p>
-            </div>
-            <span className="rounded-full bg-blue-100 px-3 py-1 text-xs font-bold text-blue-800 self-start sm:self-auto">
-              Format: JPG / PNG / WEBP
-            </span>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-12 gap-6 items-start">
-            {/* Visual Preview Brosur */}
-            <div className="md:col-span-5 lg:col-span-4 flex flex-col items-center">
-              <div className="relative aspect-[3/4] w-full max-w-[280px] overflow-hidden rounded-xl border-2 border-slate-200 bg-slate-50 shadow-md group">
+        <div className="rounded-xl border border-slate-200 bg-white p-5 sm:p-7">
+          <div className="flex flex-col gap-6 md:flex-row md:items-start">
+            <div className="w-full shrink-0 md:w-56">
+              <button
+                type="button"
+                onClick={() => setPreviewBrochureOpen(true)}
+                className="group relative block aspect-[3/4] w-full overflow-hidden rounded-xl bg-slate-100"
+              >
                 <Image
                   src={data.brochureUrl || "/images/spmb-brochure.jpg"}
                   alt="Brosur Resmi SPMB"
                   fill
-                  sizes="320px"
-                  className="object-cover transition duration-300 group-hover:scale-102"
+                  sizes="224px"
+                  className="object-cover transition duration-300 group-hover:scale-[1.03]"
                 />
-
-                {/* Overlay Hover */}
-                <div className="absolute inset-0 bg-slate-950/60 opacity-0 group-hover:opacity-100 transition flex flex-col items-center justify-center gap-2.5 p-4 text-white">
-                  <button
-                    type="button"
-                    onClick={() => setPreviewBrochureOpen(true)}
-                    className="rounded-lg bg-white/20 backdrop-blur-md px-3.5 py-2 text-xs font-semibold hover:bg-white hover:text-slate-900 transition flex items-center gap-1.5"
-                  >
-                    <span>🔍 Lihat Ukuran Penuh</span>
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => fileInputRef.current?.click()}
-                    className="rounded-lg bg-[#2563eb] px-3.5 py-2 text-xs font-semibold hover:bg-[#1d4ed8] transition flex items-center gap-1.5"
-                  >
-                    <span>📤 Unggah Brosur Baru</span>
-                  </button>
-                </div>
-              </div>
-              <button
-                type="button"
-                onClick={() => setPreviewBrochureOpen(true)}
-                className="mt-2.5 text-xs font-bold text-[#2563eb] hover:underline"
-              >
-                Klik untuk memperbesar gambar
+                <span className="absolute inset-x-0 bottom-0 bg-slate-950/65 px-3 py-2 text-center text-xs font-medium text-white opacity-0 transition group-hover:opacity-100">
+                  Lihat ukuran penuh
+                </span>
               </button>
             </div>
 
-            {/* Informasi File & Aksi Upload */}
-            <div className="md:col-span-7 lg:col-span-8 space-y-5">
-              <div className="rounded-xl border border-slate-200 bg-slate-50/70 p-4 space-y-3">
-                <h4 className="text-xs font-bold text-slate-800 uppercase tracking-wider">
-                  Informasi Berkas Brosur Aktif
-                </h4>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
-                  <div className="rounded-lg bg-white p-3 border border-slate-200">
-                    <span className="text-[10px] text-slate-400 block font-semibold uppercase">Nama File</span>
-                    <span className="font-bold text-slate-800 truncate block mt-0.5">
-                      {data.brochureFileName || "Brosur-SPMB.jpg"}
-                    </span>
-                  </div>
-                  <div className="rounded-lg bg-white p-3 border border-slate-200">
-                    <span className="text-[10px] text-slate-400 block font-semibold uppercase">Tanggal Pembaruan</span>
-                    <span className="font-bold text-slate-800 block mt-0.5">
-                      {data.brochureUploadedAt || "2026-10-20"}
-                    </span>
-                  </div>
-                </div>
-              </div>
+            <div className="min-w-0 flex-1">
+              <h3 className="text-base font-semibold text-slate-900">
+                Brosur resmi SPMB
+              </h3>
+              <p className="mt-1 text-sm leading-6 text-slate-500">
+                File ini tampil di halaman publik dan dapat diunduh oleh calon
+                siswa atau orang tua.
+              </p>
 
-              {/* Area Aksi Unggah */}
-              <div className="rounded-xl border-2 border-dashed border-slate-300 bg-white p-6 text-center space-y-3">
-                <div className="flex h-12 w-12 items-center justify-center rounded-full bg-blue-50 text-blue-600 mx-auto">
-                  <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M4 16v1a3 3 0 0 0 3 3h10a3 3 0 0 0 3-3v-1m-4-8-4-4m0 0L8 8m4-4v12" />
-                  </svg>
+              <dl className="mt-5 grid gap-4 border-y border-slate-100 py-4 text-sm sm:grid-cols-2">
+                <div>
+                  <dt className="text-slate-500">Nama file</dt>
+                  <dd className="mt-1 truncate font-medium text-slate-800">
+                    {data.brochureFileName || "Brosur-SPMB.jpg"}
+                  </dd>
                 </div>
                 <div>
-                  <p className="text-sm font-bold text-slate-800">
-                    Unggah Brosur SPMB Terbaru
-                  </p>
-                  <p className="text-xs text-slate-500 mt-0.5">
-                    Mendukung file format JPG, PNG, atau WEBP dengan resolusi tinggi (maksimal 5MB).
-                  </p>
+                  <dt className="text-slate-500">Terakhir diperbarui</dt>
+                  <dd className="mt-1 font-medium text-slate-800">
+                    {data.brochureUploadedAt || "2026-10-20"}
+                  </dd>
                 </div>
+              </dl>
 
-                {/* Hidden File Input */}
+              <div className="mt-5">
+                <p className="text-sm font-medium text-slate-700">
+                  Ganti brosur
+                </p>
+                <p className="mt-1 text-sm text-slate-500">
+                  Gunakan JPG, PNG, atau WebP dengan ukuran maksimal 5 MB.
+                </p>
                 <input
                   ref={fileInputRef}
                   type="file"
@@ -687,82 +517,209 @@ export default function AdminSpmbSection({ onNotify }: AdminSpmbSectionProps) {
                   onChange={handleBrochureUpload}
                   className="hidden"
                 />
-
-                <div className="flex flex-wrap items-center justify-center gap-3 pt-2">
+                <div className="mt-4 flex flex-wrap gap-2">
                   <button
                     type="button"
                     onClick={() => fileInputRef.current?.click()}
-                    className="rounded-lg bg-[#2563eb] px-4 py-2 text-xs font-bold text-white shadow-xs hover:bg-[#1d4ed8] transition"
+                    className="rounded-lg bg-[#31529a] px-3.5 py-2 text-sm font-semibold text-white transition hover:bg-[#26437f]"
                   >
-                    Pilih Berkas Dari Komputer
+                    Pilih file
                   </button>
-
                   <a
                     href={data.brochureUrl || "/images/spmb-brochure.jpg"}
-                    download={data.brochureFileName || "Brosur-SPMB-Widya-Darma.jpg"}
+                    download={
+                      data.brochureFileName || "Brosur-SPMB-Widya-Darma.jpg"
+                    }
                     target="_blank"
                     rel="noreferrer"
-                    className="rounded-lg border border-slate-300 bg-white px-4 py-2 text-xs font-bold text-slate-700 hover:bg-slate-50 transition"
+                    className="rounded-lg border border-slate-200 px-3.5 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-50"
                   >
-                    Unduh Berkas Ini
+                    Unduh
                   </a>
-
                   <button
                     type="button"
                     onClick={handleResetBrochure}
-                    className="rounded-lg border border-slate-200 bg-slate-50 px-3.5 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-100 transition"
+                    className="rounded-lg px-3.5 py-2 text-sm font-semibold text-slate-500 transition hover:bg-slate-100 hover:text-slate-800"
                   >
-                    Kembalikan ke Default
+                    Kembalikan default
                   </button>
                 </div>
               </div>
             </div>
           </div>
+
+          <div className="mt-7 flex justify-center border-t border-slate-100 pt-6">
+            <button
+              type="button"
+              onClick={handleSave}
+              className={cn(
+                "w-full rounded-lg px-5 py-3 text-sm font-semibold text-white transition sm:w-72",
+                isSaved
+                  ? "bg-emerald-600 hover:bg-emerald-700"
+                  : "bg-[#07528c] hover:bg-[#063b68]",
+              )}
+            >
+              {isSaved ? "Perubahan tersimpan" : "Simpan semua perubahan"}
+            </button>
+          </div>
         </div>
       )}
 
-      {/* 4. Modal Pratinjau Brosur Ukuran Penuh */}
-      {previewBrochureOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/80 backdrop-blur-xs p-4 sm:p-6 animate-in fade-in duration-200">
-          <div
-            className="fixed inset-0"
-            onClick={() => setPreviewBrochureOpen(false)}
-            aria-hidden="true"
+      {editingWave && editingWaveIndex !== null && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/50 p-4 backdrop-blur-sm">
+          <button
+            type="button"
+            aria-label="Tutup editor gelombang"
+            className="absolute inset-0 cursor-default"
+            onClick={() => setEditingWaveIndex(null)}
           />
-
-          <div className="relative z-10 max-w-2xl w-full max-h-[90vh] flex flex-col items-center bg-white rounded-2xl overflow-hidden shadow-2xl">
-            <div className="w-full flex items-center justify-between border-b border-slate-200 bg-slate-50 px-4 py-3">
+          <div className="relative z-10 w-full max-w-lg rounded-2xl bg-white shadow-xl">
+            <div className="flex items-center justify-between border-b border-slate-100 px-5 py-4">
               <div>
-                <h4 className="text-xs font-bold text-slate-800">
-                  Pratinjau Brosur Resmi SPMB
-                </h4>
-                <p className="text-[11px] text-slate-400">
+                <h3 className="text-base font-semibold text-slate-900">
+                  Edit gelombang
+                </h3>
+                <p className="mt-0.5 text-sm text-slate-500">
+                  Perbarui detail jadwal pendaftaran.
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setEditingWaveIndex(null)}
+                aria-label="Tutup editor"
+                className="rounded-lg p-2 text-slate-400 hover:bg-slate-100 hover:text-slate-700"
+              >
+                ×
+              </button>
+            </div>
+            <div className="grid gap-4 p-5 sm:grid-cols-2">
+              <div className="sm:col-span-2">
+                <label className="mb-1.5 block text-sm font-medium text-slate-700">
+                  Nama gelombang
+                </label>
+                <input
+                  type="text"
+                  value={editingWave.name}
+                  onChange={(event) =>
+                    handleUpdateWave(editingWaveIndex, {
+                      name: event.target.value,
+                    })
+                  }
+                  className={fieldClass}
+                />
+              </div>
+              <div className="sm:col-span-2">
+                <label className="mb-1.5 block text-sm font-medium text-slate-700">
+                  Periode
+                </label>
+                <input
+                  type="text"
+                  value={editingWave.period}
+                  onChange={(event) =>
+                    handleUpdateWave(editingWaveIndex, {
+                      period: event.target.value,
+                    })
+                  }
+                  className={fieldClass}
+                />
+              </div>
+              <div>
+                <label className="mb-1.5 block text-sm font-medium text-slate-700">
+                  Status
+                </label>
+                <select
+                  value={editingWave.status}
+                  onChange={(event) =>
+                    handleUpdateWave(editingWaveIndex, {
+                      status: event.target.value as SpmbWave["status"],
+                    })
+                  }
+                  className={fieldClass}
+                >
+                  <option value="Aktif">Aktif</option>
+                  <option value="Segera Dibuka">Segera dibuka</option>
+                  <option value="Ditutup">Ditutup</option>
+                </select>
+              </div>
+              <div>
+                <label className="mb-1.5 block text-sm font-medium text-slate-700">
+                  Kuota
+                </label>
+                <input
+                  type="text"
+                  value={editingWave.quota}
+                  onChange={(event) =>
+                    handleUpdateWave(editingWaveIndex, {
+                      quota: event.target.value,
+                    })
+                  }
+                  className={fieldClass}
+                />
+              </div>
+              <div className="sm:col-span-2">
+                <label className="mb-1.5 block text-sm font-medium text-slate-700">
+                  Potongan / beasiswa
+                </label>
+                <input
+                  type="text"
+                  value={editingWave.discount || ""}
+                  onChange={(event) =>
+                    handleUpdateWave(editingWaveIndex, {
+                      discount: event.target.value,
+                    })
+                  }
+                  className={fieldClass}
+                />
+              </div>
+            </div>
+            <div className="flex items-center justify-between border-t border-slate-100 px-5 py-4">
+              <button
+                type="button"
+                onClick={() => handleDeleteWave(editingWave.id)}
+                className="text-sm font-semibold text-rose-600 transition hover:text-rose-700"
+              >
+                Hapus gelombang
+              </button>
+              <button
+                type="button"
+                onClick={() => setEditingWaveIndex(null)}
+                className="rounded-lg bg-[#31529a] px-4 py-2 text-sm font-semibold text-white transition hover:bg-[#26437f]"
+              >
+                Selesai
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {previewBrochureOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/80 p-4 backdrop-blur-sm sm:p-6">
+          <button
+            type="button"
+            aria-label="Tutup pratinjau brosur"
+            className="absolute inset-0 cursor-default"
+            onClick={() => setPreviewBrochureOpen(false)}
+          />
+          <div className="relative z-10 flex max-h-[90vh] w-full max-w-2xl flex-col overflow-hidden rounded-2xl bg-white shadow-2xl">
+            <div className="flex items-center justify-between border-b border-slate-100 px-5 py-3">
+              <div>
+                <h3 className="text-sm font-semibold text-slate-900">
+                  Pratinjau brosur
+                </h3>
+                <p className="mt-0.5 text-xs text-slate-500">
                   {data.brochureFileName || "Brosur-SPMB.jpg"}
                 </p>
               </div>
-              <div className="flex items-center gap-2">
-                <a
-                  href={data.brochureUrl || "/images/spmb-brochure.jpg"}
-                  download={data.brochureFileName || "Brosur-SPMB-Widya-Darma.jpg"}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="rounded-md bg-[#2563eb] px-3 py-1.5 text-xs font-bold text-white hover:bg-[#1d4ed8] transition"
-                >
-                  Unduh Brosur
-                </a>
-                <button
-                  type="button"
-                  onClick={() => setPreviewBrochureOpen(false)}
-                  className="flex h-7 w-7 items-center justify-center rounded-full text-slate-400 hover:bg-slate-200 hover:text-slate-700 transition"
-                  aria-label="Tutup pratinjau brosur"
-                >
-                  ✕
-                </button>
-              </div>
+              <button
+                type="button"
+                onClick={() => setPreviewBrochureOpen(false)}
+                className="rounded-lg p-2 text-slate-400 transition hover:bg-slate-100 hover:text-slate-700"
+              >
+                ×
+              </button>
             </div>
-
-            <div className="overflow-auto p-4 max-h-[75vh] w-full flex justify-center">
-              <div className="relative w-full max-w-md aspect-[3/4] rounded-lg overflow-hidden border border-slate-200 shadow-md">
+            <div className="flex min-h-0 flex-1 justify-center overflow-auto bg-slate-50 p-5">
+              <div className="relative aspect-[3/4] w-full max-w-md overflow-hidden rounded-lg bg-white shadow-sm">
                 <Image
                   src={data.brochureUrl || "/images/spmb-brochure.jpg"}
                   alt="Brosur Resmi SPMB"
@@ -775,6 +732,6 @@ export default function AdminSpmbSection({ onNotify }: AdminSpmbSectionProps) {
           </div>
         </div>
       )}
-    </div>
+    </section>
   );
 }

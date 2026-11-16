@@ -34,12 +34,12 @@ export default function AdminGalleryDetailModal({
     <div className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto bg-slate-900/70 p-4 backdrop-blur-xs">
       <div className="relative flex max-h-[90vh] w-full max-w-4xl flex-col overflow-hidden rounded-2xl bg-white shadow-2xl">
         {/* Header */}
-        <div className="flex items-center justify-between border-b border-slate-100 bg-slate-50/60 px-6 py-4">
+        <div className="flex items-center justify-between border-b border-slate-100 px-6 py-4">
           <div>
-            <span className="rounded-md bg-primary/10 px-2.5 py-0.5 text-xs font-semibold text-primary">
+            <span className="text-[11px] font-semibold text-primary">
               {activity.category}
             </span>
-            <h2 className="mt-1 text-lg font-bold text-slate-900">
+            <h2 className="mt-0.5 text-base font-bold text-slate-900">
               {activity.title}
             </h2>
           </div>
@@ -50,14 +50,14 @@ export default function AdminGalleryDetailModal({
                 onClose();
                 onEdit(activity);
               }}
-              className="rounded-lg bg-slate-100 px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-200 transition"
+              className="rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-50 transition"
             >
-              ✏️ Edit Kegiatan
+              Edit Kegiatan
             </button>
             <button
               type="button"
               onClick={onClose}
-              className="flex h-8 w-8 items-center justify-center rounded-full text-slate-400 hover:bg-slate-200 hover:text-slate-700 transition"
+              className="flex h-8 w-8 items-center justify-center rounded-full text-slate-400 hover:bg-slate-100 hover:text-slate-700 transition"
             >
               ✕
             </button>
@@ -65,25 +65,18 @@ export default function AdminGalleryDetailModal({
         </div>
 
         {/* Modal Content */}
-        <div className="flex-1 overflow-y-auto p-6 space-y-6">
-          
-          {/* Metadata Bar: Date & Mandatory Author Info */}
-          <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl bg-slate-50 p-3.5 border border-slate-100">
-            <div className="flex items-center gap-2 text-xs font-medium text-slate-600">
-              <span>📅 {activity.date}</span>
-              <span>•</span>
-              <span className="text-slate-900 font-semibold">
-                ✍️ Ditulis oleh {activity.authorName}
-              </span>
-            </div>
-            <div className="flex items-center gap-2">
-              <span className="rounded-full bg-emerald-100 px-2.5 py-0.5 text-[11px] font-bold text-emerald-800">
-                ● {activity.status || "Terbit"}
-              </span>
-              <span className="text-xs text-slate-400">
-                ({photos.length} Foto Asli dalam Slider)
-              </span>
-            </div>
+        <div className="flex-1 overflow-y-auto p-6 space-y-5">
+
+          {/* Metadata: Date & Author — plain, no card */}
+          <div className="flex flex-wrap items-center gap-3 text-xs text-slate-500">
+            <span>{activity.date}</span>
+            <span>•</span>
+            <span>Oleh {activity.authorName}</span>
+            <span>•</span>
+            <span>{photos.length} foto</span>
+            <span className="ml-auto rounded-full bg-emerald-100 px-2.5 py-0.5 text-[11px] font-semibold text-emerald-800">
+              {activity.status || "Terbit"}
+            </span>
           </div>
 
           {/* Slider Foto Asli (Original Photos Slider for Detail Page) */}
@@ -158,23 +151,13 @@ export default function AdminGalleryDetailModal({
           )}
 
           {/* Article Text Content */}
-          <div className="space-y-3">
-            <h3 className="text-sm font-bold text-slate-900">Artikel Kegiatan</h3>
-            <p className="text-sm leading-relaxed text-slate-700 whitespace-pre-line bg-slate-50/50 p-4 rounded-xl border border-slate-100">
-              {activity.content || "Belum ada artikel singkat."}
-            </p>
-          </div>
-
-          {/* Crop Config Parameters Technical Summary */}
-          <div className="rounded-xl border border-amber-200 bg-amber-50/40 p-3.5 text-xs text-amber-900">
-            <span className="font-bold">📐 Detail Konfigurasi Crop 3:4 Sampul:</span>
-            <div className="mt-1 flex flex-wrap gap-4 font-mono text-[11px] text-amber-800">
-              <span>Zoom: {activity.cropConfig?.zoom?.toFixed(2) || "1.00"}x</span>
-              <span>Offset X: {activity.cropConfig?.x || 0}%</span>
-              <span>Offset Y: {activity.cropConfig?.y || 0}%</span>
-              <span>Cover Photo ID: {activity.coverPhotoId}</span>
+          {activity.content && (
+            <div>
+              <p className="text-sm leading-relaxed text-slate-600 whitespace-pre-line">
+                {activity.content}
+              </p>
             </div>
-          </div>
+          )}
 
         </div>
 
