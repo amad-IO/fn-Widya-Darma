@@ -9,7 +9,7 @@ export const adminTheme = {
   colors: {
     primary: "#07528c",
     primaryDark: "#063b68",
-    sidebar: "#31529a",
+    sidebar: "#07528c",
   },
   typography: {
     label: "text-sm font-medium text-slate-700",

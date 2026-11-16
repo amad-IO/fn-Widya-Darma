@@ -1,7 +1,12 @@
 import type { AdminIconName } from "@/components/admin/AdminIcon";
 
 export type AdminSection =
-  "dashboard" | "guru" | "spmb" | "galeri";
+  | "dashboard"
+  | "guru"
+  | "spmb"
+  | "galeri"
+  | "kelas"
+  | "pengaturan";
 export type PublicationCategory =
   "Berita" | "Jurnal" | "Karya" | "Prestasi" | "Ekstrakurikuler";
 export type PublicationStatus = "Terbit" | "Draf" | "Dalam tinjauan";
@@ -41,9 +46,21 @@ export const adminNavigation: {
   },
   {
     id: "galeri",
-    label: "Galeri Kegiatan",
+    label: "Kegiatan",
     icon: "gallery",
     caption: "Dokumentasi foto dan artikel kegiatan sekolah.",
+  },
+  {
+    id: "kelas",
+    label: "Kelas",
+    icon: "book",
+    caption: "Pengelolaan data kelas dan rombongan belajar.",
+  },
+  {
+    id: "pengaturan",
+    label: "Pengaturan",
+    icon: "settings",
+    caption: "Pengaturan akun dan informasi administrasi.",
   },
 ];
 

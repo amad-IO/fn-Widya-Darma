@@ -141,6 +141,17 @@ export default function AdminDashboard() {
         />
       ) : section === "spmb" ? (
         <AdminSpmbSection onNotify={(msg) => setNotice(msg)} />
+      ) : section === "kelas" || section === "pengaturan" ? (
+        <section className="rounded-2xl border border-slate-200 bg-white px-6 py-10 text-center shadow-xs">
+          <h2 className="text-lg font-bold text-slate-900">
+            {section === "kelas" ? "Kelas" : "Pengaturan"}
+          </h2>
+          <p className="mx-auto mt-2 max-w-md text-sm leading-6 text-slate-500">
+            {section === "kelas"
+              ? "Menu pengelolaan kelas akan tersedia di sini."
+              : "Menu pengaturan administrasi akan tersedia di sini."}
+          </p>
+        </section>
       ) : null}
 
       {/* Admin Gallery Modal */}

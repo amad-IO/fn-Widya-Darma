@@ -100,9 +100,6 @@ export default function AdminLayout({
             <p className="mt-2 text-sm font-bold tracking-[0.18em] text-primary">
               SMA WIDYA DARMA
             </p>
-            <span className="mt-0.5 text-[10px] font-medium uppercase tracking-[0.18em] text-slate-400">
-              Panel Administrasi
-            </span>
           </div>
 
           {children}
