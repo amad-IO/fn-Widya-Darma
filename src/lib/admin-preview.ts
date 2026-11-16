@@ -1,7 +1,7 @@
 import type { AdminIconName } from "@/components/admin/AdminIcon";
 
 export type AdminSection =
-  "dashboard" | "profil" | "guru" | "spmb" | "publikasi" | "galeri" | "kontak";
+  "dashboard" | "guru" | "spmb" | "galeri";
 export type PublicationCategory =
   "Berita" | "Jurnal" | "Karya" | "Prestasi" | "Ekstrakurikuler";
 export type PublicationStatus = "Terbit" | "Draf" | "Dalam tinjauan";
@@ -28,12 +28,6 @@ export const adminNavigation: {
     caption: "Ringkasan pengelolaan website sekolah.",
   },
   {
-    id: "profil",
-    label: "Profil & Organisasi",
-    icon: "school",
-    caption: "Profil, visi-misi, dan struktur organisasi sekolah.",
-  },
-  {
     id: "guru",
     label: "Data Guru",
     icon: "people",
@@ -46,22 +40,10 @@ export const adminNavigation: {
     caption: "Jadwal, persyaratan, dan alur penerimaan siswa baru.",
   },
   {
-    id: "publikasi",
-    label: "Publikasi",
-    icon: "article",
-    caption: "Berita, jurnal, karya, dan informasi kegiatan sekolah.",
-  },
-  {
     id: "galeri",
-    label: "Galeri Sekolah",
+    label: "Galeri Kegiatan",
     icon: "gallery",
-    caption: "Dokumentasi prestasi dan kegiatan ekstrakurikuler.",
-  },
-  {
-    id: "kontak",
-    label: "Kontak Sekolah",
-    icon: "contact",
-    caption: "Informasi kontak dan kanal komunikasi resmi sekolah.",
+    caption: "Dokumentasi foto dan artikel kegiatan sekolah.",
   },
 ];
 

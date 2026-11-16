@@ -7,13 +7,15 @@ import AdminIcon from "./AdminIcon";
 export default function AdminSidebar({
   mobile = false,
   section,
-  publicationCount,
+  galleryCount = 0,
+  teachersCount = 0,
   onNavigate,
   onClose,
 }: {
   mobile?: boolean;
   section: AdminSection;
-  publicationCount: number;
+  galleryCount?: number;
+  teachersCount?: number;
   onNavigate: (section: AdminSection) => void;
   onClose: () => void;
 }) {
@@ -64,29 +66,29 @@ export default function AdminSidebar({
           >
             <AdminIcon name={item.icon} className="h-[18px] w-[18px]" />
             {item.label}
-            {item.id === "publikasi" && (
+            {item.id === "galeri" && galleryCount > 0 && (
               <span
                 className={cn(
                   "ml-auto rounded-md px-1.5 py-0.5 text-[10px]",
                   section === item.id ? "bg-white/15" : "bg-white/7",
                 )}
               >
-                {publicationCount}
+                {galleryCount}
+              </span>
+            )}
+            {item.id === "guru" && teachersCount > 0 && (
+              <span
+                className={cn(
+                  "ml-auto rounded-md px-1.5 py-0.5 text-[10px]",
+                  section === item.id ? "bg-white/15" : "bg-white/7",
+                )}
+              >
+                {teachersCount}
               </span>
             )}
           </button>
         ))}
       </nav>
-      <div className="mt-8 px-3 text-[10px] font-semibold tracking-[0.18em] text-blue-200/45">
-        PENGEMBANGAN
-      </div>
-      <div className="mt-3 flex items-center gap-3 px-3 py-3 whitespace-nowrap text-[11px] text-blue-100/45">
-        <AdminIcon name="book" className="h-[18px] w-[18px]" />
-        Knowledge Base
-        <span className="ml-auto rounded border border-white/10 px-1.5 py-0.5 text-[8px]">
-          Rencana
-        </span>
-      </div>
       <div className="mt-auto pt-10">
         <div className="rounded-xl border border-blue-300/10 bg-white/5 p-4">
           <p className="text-xs font-medium">Ruang informasi sekolah</p>
