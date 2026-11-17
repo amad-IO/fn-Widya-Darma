@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useRef, useState } from "react";
-import { Teacher, TeacherCategory, TeacherStatus } from "@/types/teacher";
+import { Teacher } from "@/types/teacher";
 import AdminIcon from "./AdminIcon";
 
 interface AdminTeacherModalProps {
@@ -11,21 +11,6 @@ interface AdminTeacherModalProps {
   initialData?: Teacher | null;
 }
 
-const CATEGORIES: TeacherCategory[] = [
-  "MIPA",
-  "Bahasa",
-  "Sosial & Humaniora",
-  "Seni & Olahraga",
-  "Bimbingan Konseling",
-  "Lainnya",
-];
-
-const STATUSES: TeacherStatus[] = [
-  "Guru Tetap",
-  "Aktif",
-  "Guru Honorer",
-  "Cuti",
-];
 const DEFAULT_IMAGE = "/images/teachers/teacher-1.jpg";
 
 export default function AdminTeacherModal({
@@ -35,43 +20,25 @@ export default function AdminTeacherModal({
   initialData,
 }: AdminTeacherModalProps) {
   const [name, setName] = useState("");
-  const [code, setCode] = useState("");
-  const [role, setRole] = useState("");
-  const [category, setCategory] = useState<TeacherCategory>("MIPA");
+  const [description, setDescription] = useState("");
+  const [education, setEducation] = useState("");
   const [subject, setSubject] = useState("");
-  const [email, setEmail] = useState("");
-  const [phone, setPhone] = useState("");
-  const [address, setAddress] = useState("");
-  const [nip, setNip] = useState("");
-  const [status, setStatus] = useState<TeacherStatus>("Guru Tetap");
   const [image, setImage] = useState(DEFAULT_IMAGE);
-  const [errors, setErrors] = useState<{ name?: string; email?: string }>({});
+  const [errors, setErrors] = useState<{ name?: string }>({});
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     if (initialData) {
       setName(initialData.name || "");
-      setCode(initialData.code || "");
-      setRole(initialData.role || "");
-      setCategory(initialData.category || "MIPA");
+      setDescription(initialData.bio || "");
+      setEducation(initialData.education?.[0] || "");
       setSubject(initialData.subject || "");
-      setEmail(initialData.email || "");
-      setPhone(initialData.phone || "");
-      setAddress(initialData.address || "");
-      setNip(initialData.nip || "");
-      setStatus(initialData.status || "Guru Tetap");
       setImage(initialData.image || DEFAULT_IMAGE);
     } else {
       setName("");
-      setCode("");
-      setRole("");
-      setCategory("MIPA");
+      setDescription("");
+      setEducation("");
       setSubject("");
-      setEmail("");
-      setPhone("");
-      setAddress("");
-      setNip("");
-      setStatus("Guru Tetap");
       setImage(DEFAULT_IMAGE);
     }
     setErrors({});
@@ -99,9 +66,8 @@ export default function AdminTeacherModal({
 
   const handleSave = (event: React.FormEvent) => {
     event.preventDefault();
-    const nextErrors: { name?: string; email?: string } = {};
+    const nextErrors: { name?: string } = {};
     if (!name.trim()) nextErrors.name = "Nama lengkap wajib diisi.";
-    if (!email.trim()) nextErrors.email = "Email wajib diisi.";
 
     if (Object.keys(nextErrors).length) {
       setErrors(nextErrors);
@@ -112,22 +78,20 @@ export default function AdminTeacherModal({
       ...initialData,
       id: initialData?.id || `guru-${Date.now()}`,
       name: name.trim(),
-      code: code.trim() ? code.trim().toUpperCase() : undefined,
-      role: role.trim() || "Tenaga Pendidik",
-      category,
       subject: subject.trim() || "-",
-      email: email.trim(),
-      phone: phone.trim() || undefined,
-      address: address.trim() || undefined,
-      nip: nip.trim() || undefined,
+      bio: description.trim() || undefined,
+      education: education.trim() ? [education.trim()] : undefined,
       image: image || DEFAULT_IMAGE,
-      status,
+      role: initialData?.role || "Guru Mata Pelajaran",
+      category: initialData?.category || "Lainnya",
+      email: initialData?.email || "-",
+      status: initialData?.status || "Aktif",
       order: initialData?.order || Date.now(),
     });
     onClose();
   };
 
-  const previewName = name || "Nama Guru, Gelar";
+  const previewName = name || "Nama Guru";
   const inputClass =
     "w-full rounded-xl border border-slate-200 bg-slate-50 px-3.5 py-2.5 text-sm text-slate-800 outline-none transition placeholder:text-slate-400 focus:border-[#31529a] focus:bg-white focus:ring-2 focus:ring-[#31529a]/15";
 
@@ -172,51 +136,6 @@ export default function AdminTeacherModal({
 
           <div>
             <label className="mb-1.5 block text-xs font-semibold text-slate-700">
-              Kode guru
-            </label>
-            <input
-              type="text"
-              value={code}
-              onChange={(event) => setCode(event.target.value)}
-              placeholder="Contoh: KFI"
-              className={`${inputClass} uppercase`}
-            />
-          </div>
-
-          <div>
-            <label className="mb-1.5 block text-xs font-semibold text-slate-700">
-              Jabatan
-            </label>
-            <input
-              type="text"
-              value={role}
-              onChange={(event) => setRole(event.target.value)}
-              placeholder="Contoh: Guru Mata Pelajaran"
-              className={inputClass}
-            />
-          </div>
-
-          <div>
-            <label className="mb-1.5 block text-xs font-semibold text-slate-700">
-              Bidang studi
-            </label>
-            <select
-              value={category}
-              onChange={(event) =>
-                setCategory(event.target.value as TeacherCategory)
-              }
-              className={inputClass}
-            >
-              {CATEGORIES.map((item) => (
-                <option key={item} value={item}>
-                  {item}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          <div>
-            <label className="mb-1.5 block text-xs font-semibold text-slate-700">
               Mata pelajaran
             </label>
             <input
@@ -230,76 +149,28 @@ export default function AdminTeacherModal({
 
           <div>
             <label className="mb-1.5 block text-xs font-semibold text-slate-700">
-              Email <span className="text-rose-500">*</span>
-            </label>
-            <input
-              type="email"
-              value={email}
-              onChange={(event) => setEmail(event.target.value)}
-              placeholder="nama@sekolah.sch.id"
-              className={inputClass}
-            />
-            {errors.email && (
-              <p className="mt-1 text-xs text-rose-500">{errors.email}</p>
-            )}
-          </div>
-
-          <div>
-            <label className="mb-1.5 block text-xs font-semibold text-slate-700">
-              No. telepon
-            </label>
-            <input
-              type="tel"
-              value={phone}
-              onChange={(event) => setPhone(event.target.value)}
-              placeholder="Contoh: +62 812-3456-7890"
-              className={inputClass}
-            />
-          </div>
-
-          <div>
-            <label className="mb-1.5 block text-xs font-semibold text-slate-700">
-              Alamat domisili
+              Deskripsi singkat
             </label>
             <textarea
               rows={3}
-              value={address}
-              onChange={(event) => setAddress(event.target.value)}
-              placeholder="Contoh: Jl. Melati No. 14, Jakarta Timur"
+              value={description}
+              onChange={(event) => setDescription(event.target.value)}
+              placeholder="Tuliskan deskripsi singkat mengenai guru"
               className={inputClass}
             />
           </div>
 
           <div>
             <label className="mb-1.5 block text-xs font-semibold text-slate-700">
-              NIP
+              Pendidikan S1
             </label>
             <input
               type="text"
-              value={nip}
-              onChange={(event) => setNip(event.target.value)}
-              placeholder="Contoh: 19910412 201801 2 004"
+              value={education}
+              onChange={(event) => setEducation(event.target.value)}
+              placeholder="Contoh: S1 Pendidikan Informatika — Universitas Indonesia"
               className={inputClass}
             />
-          </div>
-
-          <div>
-            <label className="mb-1.5 block text-xs font-semibold text-slate-700">
-              Status kepegawaian
-            </label>
-            <select
-              value={status}
-              onChange={(event) =>
-                setStatus(event.target.value as TeacherStatus)
-              }
-              className={inputClass}
-            >
-              {STATUSES.map((item) => (
-                <option key={item} value={item}>
-                  {item}
-                </option>
-              ))}
-            </select>
           </div>
 
           <div className="rounded-2xl border border-dashed border-blue-200 bg-blue-50/40 p-4">
@@ -343,13 +214,13 @@ export default function AdminTeacherModal({
                   {previewName}
                 </h3>
                 <p className="mt-1 text-xs font-medium text-[#31529a]">
-                  {role || "Jabatan guru"}
+                  {subject || "Mata pelajaran"}
                 </p>
-                <p className="mt-3 text-xs text-slate-500">
-                  {subject || "Mata pelajaran"} · {category}
+                <p className="mt-3 line-clamp-2 text-xs leading-5 text-slate-500">
+                  {description || "Deskripsi singkat guru"}
                 </p>
-                <p className="mt-1 truncate text-xs text-slate-500">
-                  {email || "email@sekolah.sch.id"}
+                <p className="mt-2 truncate text-xs text-slate-500">
+                  {education || "Pendidikan S1"}
                 </p>
               </div>
             </div>

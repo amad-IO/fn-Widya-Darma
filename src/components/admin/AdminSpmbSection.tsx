@@ -28,6 +28,9 @@ export default function AdminSpmbSection({ onNotify }: AdminSpmbSectionProps) {
   const [isSaved, setIsSaved] = useState(false);
   const [previewBrochureOpen, setPreviewBrochureOpen] = useState(false);
   const [editingWaveIndex, setEditingWaveIndex] = useState<number | null>(null);
+  const [wavePendingDeletion, setWavePendingDeletion] = useState<string | null>(null);
+  const [requirementPendingDeletion, setRequirementPendingDeletion] =
+    useState<number | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -105,10 +108,17 @@ export default function AdminSpmbSection({ onNotify }: AdminSpmbSectionProps) {
   };
 
   const handleDeleteWave = (id: string) => {
-    if (confirm("Hapus gelombang pendaftaran ini?")) {
-      setData({ ...data, waves: data.waves.filter((wave) => wave.id !== id) });
-      setEditingWaveIndex(null);
-    }
+    setWavePendingDeletion(id);
+  };
+
+  const confirmDeleteWave = () => {
+    if (!wavePendingDeletion) return;
+    setData({
+      ...data,
+      waves: data.waves.filter((wave) => wave.id !== wavePendingDeletion),
+    });
+    setWavePendingDeletion(null);
+    setEditingWaveIndex(null);
   };
 
   const handleUpdateReq = (index: number, value: string) => {
@@ -123,13 +133,18 @@ export default function AdminSpmbSection({ onNotify }: AdminSpmbSectionProps) {
       requirements: [...data.requirements, "Dokumen persyaratan tambahan baru"],
     });
 
-  const handleDeleteReq = (index: number) =>
+  const handleDeleteReq = (index: number) => setRequirementPendingDeletion(index);
+
+  const confirmDeleteReq = () => {
+    if (requirementPendingDeletion === null) return;
     setData({
       ...data,
       requirements: data.requirements.filter(
-        (_, itemIndex) => itemIndex !== index,
+        (_, itemIndex) => itemIndex !== requirementPendingDeletion,
       ),
     });
+    setRequirementPendingDeletion(null);
+  };
 
   const handleUpdateStep = (
     index: number,
@@ -728,6 +743,72 @@ export default function AdminSpmbSection({ onNotify }: AdminSpmbSectionProps) {
                   className="object-contain"
                 />
               </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {wavePendingDeletion && (
+        <div className="fixed inset-0 z-[60] flex items-center justify-center bg-slate-950/45 p-4 backdrop-blur-sm">
+          <button
+            type="button"
+            aria-label="Tutup konfirmasi hapus gelombang"
+            onClick={() => setWavePendingDeletion(null)}
+            className="absolute inset-0 cursor-default"
+          />
+          <div className="relative z-10 w-full max-w-sm rounded-2xl bg-white p-6 shadow-2xl">
+            <h3 className="text-base font-bold text-slate-900">Hapus gelombang?</h3>
+            <p className="mt-2 text-sm leading-6 text-slate-500">
+              Anda yakin ingin menghapus gelombang pendaftaran ini?
+            </p>
+            <div className="mt-6 flex justify-end gap-2.5">
+              <button
+                type="button"
+                onClick={() => setWavePendingDeletion(null)}
+                className="rounded-xl border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-600 transition hover:bg-slate-50"
+              >
+                Batal
+              </button>
+              <button
+                type="button"
+                onClick={confirmDeleteWave}
+                className="rounded-xl bg-rose-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-rose-700"
+              >
+                Ya, Hapus
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {requirementPendingDeletion !== null && (
+        <div className="fixed inset-0 z-[60] flex items-center justify-center bg-slate-950/45 p-4 backdrop-blur-sm">
+          <button
+            type="button"
+            aria-label="Tutup konfirmasi hapus persyaratan"
+            onClick={() => setRequirementPendingDeletion(null)}
+            className="absolute inset-0 cursor-default"
+          />
+          <div className="relative z-10 w-full max-w-sm rounded-2xl bg-white p-6 shadow-2xl">
+            <h3 className="text-base font-bold text-slate-900">Hapus persyaratan?</h3>
+            <p className="mt-2 text-sm leading-6 text-slate-500">
+              Anda yakin ingin menghapus persyaratan ini?
+            </p>
+            <div className="mt-6 flex justify-end gap-2.5">
+              <button
+                type="button"
+                onClick={() => setRequirementPendingDeletion(null)}
+                className="rounded-xl border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-600 transition hover:bg-slate-50"
+              >
+                Batal
+              </button>
+              <button
+                type="button"
+                onClick={confirmDeleteReq}
+                className="rounded-xl bg-rose-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-rose-700"
+              >
+                Ya, Hapus
+              </button>
             </div>
           </div>
         </div>

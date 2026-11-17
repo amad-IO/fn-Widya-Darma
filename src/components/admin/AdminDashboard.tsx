@@ -7,7 +7,7 @@ import AdminGalleryDetailModal from "./AdminGalleryDetailModal";
 import AdminTeacherModal from "./AdminTeacherModal";
 import AdminTeacherTable from "./AdminTeacherTable";
 import AdminOverview from "./AdminOverview";
-import AdminGallerySection from "./AdminGallerySection";
+import AdminGallerySection, { type GalleryTab } from "./AdminGallerySection";
 import AdminSpmbSection from "./AdminSpmbSection";
 import TeacherDetailModal from "@/components/shared/TeacherDetailModal";
 import { GalleryActivity } from "@/types/gallery";
@@ -27,6 +27,7 @@ export default function AdminDashboard() {
     removeActivity,
   } = useAdminGallery();
   const [isGalleryModalOpen, setIsGalleryModalOpen] = useState(false);
+  const [galleryTab, setGalleryTab] = useState<GalleryTab>("kegiatan");
   const [editingGalleryActivity, setEditingGalleryActivity] =
     useState<GalleryActivity | null>(null);
   const [viewingGalleryActivity, setViewingGalleryActivity] =
@@ -58,6 +59,13 @@ export default function AdminDashboard() {
 
   const handleSaveGallery = (savedActivity: GalleryActivity) => {
     saveActivity(savedActivity);
+    setGalleryTab(
+      savedActivity.category === "Jurnal Karya"
+        ? "jurnal-karya"
+        : savedActivity.category === "Prestasi Akademik"
+          ? "prestasi-akademik"
+          : "kegiatan",
+    );
     setNotice(
       editingGalleryActivity
         ? "Kegiatan galeri berhasil diperbarui."
@@ -69,6 +77,8 @@ export default function AdminDashboard() {
   const [isTeacherModalOpen, setIsTeacherModalOpen] = useState(false);
   const [editingTeacher, setEditingTeacher] = useState<Teacher | null>(null);
   const [viewingTeacher, setViewingTeacher] = useState<Teacher | null>(null);
+  const [teacherPendingDeletion, setTeacherPendingDeletion] =
+    useState<Teacher | null>(null);
 
   // Teacher CRUD Operations
   const handleOpenAddTeacher = () => {
@@ -83,14 +93,14 @@ export default function AdminDashboard() {
 
   const handleDeleteTeacher = (id: string) => {
     const target = teachers.find((t) => t.id === id);
-    if (
-      confirm(
-        `Apakah Anda yakin ingin menghapus data guru "${target?.name || "ini"}"?`,
-      )
-    ) {
-      removeTeacher(id);
-      setNotice("Data guru berhasil dihapus.");
-    }
+    if (target) setTeacherPendingDeletion(target);
+  };
+
+  const confirmDeleteTeacher = () => {
+    if (!teacherPendingDeletion) return;
+    removeTeacher(teacherPendingDeletion.id);
+    setNotice(`Data guru "${teacherPendingDeletion.name}" berhasil dihapus.`);
+    setTeacherPendingDeletion(null);
   };
 
   const handleSaveTeacher = (savedTeacher: Teacher) => {
@@ -130,6 +140,8 @@ export default function AdminDashboard() {
           onAdd={handleOpenAddGallery}
           onEdit={handleOpenEditGallery}
           onView={setViewingGalleryActivity}
+          activeTab={galleryTab}
+          onTabChange={setGalleryTab}
         />
       ) : section === "guru" ? (
         <AdminTeacherTable
@@ -161,6 +173,13 @@ export default function AdminDashboard() {
         onSave={handleSaveGallery}
         onDelete={handleDeleteGallery}
         initialData={editingGalleryActivity}
+        initialCategory={
+          galleryTab === "jurnal-karya"
+            ? "Jurnal Karya"
+            : galleryTab === "prestasi-akademik"
+              ? "Prestasi Akademik"
+              : "Kreativitas & Seni"
+        }
       />
 
       {/* Admin Gallery Detail Modal */}
@@ -191,6 +210,47 @@ export default function AdminDashboard() {
           handleOpenEditTeacher(t);
         }}
       />
+
+      {teacherPendingDeletion && (
+        <div className="fixed inset-0 z-[60] flex items-center justify-center bg-slate-950/45 p-4 backdrop-blur-sm">
+          <button
+            type="button"
+            aria-label="Tutup konfirmasi hapus guru"
+            onClick={() => setTeacherPendingDeletion(null)}
+            className="absolute inset-0 cursor-default"
+          />
+          <div
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="delete-teacher-title"
+            className="relative z-10 w-full max-w-sm rounded-2xl bg-white p-6 text-slate-800 shadow-2xl"
+          >
+            <h2 id="delete-teacher-title" className="text-base font-bold">
+              Hapus data guru?
+            </h2>
+            <p className="mt-2 text-sm leading-6 text-slate-500">
+              Anda yakin ingin menghapus data guru &ldquo;
+              {teacherPendingDeletion.name}&rdquo;?
+            </p>
+            <div className="mt-6 flex justify-end gap-2.5">
+              <button
+                type="button"
+                onClick={() => setTeacherPendingDeletion(null)}
+                className="rounded-xl border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-600 transition hover:bg-slate-50"
+              >
+                Batal
+              </button>
+              <button
+                type="button"
+                onClick={confirmDeleteTeacher}
+                className="rounded-xl bg-rose-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-rose-700"
+              >
+                Ya, Hapus
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </AdminLayout>
   );
 }

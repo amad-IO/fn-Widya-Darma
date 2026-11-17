@@ -13,16 +13,6 @@ interface AdminTeacherTableProps {
   onViewDetail: (teacher: Teacher) => void;
 }
 
-const CATEGORIES = [
-  "Semua",
-  "MIPA",
-  "Bahasa",
-  "Sosial & Humaniora",
-  "Seni & Olahraga",
-  "Bimbingan Konseling",
-  "Lainnya",
-];
-
 export default function AdminTeacherTable({
   teachers,
   onOpenAdd,
@@ -30,25 +20,27 @@ export default function AdminTeacherTable({
   onDelete,
   onViewDetail,
 }: AdminTeacherTableProps) {
+  const itemsPerPage = 10;
   const [searchQuery, setSearchQuery] = useState("");
-  const [categoryFilter, setCategoryFilter] = useState("Semua");
+  const [page, setPage] = useState(1);
 
   const filteredTeachers = teachers.filter((t) => {
-    const matchCategory =
-      categoryFilter === "Semua" || t.category === categoryFilter;
     const q = searchQuery.toLowerCase().trim();
     const matchQuery =
       !q ||
       t.name.toLowerCase().includes(q) ||
-      (t.code && t.code.toLowerCase().includes(q)) ||
       (t.subject && t.subject.toLowerCase().includes(q)) ||
-      (t.nip && t.nip.toLowerCase().includes(q)) ||
-      (t.role && t.role.toLowerCase().includes(q)) ||
-      (t.category && t.category.toLowerCase().includes(q)) ||
-      (t.address && t.address.toLowerCase().includes(q)) ||
-      (t.email && t.email.toLowerCase().includes(q));
-    return matchCategory && matchQuery;
+      (t.education && t.education.join(" ").toLowerCase().includes(q)) ||
+      (t.bio && t.bio.toLowerCase().includes(q));
+    return matchQuery;
   });
+  const totalPages = Math.max(1, Math.ceil(filteredTeachers.length / itemsPerPage));
+  const activePage = Math.min(page, totalPages);
+  const firstItemIndex = (activePage - 1) * itemsPerPage;
+  const visibleTeachers = filteredTeachers.slice(
+    firstItemIndex,
+    firstItemIndex + itemsPerPage,
+  );
 
   return (
     <div className="space-y-5">
@@ -62,37 +54,17 @@ export default function AdminTeacherTable({
       </div>
 
       <div className="overflow-hidden rounded-2xl border border-slate-200/80 bg-white shadow-xs">
-        <div className="flex flex-col gap-3 border-b border-slate-100 px-5 py-3.5 sm:flex-row sm:items-center sm:justify-between sm:px-6">
-          <button
-            type="button"
-            onClick={onOpenAdd}
-            className="inline-flex w-fit items-center justify-center gap-2 rounded-xl bg-primary px-4 py-2 text-xs font-semibold text-white shadow-xs transition hover:bg-primary-dark active:scale-[0.99]"
-          >
-            <span className="text-base font-bold leading-none">+</span>
-            <span>Tambah Guru Baru</span>
-          </button>
-
+        <div className="flex justify-end border-b border-slate-100 px-5 py-3.5 sm:px-6">
           <div className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row sm:items-center">
-            <select
-              id="filter-kategori-guru"
-              aria-label="Filter bidang studi"
-              value={categoryFilter}
-              onChange={(e) => setCategoryFilter(e.target.value)}
-              className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-medium text-slate-700 outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/10"
-            >
-              <option value="Semua">Filter bidang studi</option>
-              {CATEGORIES.filter((c) => c !== "Semua").map((cat) => (
-                <option key={cat} value={cat}>
-                  {cat}
-                </option>
-              ))}
-            </select>
             <div className="relative w-full sm:w-64">
               <input
                 type="text"
-                placeholder="Cari nama, NIP, atau mapel"
+                placeholder="Cari nama atau mata pelajaran"
                 value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
+                onChange={(e) => {
+                  setSearchQuery(e.target.value);
+                  setPage(1);
+                }}
                 className="w-full rounded-xl border border-slate-200 bg-white py-2 pl-8 pr-7 text-xs text-slate-800 placeholder-slate-400 outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/10"
               />
               <span className="pointer-events-none absolute left-2.5 top-2.5 text-slate-400">
@@ -113,7 +85,10 @@ export default function AdminTeacherTable({
               {searchQuery && (
                 <button
                   type="button"
-                  onClick={() => setSearchQuery("")}
+                  onClick={() => {
+                    setSearchQuery("");
+                    setPage(1);
+                  }}
                   className="absolute right-2.5 top-2 text-xs text-slate-400 hover:text-slate-600"
                   title="Hapus pencarian"
                 >
@@ -121,6 +96,14 @@ export default function AdminTeacherTable({
                 </button>
               )}
             </div>
+            <button
+              type="button"
+              onClick={onOpenAdd}
+              className="inline-flex shrink-0 items-center justify-center gap-2 rounded-xl bg-primary px-4 py-2 text-xs font-semibold text-white shadow-xs transition hover:bg-primary-dark active:scale-[0.99]"
+            >
+              <span className="text-base font-bold leading-none">+</span>
+              <span>Tambah Guru Baru</span>
+            </button>
           </div>
         </div>
 
@@ -130,10 +113,8 @@ export default function AdminTeacherTable({
               <tr className="border-b border-blue-200 bg-gradient-to-r from-[#07528c]/[0.16] via-blue-50 to-[#07528c]/[0.1] text-[11px] font-bold uppercase tracking-wider text-primary">
                 <th className="w-12 px-4 py-3 text-center">No</th>
                 <th className="min-w-[220px] px-4 py-3">Guru & Profil</th>
-                <th className="min-w-[130px] px-4 py-3">NIP / Kode</th>
                 <th className="min-w-[150px] px-4 py-3">Mata Pelajaran</th>
-                <th className="min-w-[130px] px-4 py-3">Bidang Studi</th>
-                <th className="min-w-[170px] px-4 py-3">Alamat</th>
+                <th className="min-w-[190px] px-4 py-3">Pendidikan S1</th>
                 <th className="w-28 px-4 py-3 text-right">Tindakan</th>
               </tr>
             </thead>
@@ -141,7 +122,7 @@ export default function AdminTeacherTable({
               {filteredTeachers.length === 0 ? (
                 <tr>
                   <td
-                    colSpan={7}
+                    colSpan={5}
                     className="px-4 py-12 text-center text-slate-400"
                   >
                     <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-slate-100 text-slate-400 mb-2">
@@ -151,15 +132,13 @@ export default function AdminTeacherTable({
                       Data guru tidak ditemukan
                     </p>
                     <p className="text-xs text-slate-400 mt-0.5">
-                      Coba gunakan kata kunci pencarian lain atau ubah filter
-                      bidang studi.
+                      Coba gunakan kata kunci pencarian lain.
                     </p>
-                    {(searchQuery || categoryFilter !== "Semua") && (
+                    {searchQuery && (
                       <button
                         type="button"
                         onClick={() => {
                           setSearchQuery("");
-                          setCategoryFilter("Semua");
                         }}
                         className="mt-3 inline-flex items-center gap-1 text-xs font-semibold text-primary hover:underline"
                       >
@@ -169,14 +148,14 @@ export default function AdminTeacherTable({
                   </td>
                 </tr>
               ) : (
-                filteredTeachers.map((teacher, index) => (
+                visibleTeachers.map((teacher, index) => (
                   <tr
                     key={teacher.id}
                     className="hover:bg-slate-50/80 transition duration-150 group"
                   >
                     {/* No */}
                     <td className="px-4 py-3.5 text-center font-medium text-slate-400 text-[11px]">
-                      {index + 1}
+                      {firstItemIndex + index + 1}
                     </td>
 
                     {/* Guru & Profil (Avatar + Nama + Jabatan) */}
@@ -204,32 +183,11 @@ export default function AdminTeacherTable({
                           >
                             {teacher.name}
                           </button>
-                          <div className="flex items-center gap-2 mt-0.5">
-                            <span className="text-[11px] text-slate-500 truncate">
-                              {teacher.role || "Tenaga Pendidik"}
-                            </span>
-                            <span className="inline-block h-1 w-1 rounded-full bg-slate-300" />
-                            <span className="text-[10px] font-medium text-emerald-700 bg-emerald-50 px-1.5 py-0.2 rounded">
-                              {teacher.status || "Aktif"}
-                            </span>
-                          </div>
+                          <span className="mt-0.5 block text-[11px] text-slate-500">
+                            Guru
+                          </span>
                         </div>
                       </div>
-                    </td>
-
-                    {/* NIP / Kode */}
-                    <td className="px-4 py-3.5 font-mono text-xs text-slate-600 whitespace-nowrap">
-                      {teacher.nip ? (
-                        <span className="bg-slate-100 px-2 py-0.5 rounded text-[11px] font-medium text-slate-700">
-                          {teacher.nip}
-                        </span>
-                      ) : teacher.code ? (
-                        <span className="bg-blue-50 text-primary font-sans font-bold px-1.5 py-0.5 rounded text-[10px]">
-                          {teacher.code}
-                        </span>
-                      ) : (
-                        <span className="text-slate-300">-</span>
-                      )}
                     </td>
 
                     {/* Mata Pelajaran */}
@@ -237,20 +195,10 @@ export default function AdminTeacherTable({
                       {teacher.subject || "-"}
                     </td>
 
-                    {/* Rumpun */}
-                    <td className="px-4 py-3.5">
-                      <span className="inline-block rounded-md bg-slate-100 px-2 py-0.5 text-[11px] font-semibold text-slate-700">
-                        {teacher.category || "-"}
-                      </span>
-                    </td>
-
-                    {/* Alamat */}
+                    {/* Pendidikan S1 */}
                     <td className="px-4 py-3.5 text-slate-600">
-                      <span
-                        className="line-clamp-1 max-w-[180px]"
-                        title={teacher.address}
-                      >
-                        {teacher.address || "-"}
+                      <span className="line-clamp-2 max-w-[220px]">
+                        {teacher.education?.[0] || "-"}
                       </span>
                     </td>
 
@@ -308,17 +256,39 @@ export default function AdminTeacherTable({
         </div>
 
         {/* 4. Footer Info Total Data yang Ringkas */}
-        <div className="flex items-center justify-between border-t border-slate-100 bg-slate-50/50 px-5 py-3 text-xs text-slate-500">
+        <div className="flex flex-col gap-3 border-t border-slate-100 bg-slate-50/50 px-5 py-3 text-xs text-slate-500 sm:flex-row sm:items-center sm:justify-between">
           <p>
             Menampilkan{" "}
             <span className="font-semibold text-slate-800">
-              {filteredTeachers.length}
+              {filteredTeachers.length
+                ? `${firstItemIndex + 1}–${Math.min(firstItemIndex + itemsPerPage, filteredTeachers.length)}`
+                : 0}
             </span>{" "}
             dari {teachers.length} guru
           </p>
-          <span className="text-[11px] text-slate-400 hidden sm:inline">
-            Data tersimpan di penyimpanan lokal dan tersinkronisasi otomatis
-          </span>
+          <div className="flex items-center gap-2 self-end sm:self-auto">
+            <button
+              type="button"
+              onClick={() => setPage((current) => Math.max(1, current - 1))}
+              disabled={activePage === 1}
+              className="rounded-lg border border-slate-200 bg-white px-2.5 py-1 text-xs font-semibold text-slate-600 transition hover:border-primary/30 hover:text-primary disabled:cursor-not-allowed disabled:opacity-40"
+            >
+              Sebelumnya
+            </button>
+            <span className="min-w-12 text-center text-[11px] font-semibold text-slate-500">
+              {activePage} dari {totalPages}
+            </span>
+            <button
+              type="button"
+              onClick={() =>
+                setPage((current) => Math.min(totalPages, current + 1))
+              }
+              disabled={activePage === totalPages}
+              className="rounded-lg border border-slate-200 bg-white px-2.5 py-1 text-xs font-semibold text-slate-600 transition hover:border-primary/30 hover:text-primary disabled:cursor-not-allowed disabled:opacity-40"
+            >
+              Berikutnya
+            </button>
+          </div>
         </div>
       </div>
     </div>

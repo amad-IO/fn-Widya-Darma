@@ -23,11 +23,15 @@ const DATA_7_HARI: DataPoint[] = [
 
 const DATA_HALAMAN: DataPoint[] = [
   { label: "Beranda", subLabel: "/", value: 720, pageviews: 1890 },
-  { label: "Profil Guru", subLabel: "/guru", value: 650, pageviews: 1620 },
-  { label: "Info SPMB", subLabel: "/spmb", value: 580, pageviews: 1390 },
-  { label: "Galeri Foto", subLabel: "/galeri", value: 440, pageviews: 1150 },
-  { label: "Profil Sekolah", subLabel: "/profil", value: 310, pageviews: 740 },
-  { label: "Kontak", subLabel: "/kontak", value: 210, pageviews: 480 },
+  { label: "Profil", subLabel: "/profil", value: 650, pageviews: 1620 },
+  { label: "SPMB", subLabel: "/spmb", value: 580, pageviews: 1390 },
+  {
+    label: "Galeri Kegiatan",
+    subLabel: "/publikasi",
+    value: 440,
+    pageviews: 1150,
+  },
+  { label: "Tanya AI", subLabel: "/tanya-ai", value: 310, pageviews: 740 },
 ];
 
 const DATA_BULANAN: DataPoint[] = [
@@ -67,20 +71,9 @@ export default function AdminVisitorChart() {
     <div className="overflow-hidden rounded-2xl border border-slate-200/80 bg-white shadow-xs">
       {/* Top Header Bar */}
       <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-100 bg-white p-5 sm:p-6">
-        <div>
-          <div className="flex items-center gap-2">
-            <h3 className="text-sm sm:text-base font-bold text-slate-900 tracking-tight">
-              Statistik Kunjungan Website Sekolah
-            </h3>
-            <span className="inline-block rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 px-2.5 py-0.5 text-[10px] font-bold">
-              ● Live Analytics
-            </span>
-          </div>
-          <p className="mt-0.5 text-xs text-slate-500">
-            Pantau volume pengunjung dan interaksi halaman situs SMA Widya
-            Darma.
-          </p>
-        </div>
+        <h3 className="text-sm font-bold tracking-tight text-slate-900 sm:text-base">
+          Statistik Kunjungan Website Sekolah
+        </h3>
 
         {/* Period Switcher Tabs */}
         <div className="flex items-center rounded-xl bg-slate-100/80 p-1 border border-slate-200/60 shadow-2xs">
@@ -130,10 +123,10 @@ export default function AdminVisitorChart() {
       </div>
 
       {/* Main Chart Area */}
-      <div className="p-5 sm:p-7">
+      <div className="bg-gradient-to-br from-blue-50/80 via-white to-[#07528c]/[0.07] p-5 sm:p-7">
         <div className="relative pt-6 pb-2">
           {/* Grid Lines & Y-Axis Labels */}
-          <div className="relative h-64 sm:h-72 w-full">
+          <div className="relative h-64 w-full sm:h-72">
             {/* Horizontal Gridlines */}
             {yTicks.map((tick) => {
               const bottomPercent = (tick / maxValue) * 100;
@@ -146,7 +139,7 @@ export default function AdminVisitorChart() {
                   <span className="w-10 text-right pr-3 font-mono text-[11px] text-slate-400 select-none">
                     {tick}
                   </span>
-                  <div className="h-px flex-1 bg-slate-100" />
+                  <div className="h-px flex-1 bg-blue-100/80" />
                 </div>
               );
             })}
@@ -232,8 +225,8 @@ export default function AdminVisitorChart() {
         </div>
 
         {/* Clean, Non-crowded Analytics Metrics Footer */}
-        <div className="mt-8 grid grid-cols-2 sm:grid-cols-4 gap-3.5 border-t border-slate-100 pt-5">
-          <div className="rounded-xl bg-slate-50/70 p-3.5 border border-slate-100">
+        <div className="mt-8 grid grid-cols-1 gap-3.5 border-t border-blue-100/80 pt-5 sm:grid-cols-3">
+          <div className="rounded-xl border border-blue-100 bg-gradient-to-br from-white via-blue-50/80 to-blue-100/45 p-3.5">
             <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
               Total Pengunjung
             </span>
@@ -250,7 +243,7 @@ export default function AdminVisitorChart() {
             </p>
           </div>
 
-          <div className="rounded-xl bg-slate-50/70 p-3.5 border border-slate-100">
+          <div className="rounded-xl border border-blue-100 bg-gradient-to-br from-white via-blue-50/80 to-blue-100/45 p-3.5">
             <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
               Total Tayangan
             </span>
@@ -267,7 +260,7 @@ export default function AdminVisitorChart() {
             </p>
           </div>
 
-          <div className="rounded-xl bg-slate-50/70 p-3.5 border border-slate-100">
+          <div className="rounded-xl border border-blue-100 bg-gradient-to-br from-white via-blue-50/80 to-blue-100/45 p-3.5">
             <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
               Puncak Kunjungan
             </span>
@@ -284,19 +277,6 @@ export default function AdminVisitorChart() {
             </p>
           </div>
 
-          <div className="rounded-xl bg-slate-50/70 p-3.5 border border-slate-100">
-            <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
-              Akses Perangkat
-            </span>
-            <div className="mt-1 flex items-center justify-between text-xs font-bold text-slate-800">
-              <span>Mobile 68%</span>
-              <span className="text-slate-300 font-normal">|</span>
-              <span>Desktop 32%</span>
-            </div>
-            <p className="text-[10px] text-slate-400 mt-0.5">
-              Perangkat pengguna
-            </p>
-          </div>
         </div>
       </div>
     </div>

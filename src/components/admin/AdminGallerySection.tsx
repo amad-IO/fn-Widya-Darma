@@ -1,11 +1,31 @@
+"use client";
+
+import { useMemo } from "react";
 import Image from "next/image";
 import type { GalleryActivity } from "@/types/gallery";
+import { cn } from "@/lib/utils";
+
+export type GalleryTab = "kegiatan" | "jurnal-karya" | "prestasi-akademik";
+
+const galleryTabs: { id: GalleryTab; label: string }[] = [
+  { id: "kegiatan", label: "Kegiatan" },
+  { id: "jurnal-karya", label: "Jurnal Karya" },
+  { id: "prestasi-akademik", label: "Prestasi Akademik" },
+];
+
+function tabForCategory(category: string): GalleryTab {
+  if (category === "Jurnal Karya") return "jurnal-karya";
+  if (category === "Prestasi Akademik") return "prestasi-akademik";
+  return "kegiatan";
+}
 
 interface AdminGallerySectionProps {
   activities: GalleryActivity[];
   onAdd: () => void;
   onEdit: (activity: GalleryActivity) => void;
   onView: (activity: GalleryActivity) => void;
+  activeTab: GalleryTab;
+  onTabChange: (tab: GalleryTab) => void;
 }
 
 export default function AdminGallerySection({
@@ -13,28 +33,60 @@ export default function AdminGallerySection({
   onAdd,
   onEdit,
   onView,
+  activeTab,
+  onTabChange,
 }: AdminGallerySectionProps) {
-  return (
-    <section className="mx-auto max-w-6xl space-y-5">
-      <div className="flex flex-col gap-3 rounded-2xl bg-gradient-to-r from-[#07528c] via-[#0b639f] to-[#07528c] p-1.5 shadow-sm sm:flex-row sm:items-center sm:justify-between">
-        <div className="flex items-center gap-2 px-3 py-2 text-white">
-          <h2 className="text-sm font-bold tracking-wide">Galeri Kegiatan</h2>
-          <span className="rounded-full bg-white/15 px-2 py-0.5 text-[11px] font-semibold text-white/90">
-            {activities.length}
-          </span>
-        </div>
-        <button
-          type="button"
-          onClick={onAdd}
-          className="inline-flex self-start items-center justify-center gap-2 rounded-xl bg-white px-4 py-2.5 text-xs font-semibold text-primary shadow-sm transition hover:bg-blue-50 active:scale-[0.99] sm:self-auto"
-        >
-          <span className="text-base font-bold leading-none">+</span>
-          <span>Tambah Kegiatan</span>
-        </button>
-      </div>
+  const visibleActivities = useMemo(
+    () =>
+      activities.filter(
+        (activity) => tabForCategory(activity.category) === activeTab,
+      ),
+    [activities, activeTab],
+  );
+  const activeLabel =
+    galleryTabs.find((tab) => tab.id === activeTab)?.label ?? "Kegiatan";
 
-      <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
-        {activities.map((activity) => {
+  return (
+    <section className="space-y-5">
+      <nav
+        aria-label="Kategori galeri kegiatan"
+        className="grid grid-cols-1 gap-1.5 rounded-2xl bg-gradient-to-r from-[#07528c] via-[#0b639f] to-[#07528c] p-1.5 shadow-sm sm:grid-cols-3"
+      >
+        {galleryTabs.map((tab) => {
+          const count = activities.filter(
+            (activity) => tabForCategory(activity.category) === tab.id,
+          ).length;
+
+          return (
+            <button
+              key={tab.id}
+              type="button"
+              onClick={() => onTabChange(tab.id)}
+              className={cn(
+                "flex items-center justify-center gap-2 rounded-xl px-3 py-2.5 text-sm font-semibold transition",
+                activeTab === tab.id
+                  ? "bg-white text-primary shadow-sm"
+                  : "text-white/80 hover:bg-white/12 hover:text-white",
+              )}
+            >
+              <span>{tab.label}</span>
+              <span
+                className={cn(
+                  "rounded-full px-1.5 py-0.5 text-[10px] font-bold tabular-nums",
+                  activeTab === tab.id
+                    ? "bg-primary/10 text-primary"
+                    : "bg-white/15 text-white/90",
+                )}
+              >
+                {count}
+              </span>
+            </button>
+          );
+        })}
+      </nav>
+
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+        {visibleActivities.map((activity) => {
           const coverPhoto =
             activity.photos.find(
               (photo) => photo.id === activity.coverPhotoId,
@@ -94,6 +146,23 @@ export default function AdminGallerySection({
             </article>
           );
         })}
+
+        <article className="group flex flex-col overflow-hidden rounded-2xl border border-dashed border-primary/40 bg-white transition duration-200 hover:border-primary hover:bg-primary/[0.025]">
+          <button
+            type="button"
+            onClick={onAdd}
+            className="flex aspect-[3/4] w-full flex-col items-center justify-center gap-3 text-primary outline-none transition hover:bg-primary/[0.03] focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-primary"
+            aria-label={`Tambah ${activeLabel}`}
+          >
+            <span className="flex h-12 w-12 items-center justify-center rounded-full bg-primary/10 text-3xl font-light leading-none transition group-hover:scale-105 group-hover:bg-primary group-hover:text-white">
+              +
+            </span>
+            <span className="text-sm font-semibold">Tambah {activeLabel}</span>
+          </button>
+          <div className="border-t border-dashed border-primary/20 px-3 py-3 text-center text-xs text-slate-500">
+            Buat publikasi baru
+          </div>
+        </article>
       </div>
     </section>
   );

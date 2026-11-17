@@ -10,10 +10,12 @@ interface AdminGalleryModalProps {
   onSave: (activity: GalleryActivity) => void;
   onDelete?: (id: string) => void;
   initialData?: GalleryActivity | null;
+  initialCategory?: string;
 }
 
 const DEFAULT_CATEGORIES = [
   "Kreativitas & Seni",
+  "Jurnal Karya",
   "Prestasi Akademik",
   "Kegiatan Sosial",
   "Ekstrakurikuler",
@@ -76,6 +78,7 @@ export default function AdminGalleryModal({
   onSave,
   onDelete,
   initialData,
+  initialCategory = "Kreativitas & Seni",
 }: AdminGalleryModalProps) {
   const [title, setTitle] = useState("");
   const [slug, setSlug] = useState("");
@@ -92,6 +95,8 @@ export default function AdminGalleryModal({
   });
   const [status, setStatus] = useState<"Terbit" | "Draf">("Terbit");
   const [isDatePickerOpen, setIsDatePickerOpen] = useState(false);
+  const [isActivityDeleteOpen, setIsActivityDeleteOpen] = useState(false);
+  const [photoPendingDeletion, setPhotoPendingDeletion] = useState<string | null>(null);
   const [pendingDate, setPendingDate] = useState("");
   const [calendarMonth, setCalendarMonth] = useState(() => new Date());
 
@@ -134,7 +139,7 @@ export default function AdminGalleryModal({
       setSlug("");
       setDate(new Date().toISOString().slice(0, 10));
       setAuthorName("");
-      setCategory("Kreativitas & Seni");
+      setCategory(initialCategory);
       setContent("");
       const defaultPhotos: GalleryPhoto[] = [
         {
@@ -156,7 +161,9 @@ export default function AdminGalleryModal({
       setStatus("Terbit");
     }
     setErrors({});
-  }, [initialData, isOpen]);
+    setIsActivityDeleteOpen(false);
+    setPhotoPendingDeletion(null);
+  }, [initialData, initialCategory, isOpen]);
 
   if (!isOpen) return null;
 
@@ -280,11 +287,14 @@ export default function AdminGalleryModal({
 
   const handleDeleteActivity = () => {
     if (!initialData || !onDelete) return;
+    setIsActivityDeleteOpen(true);
+  };
 
-    if (window.confirm(`Hapus publikasi “${initialData.title}”?`)) {
-      onDelete(initialData.id);
-      onClose();
-    }
+  const confirmDeleteActivity = () => {
+    if (!initialData || !onDelete) return;
+    onDelete(initialData.id);
+    setIsActivityDeleteOpen(false);
+    onClose();
   };
 
   // Form Validation & Save
@@ -540,7 +550,7 @@ export default function AdminGalleryModal({
                           </button>
                           <button
                             type="button"
-                            onClick={() => handleDeletePhoto(photo.id)}
+                            onClick={() => setPhotoPendingDeletion(photo.id)}
                             title="Hapus Foto"
                             className="flex h-7 w-7 items-center justify-center rounded-lg border border-rose-200 bg-rose-50 text-xs text-rose-600 hover:bg-rose-100 transition"
                           >
@@ -821,6 +831,75 @@ export default function AdminGalleryModal({
                 className="rounded-xl bg-primary px-5 py-2 text-sm font-bold text-white shadow-sm transition hover:bg-primary-dark"
               >
                 Pilih Tanggal
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {isActivityDeleteOpen && initialData && (
+        <div className="fixed inset-0 z-[70] flex items-center justify-center bg-slate-950/45 p-4 backdrop-blur-sm">
+          <button
+            type="button"
+            aria-label="Tutup konfirmasi hapus publikasi"
+            onClick={() => setIsActivityDeleteOpen(false)}
+            className="absolute inset-0 cursor-default"
+          />
+          <div className="relative z-10 w-full max-w-sm rounded-2xl bg-white p-6 shadow-2xl">
+            <h3 className="text-base font-bold text-slate-900">Hapus publikasi?</h3>
+            <p className="mt-2 text-sm leading-6 text-slate-500">
+              Anda yakin ingin menghapus &ldquo;{initialData.title}&rdquo;?
+            </p>
+            <div className="mt-6 flex justify-end gap-2.5">
+              <button
+                type="button"
+                onClick={() => setIsActivityDeleteOpen(false)}
+                className="rounded-xl border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-600 transition hover:bg-slate-50"
+              >
+                Batal
+              </button>
+              <button
+                type="button"
+                onClick={confirmDeleteActivity}
+                className="rounded-xl bg-rose-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-rose-700"
+              >
+                Ya, Hapus
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {photoPendingDeletion && (
+        <div className="fixed inset-0 z-[70] flex items-center justify-center bg-slate-950/45 p-4 backdrop-blur-sm">
+          <button
+            type="button"
+            aria-label="Tutup konfirmasi hapus foto"
+            onClick={() => setPhotoPendingDeletion(null)}
+            className="absolute inset-0 cursor-default"
+          />
+          <div className="relative z-10 w-full max-w-sm rounded-2xl bg-white p-6 shadow-2xl">
+            <h3 className="text-base font-bold text-slate-900">Hapus foto?</h3>
+            <p className="mt-2 text-sm leading-6 text-slate-500">
+              Anda yakin ingin menghapus foto ini dari publikasi?
+            </p>
+            <div className="mt-6 flex justify-end gap-2.5">
+              <button
+                type="button"
+                onClick={() => setPhotoPendingDeletion(null)}
+                className="rounded-xl border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-600 transition hover:bg-slate-50"
+              >
+                Batal
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  handleDeletePhoto(photoPendingDeletion);
+                  setPhotoPendingDeletion(null);
+                }}
+                className="rounded-xl bg-rose-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-rose-700"
+              >
+                Ya, Hapus
               </button>
             </div>
           </div>

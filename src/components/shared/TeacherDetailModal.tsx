@@ -38,6 +38,91 @@ export default function TeacherDetailModal({
     ? `${teacher.name} (${teacher.code})`
     : teacher.name;
 
+  if (isAdmin) {
+    return (
+      <div className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto bg-slate-950/70 p-4 backdrop-blur-xs sm:p-6">
+        <div className="fixed inset-0" onClick={onClose} aria-hidden="true" />
+        <div className="relative z-10 my-auto w-full max-w-xl overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-2xl">
+          <div className="flex items-center justify-between border-b border-slate-100 bg-slate-50 px-6 py-4">
+            <h2 className="text-base font-bold text-slate-900">Profil Guru</h2>
+            <div className="flex items-center gap-2">
+              {onEdit && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    onClose();
+                    onEdit(teacher);
+                  }}
+                  className="inline-flex items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 transition hover:bg-slate-50"
+                >
+                  <AdminIcon name="edit" className="h-3.5 w-3.5" />
+                  Edit
+                </button>
+              )}
+              <button
+                type="button"
+                onClick={onClose}
+                aria-label="Tutup jendela profil"
+                className="flex h-8 w-8 items-center justify-center rounded-full text-slate-400 transition hover:bg-slate-200 hover:text-slate-700"
+              >
+                <AdminIcon name="close" className="h-4 w-4" />
+              </button>
+            </div>
+          </div>
+
+          <div className="max-h-[78vh] space-y-6 overflow-y-auto p-6 sm:p-8">
+            <div className="flex flex-col items-center text-center">
+              <div className="relative aspect-[3/4] w-36 overflow-hidden rounded-2xl border border-slate-200 bg-slate-100 shadow-sm">
+                <Image
+                  src={teacher.image || "/images/50.webp"}
+                  alt={teacher.name}
+                  fill
+                  sizes="144px"
+                  className="object-cover"
+                />
+              </div>
+              <h3 className="mt-4 text-xl font-bold text-slate-900">
+                {teacher.name}
+              </h3>
+              <p className="mt-1 text-sm font-medium text-primary">
+                {teacher.subject || "Mata pelajaran belum diisi"}
+              </p>
+            </div>
+
+            <dl className="divide-y divide-slate-100 border-y border-slate-100">
+              <div className="py-4">
+                <dt className="text-[11px] font-bold uppercase tracking-wider text-slate-400">
+                  Deskripsi Singkat
+                </dt>
+                <dd className="mt-1.5 text-sm leading-6 text-slate-700">
+                  {teacher.bio || "Belum ada deskripsi singkat."}
+                </dd>
+              </div>
+              <div className="py-4">
+                <dt className="text-[11px] font-bold uppercase tracking-wider text-slate-400">
+                  Pendidikan S1
+                </dt>
+                <dd className="mt-1.5 text-sm leading-6 text-slate-700">
+                  {teacher.education?.[0] || "Belum ada pendidikan S1."}
+                </dd>
+              </div>
+            </dl>
+          </div>
+
+          <div className="flex justify-end border-t border-slate-100 bg-slate-50/50 px-6 py-4">
+            <button
+              type="button"
+              onClick={onClose}
+              className="rounded-xl bg-slate-200 px-5 py-2 text-xs font-semibold text-slate-700 transition hover:bg-slate-300"
+            >
+              Tutup
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 overflow-y-auto bg-slate-950/70 backdrop-blur-xs animate-in fade-in duration-200">
       {/* Backdrop overlay */}
