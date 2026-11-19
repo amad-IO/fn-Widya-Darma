@@ -5,18 +5,59 @@ import Image from "next/image";
 import type { GalleryActivity } from "@/types/gallery";
 import { cn } from "@/lib/utils";
 
-export type GalleryTab = "kegiatan" | "jurnal-karya" | "prestasi-akademik";
+export type GalleryTab =
+  | "kreativitas-seni"
+  | "jurnal-karya"
+  | "prestasi-akademik"
+  | "kegiatan-sosial"
+  | "ekstrakurikuler"
+  | "pramuka-olahraga";
 
-const galleryTabs: { id: GalleryTab; label: string }[] = [
-  { id: "kegiatan", label: "Kegiatan" },
-  { id: "jurnal-karya", label: "Jurnal Karya" },
-  { id: "prestasi-akademik", label: "Prestasi Akademik" },
+export const galleryTabs: { id: GalleryTab; label: string; category: string }[] = [
+  {
+    id: "kreativitas-seni",
+    label: "Kreativitas & Seni",
+    category: "Kreativitas & Seni",
+  },
+  {
+    id: "jurnal-karya",
+    label: "Jurnal Karya",
+    category: "Jurnal Karya",
+  },
+  {
+    id: "prestasi-akademik",
+    label: "Prestasi Akademik",
+    category: "Prestasi Akademik",
+  },
+  {
+    id: "kegiatan-sosial",
+    label: "Kegiatan Sosial",
+    category: "Kegiatan Sosial",
+  },
+  {
+    id: "ekstrakurikuler",
+    label: "Ekstrakurikuler",
+    category: "Ekstrakurikuler",
+  },
+  {
+    id: "pramuka-olahraga",
+    label: "Pramuka & Olahraga",
+    category: "Pramuka & Olahraga",
+  },
 ];
 
-function tabForCategory(category: string): GalleryTab {
+export function galleryTabForCategory(category: string): GalleryTab {
+  if (category === "Kreativitas & Seni") return "kreativitas-seni";
   if (category === "Jurnal Karya") return "jurnal-karya";
   if (category === "Prestasi Akademik") return "prestasi-akademik";
-  return "kegiatan";
+  if (category === "Kegiatan Sosial") return "kegiatan-sosial";
+  if (category === "Ekstrakurikuler") return "ekstrakurikuler";
+  if (category === "Pramuka & Olahraga") return "pramuka-olahraga";
+  return "kreativitas-seni";
+}
+
+export function galleryCategoryForTab(tab: GalleryTab) {
+  return galleryTabs.find((item) => item.id === tab)?.category ?? "Kreativitas & Seni";
 }
 
 interface AdminGallerySectionProps {
@@ -39,22 +80,22 @@ export default function AdminGallerySection({
   const visibleActivities = useMemo(
     () =>
       activities.filter(
-        (activity) => tabForCategory(activity.category) === activeTab,
+        (activity) => galleryTabForCategory(activity.category) === activeTab,
       ),
     [activities, activeTab],
   );
   const activeLabel =
-    galleryTabs.find((tab) => tab.id === activeTab)?.label ?? "Kegiatan";
+    galleryTabs.find((tab) => tab.id === activeTab)?.label ?? "Kreativitas & Seni";
 
   return (
     <section className="space-y-5">
       <nav
         aria-label="Kategori galeri kegiatan"
-        className="grid grid-cols-1 gap-1.5 rounded-2xl bg-gradient-to-r from-[#07528c] via-[#0b639f] to-[#07528c] p-1.5 shadow-sm sm:grid-cols-3"
+        className="grid grid-cols-2 gap-1.5 rounded-2xl bg-gradient-to-r from-[#07528c] via-[#0b639f] to-[#07528c] p-1.5 shadow-sm sm:grid-cols-3 xl:grid-cols-6"
       >
         {galleryTabs.map((tab) => {
           const count = activities.filter(
-            (activity) => tabForCategory(activity.category) === tab.id,
+            (activity) => galleryTabForCategory(activity.category) === tab.id,
           ).length;
 
           return (
@@ -63,7 +104,7 @@ export default function AdminGallerySection({
               type="button"
               onClick={() => onTabChange(tab.id)}
               className={cn(
-                "flex items-center justify-center gap-2 rounded-xl px-3 py-2.5 text-sm font-semibold transition",
+                "flex min-w-0 items-center justify-center gap-1.5 rounded-xl px-2 py-2.5 text-xs font-semibold transition sm:px-3 sm:text-sm",
                 activeTab === tab.id
                   ? "bg-white text-primary shadow-sm"
                   : "text-white/80 hover:bg-white/12 hover:text-white",

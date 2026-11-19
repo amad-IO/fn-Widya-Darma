@@ -1,13 +1,18 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import { useRouter } from "next/navigation";
 import AdminLayout from "./AdminLayout";
 import AdminGalleryModal from "./AdminGalleryModal";
 import AdminGalleryDetailModal from "./AdminGalleryDetailModal";
 import AdminTeacherModal from "./AdminTeacherModal";
 import AdminTeacherTable from "./AdminTeacherTable";
 import AdminOverview from "./AdminOverview";
-import AdminGallerySection, { type GalleryTab } from "./AdminGallerySection";
+import AdminGallerySection, {
+  galleryCategoryForTab,
+  galleryTabForCategory,
+  type GalleryTab,
+} from "./AdminGallerySection";
 import AdminSpmbSection from "./AdminSpmbSection";
 import TeacherDetailModal from "@/components/shared/TeacherDetailModal";
 import { GalleryActivity } from "@/types/gallery";
@@ -16,8 +21,11 @@ import { type AdminSection } from "@/lib/admin-preview";
 import { useAdminGallery } from "@/hooks/admin/useAdminGallery";
 import { useAdminNotice } from "@/hooks/admin/useAdminNotice";
 import { useAdminTeachers } from "@/hooks/admin/useAdminTeachers";
+import { validateAdminSession } from "@/lib/admin-auth";
 
 export default function AdminDashboard() {
+  const router = useRouter();
+  const [isSessionChecked, setIsSessionChecked] = useState(false);
   const [section, setSection] = useState<AdminSection>("dashboard");
   const { notice, setNotice, clearNotice } = useAdminNotice();
 
@@ -27,13 +35,32 @@ export default function AdminDashboard() {
     removeActivity,
   } = useAdminGallery();
   const [isGalleryModalOpen, setIsGalleryModalOpen] = useState(false);
-  const [galleryTab, setGalleryTab] = useState<GalleryTab>("kegiatan");
+  const [galleryTab, setGalleryTab] = useState<GalleryTab>("kreativitas-seni");
   const [editingGalleryActivity, setEditingGalleryActivity] =
     useState<GalleryActivity | null>(null);
   const [viewingGalleryActivity, setViewingGalleryActivity] =
     useState<GalleryActivity | null>(null);
 
   const mobileDialogRef = useRef<HTMLDialogElement>(null);
+
+  useEffect(() => {
+    let isActive = true;
+
+    async function checkSession() {
+      const isValid = await validateAdminSession();
+      if (!isActive) return;
+      if (!isValid) {
+        router.replace("/admin/login");
+        return;
+      }
+      setIsSessionChecked(true);
+    }
+
+    void checkSession();
+    return () => {
+      isActive = false;
+    };
+  }, [router]);
 
   function navigate(next: AdminSection) {
     setSection(next);
@@ -59,13 +86,7 @@ export default function AdminDashboard() {
 
   const handleSaveGallery = (savedActivity: GalleryActivity) => {
     saveActivity(savedActivity);
-    setGalleryTab(
-      savedActivity.category === "Jurnal Karya"
-        ? "jurnal-karya"
-        : savedActivity.category === "Prestasi Akademik"
-          ? "prestasi-akademik"
-          : "kegiatan",
-    );
+    setGalleryTab(galleryTabForCategory(savedActivity.category));
     setNotice(
       editingGalleryActivity
         ? "Kegiatan galeri berhasil diperbarui."
@@ -111,6 +132,14 @@ export default function AdminDashboard() {
         : `Guru baru "${savedTeacher.name}" berhasil ditambahkan.`,
     );
   };
+
+  if (!isSessionChecked) {
+    return (
+      <div className="flex min-h-dvh items-center justify-center bg-slate-50 px-5 text-sm font-medium text-slate-500">
+        Memeriksa sesi admin…
+      </div>
+    );
+  }
 
   return (
     <AdminLayout
@@ -173,13 +202,7 @@ export default function AdminDashboard() {
         onSave={handleSaveGallery}
         onDelete={handleDeleteGallery}
         initialData={editingGalleryActivity}
-        initialCategory={
-          galleryTab === "jurnal-karya"
-            ? "Jurnal Karya"
-            : galleryTab === "prestasi-akademik"
-              ? "Prestasi Akademik"
-              : "Kreativitas & Seni"
-        }
+        initialCategory={galleryCategoryForTab(galleryTab)}
       />
 
       {/* Admin Gallery Detail Modal */}

@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { adminNavigation, type AdminSection } from "@/lib/admin-preview";
 import AdminIcon from "./AdminIcon";
+import { logoutAdmin } from "@/lib/admin-auth";
 
 export default function AdminSidebar({
   mobile = false,
@@ -24,9 +25,10 @@ export default function AdminSidebar({
   const [isLogoutOpen, setIsLogoutOpen] = useState(false);
   const router = useRouter();
 
-  function confirmLogout() {
+  async function confirmLogout() {
+    await logoutAdmin();
     onClose();
-    router.push("/admin/login");
+    router.replace("/admin/login");
   }
 
   return (

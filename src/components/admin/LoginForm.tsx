@@ -1,13 +1,16 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@/components/ui/button";
 import { loginSchema, type LoginValues } from "@/lib/login";
+import { loginAdmin } from "@/lib/admin-auth";
 
 export default function LoginForm() {
   const [showPassword, setShowPassword] = useState(false);
+  const router = useRouter();
   const {
     register,
     handleSubmit,
@@ -16,16 +19,21 @@ export default function LoginForm() {
     formState: { errors, isSubmitting },
   } = useForm<LoginValues>({
     resolver: zodResolver(loginSchema),
-    defaultValues: { username: "", password: "" },
+    defaultValues: { email: "", password: "" },
     mode: "onBlur",
     reValidateMode: "onChange",
   });
 
-  function submit() {
-    setError("root.service", {
-      message:
-        "Layanan login belum tersedia. Silakan hubungi pengelola sekolah.",
-    });
+  async function submit(values: LoginValues) {
+    try {
+      await loginAdmin(values);
+      router.replace("/admin/dashboard");
+    } catch (error) {
+      setError("root.service", {
+        message:
+          error instanceof Error ? error.message : "Login gagal. Silakan coba lagi.",
+      });
+    }
   }
 
   return (
@@ -35,13 +43,13 @@ export default function LoginForm() {
       onChange={() => clearErrors("root")}
       className="mt-6 space-y-4"
     >
-      {/* Username Field */}
+      {/* Email Field */}
       <div>
         <label
-          htmlFor="login-username"
+          htmlFor="login-email"
           className="mb-1.5 block text-xs font-semibold text-slate-800"
         >
-          Username
+          Email
         </label>
         <div className="group relative">
           <span
@@ -63,28 +71,28 @@ export default function LoginForm() {
             </svg>
           </span>
           <input
-            id="login-username"
-            type="text"
-            autoComplete="username"
+            id="login-email"
+            type="email"
+            autoComplete="email"
             autoCapitalize="none"
             spellCheck={false}
             required
-            placeholder="Masukkan username admin"
+            placeholder="Masukkan email admin"
             className="h-11 w-full rounded-xl border border-slate-200/90 bg-slate-50/70 pl-10 pr-4 text-xs text-slate-900 shadow-[inset_0_1px_2px_rgba(0,0,0,0.03)] outline-none transition placeholder:text-slate-400 focus:border-primary focus:bg-white focus:ring-4 focus:ring-primary/10 aria-[invalid=true]:border-red-500 aria-[invalid=true]:focus:ring-red-500/15 sm:text-sm"
-            aria-invalid={!!errors.username}
+            aria-invalid={!!errors.email}
             aria-describedby={
-              errors.username ? "login-username-error" : undefined
+              errors.email ? "login-email-error" : undefined
             }
-            {...register("username")}
+            {...register("email")}
           />
         </div>
-        {errors.username && (
+        {errors.email && (
           <p
-            id="login-username-error"
+            id="login-email-error"
             role="alert"
             className="mt-1.5 text-[11px] font-medium leading-5 text-red-600"
           >
-            {errors.username.message}
+            {errors.email.message}
           </p>
         )}
       </div>
