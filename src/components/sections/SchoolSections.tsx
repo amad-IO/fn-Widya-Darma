@@ -7,6 +7,7 @@ import WhatsAppButton from "@/components/shared/WhatsAppButton";
 import { ArrowUpRight } from "@/components/shared/Svg";
 import { Button } from "@/components/ui/button";
 import { copy } from "@/lib/constants";
+import { teachers } from "@/lib/school";
 
 const sectionClass = "school-section relative py-16 sm:py-24";
 
@@ -58,7 +59,7 @@ export function SchoolIntro({ profile = false }: { profile?: boolean }) {
                 <div className="h-8 w-px bg-black/10" />
                 <div>
                   <p className="text-2xl font-bold tracking-tight text-ink sm:text-3xl">
-                    25
+                    {teachers.length}
                   </p>
                   <p className="text-[11px] text-muted">Jumlah Guru</p>
                 </div>
@@ -137,7 +138,7 @@ export function SchoolIntro({ profile = false }: { profile?: boolean }) {
               <div className="h-8 w-px bg-black/10" />
               <div>
                 <p className="text-2xl font-bold tracking-tight text-ink sm:text-3xl">
-                  25
+                  {teachers.length}
                 </p>
                 <p className="text-[11px] text-muted">Jumlah Guru</p>
               </div>

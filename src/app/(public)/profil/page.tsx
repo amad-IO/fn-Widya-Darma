@@ -8,7 +8,7 @@ export const metadata = { title: "Profil & Visi Misi — SMA Widya Darma" };
 export default function ProfilPage() {
   return (
     <>
-      {/* HERO — Profil Sekolah */}
+      {/* HERO —  */}
       <section className="relative flex min-h-[70vh] items-center justify-center overflow-hidden">
         {/* Background foto */}
         <Image

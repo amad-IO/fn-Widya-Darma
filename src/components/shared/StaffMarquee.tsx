@@ -1,5 +1,5 @@
 import StaffCard from "@/components/shared/StaffCard";
-import { leadership, teachers, type Staff } from "@/lib/school";
+import { teachers, type Staff } from "@/lib/school";
 
 interface StaffMarqueeProps {
   items?: { person: Staff; teacher: boolean }[];
@@ -15,10 +15,7 @@ export default function StaffMarquee({
   className = "",
 }: StaffMarqueeProps) {
   const staffList =
-    items ?? [
-      { person: leadership[0], teacher: false },
-      ...teachers.map((person) => ({ person, teacher: true })),
-    ];
+    items ?? teachers.map((person) => ({ person, teacher: true }));
 
   // Ulangi 3 kali per track group agar layar ultra-wide (e.g. 4K, 3840px)
   // terisi penuh tanpa celah kosong saat animasi berjalan.

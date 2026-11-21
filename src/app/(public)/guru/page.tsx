@@ -1,9 +1,9 @@
 import Image from "next/image";
 import Link from "next/link";
 import Reveal from "@/components/shared/Reveal";
-import { leadership, teachers, type Staff } from "@/lib/school";
+import { teachers, type Staff } from "@/lib/school";
 
-export const metadata = { title: "Profil Guru & Tenaga Kependidikan" };
+export const metadata = { title: "Daftar Guru" };
 
 function StaffDirectoryCard({ person }: { person: Staff }) {
   const isTendik =
@@ -49,13 +49,14 @@ function StaffDirectoryCard({ person }: { person: Staff }) {
           </p>
 
           <p className="mt-2 text-[11px] font-semibold text-ink/85 sm:text-xs">
-            🎓 {person.alumni ?? "Alumni S1 Universitas Lorem Ipsum"}
+            Kode guru {person.code}
           </p>
-
-          <p className="mt-1.5 text-[11px] leading-relaxed text-muted sm:text-xs">
-            {person.experience ??
-              "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua."}
-          </p>
+          {person.alumni && (
+            <p className="mt-2 text-xs text-ink/85">{person.alumni}</p>
+          )}
+          {person.experience && (
+            <p className="mt-1.5 text-xs leading-relaxed text-muted">{person.experience}</p>
+          )}
         </div>
       </div>
     </article>
@@ -63,12 +64,6 @@ function StaffDirectoryCard({ person }: { person: Staff }) {
 }
 
 export default function TeachersPage() {
-  const allStaff: Staff[] = [
-    leadership[0],
-    ...teachers,
-    ...leadership.slice(1),
-  ];
-
   return (
     <>
       {/* HERO — Profil Guru dengan Background Image Full */}
@@ -102,7 +97,7 @@ export default function TeachersPage() {
                 <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-sky-300 opacity-75" />
                 <span className="relative inline-flex h-2 w-2 rounded-full bg-sky-300" />
               </span>
-              Direktori Guru &amp; Staf
+              Direktori Guru
             </div>
 
             {/* 2. Heading: Staggered Word Mask Slide-Up + 3. Highlight Shimmer & Underline Draw */}
@@ -148,7 +143,7 @@ export default function TeachersPage() {
 
             {/* 4. Deskripsi: Blur-to-Crisp Cinematic Fade */}
             <p className="hero-anim-desc mt-5 text-sm leading-6 text-white/85 sm:text-base">
-              Mengenal lebih dekat latar belakang pendidikan dan pengalaman karir tenaga pendidik serta karyawan SMA Widya Darma.
+              Mengenal {teachers.length} guru SMA Widya Darma Surabaya.
             </p>
           </div>
         </div>
@@ -259,8 +254,12 @@ export default function TeachersPage() {
       {/* Daftar Card Profil Guru & Karyawan */}
       <section className="school-section py-12 sm:py-16">
         <div className="container-width">
+          <div className="mb-8 flex flex-wrap items-center justify-between gap-3">
+            <h2 className="text-2xl font-semibold text-ink">Daftar Nama Guru</h2>
+            <p className="text-sm text-muted">Jumlah: {teachers.length} guru</p>
+          </div>
           <div className="grid gap-4 sm:gap-5 md:grid-cols-2 lg:grid-cols-3">
-            {allStaff.map((person, index) => (
+            {teachers.map((person, index) => (
               <Reveal
                 key={`${person.id}-${index}`}
                 delay={(index % 3) * 0.05}

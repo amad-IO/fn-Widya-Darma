@@ -69,17 +69,19 @@ export default function Footer() {
               <div>
                 <dt className="font-semibold text-blue-200/80">Alamat</dt>
                 <dd className="mt-1 leading-relaxed text-blue-50/90">
-                  Jl. Lorem Ipsum Dolor No. 10, Jakarta
+                  {schoolContact.address}
                 </dd>
               </div>
               <div>
                 <dt className="font-semibold text-blue-200/80">Email</dt>
-                <dd className="mt-1 text-blue-50/90">info@widyadarma.sch.id</dd>
+                <dd className="mt-1 break-words text-blue-50/90">
+                  <a href={`mailto:${schoolContact.email}`} className="hover:underline">{schoolContact.email}</a>
+                </dd>
               </div>
               <div>
                 <dt className="font-semibold text-blue-200/80">WhatsApp</dt>
                 <dd className="mt-1 font-semibold text-white">
-                  {schoolContact.whatsappDisplay}
+                  <a href={schoolContact.whatsappUrl} target="_blank" rel="noopener noreferrer" className="hover:underline">{schoolContact.whatsappDisplay}</a>
                 </dd>
               </div>
             </dl>
@@ -97,6 +99,16 @@ export default function Footer() {
             <div className="mt-4">
               <WhatsAppButton className="w-full justify-center rounded-xl bg-white text-xs font-semibold text-primary shadow-sm hover:bg-blue-50" />
             </div>
+            <ul aria-label="Media sosial sekolah" className="mt-5 space-y-3 text-xs">
+              {schoolContact.socialMedia.map((social) => (
+                <li key={social.label}>
+                  <a href={social.url} target="_blank" rel="noopener noreferrer" className="inline-flex flex-wrap gap-x-2 gap-y-1 text-blue-100/80 hover:text-white hover:underline">
+                    <span className="font-semibold">{social.label}</span>
+                    <span className="break-words">{social.account}</span>
+                  </a>
+                </li>
+              ))}
+            </ul>
           </div>
         </div>
 

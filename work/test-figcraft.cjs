@@ -1,0 +1,158 @@
+const fs = require('fs');
+const { execFileSync } = require('child_process');
+
+const ref = (name) => ({ $ref: name });
+
+const script = [
+  {
+    command: 'command.batch',
+    params: {
+      label: 'Test',
+      commands: [
+        {
+          command: 'node.create',
+          as: 'f1',
+          params: {
+            type: 'frame',
+            name: 'Frame 1',
+            x: 0,
+            y: 0,
+            width: 400,
+            height: 300,
+            props: {
+              layout: 'vertical',
+              padding: [20, 24, 20, 24],
+              gap: 12,
+              fill: '#f6f7f9',
+              cornerRadius: 24,
+              clip: true
+            }
+          }
+        },
+        {
+          command: 'node.create',
+          as: 'imgBox',
+          params: {
+            type: 'frame',
+            name: 'Photo Box',
+            parent: ref('f1'),
+            width: 352,
+            height: 180,
+            props: {
+              cornerRadius: [24, 0, 24, 0],
+              clip: true,
+              effects: [{ type: 'dropShadow', color: '#07528c22', offset: [0, 8], radius: 20 }]
+            }
+          }
+        },
+        {
+          command: 'image.place',
+          params: {
+            target: ref('imgBox'),
+            path: 'e:/semester 7/Computing Project/WEB Widya Darma/frontend/public/images/01.webp',
+            mode: 'fill'
+          }
+        },
+        {
+          command: 'node.create',
+          as: 'gradBox',
+          params: {
+            type: 'frame',
+            name: 'Grad Box',
+            parent: ref('f1'),
+            width: 352,
+            height: 50,
+            props: {
+              fills: [{ type: 'linearGradient', stops: ['#083359', '#041d33'] }],
+              cornerRadius: 12
+            }
+          }
+        },
+        {
+          command: 'node.create',
+          as: 'btn',
+          params: {
+            type: 'frame',
+            name: 'Btn',
+            parent: ref('f1'),
+            props: {
+              layout: 'horizontal',
+              padding: [10, 20, 10, 20],
+              gap: 8,
+              fill: '#07528c',
+              cornerRadius: 999,
+              sizingH: 'hug',
+              sizingV: 'hug'
+            }
+          }
+        },
+        {
+          command: 'node.create',
+          params: {
+            type: 'text',
+            parent: ref('btn'),
+            text: 'Klik Saya',
+            props: {
+              fontFamily: 'Plus Jakarta Sans',
+              fontStyle: 'Bold',
+              fontSize: 14,
+              fill: '#ffffff'
+            }
+          }
+        },
+        {
+          command: 'node.create',
+          as: 'f2',
+          params: {
+            type: 'frame',
+            name: 'Frame 2',
+            x: 500,
+            y: 0,
+            width: 400,
+            height: 300,
+            props: { fill: '#ffffff' }
+          }
+        },
+        {
+          command: 'proto.interaction.add',
+          params: {
+            id: ref('btn'),
+            trigger: { type: 'onClick' },
+            action: { type: 'navigate', dest: ref('f2') },
+            transition: { type: 'smartAnimate' },
+            durationMs: 350,
+            easing: 'easeInOut'
+          }
+        },
+        {
+          command: 'proto.interaction.add',
+          params: {
+            id: ref('gradBox'),
+            trigger: { type: 'onClick' },
+            action: { type: 'scrollTo', dest: ref('imgBox') },
+            transition: { type: 'smartAnimate' },
+            durationMs: 500,
+            easing: 'easeInOut'
+          }
+        },
+        {
+          command: 'proto.flow.add',
+          params: {
+            start: ref('f1'),
+            name: 'Main Flow'
+          }
+        }
+      ]
+    }
+  }
+];
+
+fs.writeFileSync('e:/semester 7/Computing Project/WEB Widya Darma/frontend/work/test-fc.json', JSON.stringify(script));
+const out = execFileSync('D:/Programs/FigCraft/figcraft-cli.exe', [
+  'run',
+  '--automation-read-root', 'e:/semester 7/Computing Project/WEB Widya Darma',
+  '--automation-write-root', 'e:/semester 7/Computing Project/WEB Widya Darma',
+  '--out', 'e:/semester 7/Computing Project/WEB Widya Darma/frontend/work/test-fc.figcraft',
+  'e:/semester 7/Computing Project/WEB Widya Darma/frontend/work/test-fc.json'
+], { encoding: 'utf8' });
+console.log('Success! Output len:', out.length);

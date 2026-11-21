@@ -1,4 +1,5 @@
 import type { AdminIconName } from "@/components/admin/AdminIcon";
+import { teachers } from "./school";
 
 export type AdminSection =
   | "dashboard"
@@ -132,17 +133,7 @@ export const previewPublications: PreviewPublication[] = [
   },
 ];
 
-export const previewStaff = [
-  {
-    name: "Lorem Ipsum, S.Pd.",
-    subject: "Lorem ipsum",
-    role: "Kepala Sekolah",
-  },
-  {
-    name: "Dolor Sit Amet, S.Pd.",
-    subject: "Dolor sit amet",
-    role: "Wakil Kepala Sekolah",
-  },
-  { name: "Consectetur, S.Pd.", subject: "Consectetur elit", role: "Guru" },
-  { name: "Adipiscing Elit, S.Pd.", subject: "Adipiscing elit", role: "Guru" },
-];
+export const previewStaff = teachers.map((person) => ({
+  ...person,
+  subject: "Mata pelajaran belum dicantumkan.",
+}));

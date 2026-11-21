@@ -25,10 +25,7 @@ export default function StaffSection({
   id,
 }: StaffSectionProps) {
   const principal = leadership[0];
-  const allItems = [
-    { person: leadership[0], teacher: false },
-    ...teachers.map((person) => ({ person, teacher: true })),
-  ];
+  const allItems = teachers.map((person) => ({ person, teacher: true }));
   const visibleItems = limit ? allItems.slice(0, limit) : allItems;
 
   return (
@@ -51,7 +48,7 @@ export default function StaffSection({
             </span>
           </h2>
           <p className="mt-4 text-base leading-relaxed text-muted sm:text-lg">
-            Tenaga pendidik profesional dari keluarga SMA Widya Darma.
+            {teachers.length} guru dalam keluarga SMA Widya Darma Surabaya.
           </p>
         </Reveal>
 

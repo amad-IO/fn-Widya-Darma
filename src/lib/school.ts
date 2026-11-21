@@ -63,6 +63,7 @@ export const publications: Publication[] = publicationCategories
 
 export type Staff = {
   id: string;
+  code?: number;
   name: string;
   role: string;
   image: string;
@@ -72,47 +73,35 @@ export type Staff = {
   experience?: string;
 };
 
-const teacherImages = [50, 34, 22, 23, 25, 18];
+const teacherNames = [
+  "Suharni, S.Pd.",
+  "Drs. Sumarno, S.E., M.M.",
+  "Tri Hastutik, S.Pd.",
+  "Tri Indarwati, S.Pd.",
+  "Naning Tri Rahayu, S.E., M.Ak.",
+  "Moya Arfiana, S.Pd.",
+  "Sharvina Yudatika, S.Pd.",
+  "Anisa Nur Vitria, S.Pd.",
+  "Dwi Nona Ayu Kharisma, S.Pd.",
+  "Ernasari, S.Pd.",
+  "Aldika Perdani, S.Pd.",
+  "Vahemas Aditya P. Putra, S.Si., M.Pd.",
+  "Dwi Savitri Vidyawati, S.Si.",
+  "M. Husni Hamdani, S.Hum., M.Pd.",
+  "Aji Restu Septian Arwanto, S.Pd.",
+  "Redy Dwi Kristiyanto, S.Sosio.",
+  "Lilik Aisyah, S.Pd.",
+  "Aprilia Dyah Wulandari, S.Pd.",
+  "Dina Adelia Waluyo, S.Pd.",
+  "Better Boy Nainggolan, S.Pd.K.",
+];
 
-export const teachers: Staff[] = Array.from({ length: 6 }, (_, index) => ({
+export const teachers: Staff[] = teacherNames.map((name, index) => ({
   id: `guru-${index + 1}`,
-  name: [
-    "Lorem Ipsum, M.Pd.",
-    "Dolor Sit Amet, S.Pd.",
-    "Consectetur Elit, S.Si.",
-  ][index % 3],
-  role: [
-    "Wakil Kepala Sekolah",
-    "Guru Matematika",
-    "Guru Bahasa Indonesia",
-    "Guru Biologi",
-    "Guru Fisika",
-    "Guru Ekonomi",
-  ][index],
-  badge: [
-    "Wakasek Kurikulum",
-    "Guru Produktif",
-    "Guru Mapel",
-    "Guru Sains",
-    "Guru Sains",
-    "Tenaga Kependidikan",
-  ][index],
-  department: [
-    "Manajemen & Kurikulum",
-    "Bidang Studi Matematika",
-    "Bidang Studi Bahasa & Sastra",
-    "Bidang Studi Biologi",
-    "Bidang Studi Fisika",
-    "Bidang Studi Ekonomi & Administrasi",
-  ][index],
-  alumni: [
-    "Alumni S2 Universitas Lorem Ipsum",
-    "Alumni S1 Universitas Dolor Sit Amet",
-    "Alumni S1 Institut Consectetur Elit",
-  ][index % 3],
-  experience:
-    "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua dalam dunia pendidikan.",
-  image: imageAsset(teacherImages[index % teacherImages.length]),
+  code: index + 1,
+  name,
+  role: "Guru",
+  image: "/images/staff-placeholder.svg",
 }));
 
 export const leadership: Staff[] = [
@@ -162,15 +151,36 @@ export const leadership: Staff[] = [
   },
 ];
 
-// Leave unset until a verified school contact replaces the displayed demo number.
 const configuredNumber = process.env.NEXT_PUBLIC_SCHOOL_WHATSAPP?.replace(
   /\D/g,
   "",
 );
+const whatsappNumber =
+  configuredNumber && /^62\d{8,13}$/.test(configuredNumber)
+    ? configuredNumber
+    : "6285921095353";
+
 export const schoolContact = {
-  whatsappDisplay: configuredNumber ? `+${configuredNumber}` : "0812 0000 0000",
-  whatsappUrl:
-    configuredNumber && /^62\d{8,13}$/.test(configuredNumber)
-      ? `https://wa.me/${configuredNumber}`
-      : null,
+  address: "Jl. Ketintang No. 147-151, Surabaya",
+  email: "smawdsby@gmail.com",
+  whatsappDisplay:
+    whatsappNumber === "6285921095353" ? "085921095353" : `+${whatsappNumber}`,
+  whatsappUrl: `https://wa.me/${whatsappNumber}`,
+  socialMedia: [
+    {
+      label: "TikTok",
+      account: "smadya.official",
+      url: "https://www.tiktok.com/@smadyaofficial?_r=1&_t=ZS-9B5QiKiteBs",
+    },
+    {
+      label: "Instagram",
+      account: "smadya_official",
+      url: "https://www.instagram.com/smadya_official?dlrf=b3l6MTVvdmJveGYw",
+    },
+    {
+      label: "YouTube",
+      account: "SMA WIDYA DARMA SURABAYA",
+      url: "https://youtube.com/@smadyajaya?si=1nzEfnm1IHo61q1W",
+    },
+  ],
 };

@@ -1,9 +1,7 @@
 "use client";
 
-import { useRef } from "react";
 import { schoolContact } from "@/lib/school";
 import { Button } from "@/components/ui/button";
-import { Close } from "./Svg";
 import { cn } from "@/lib/utils";
 
 export function WhatsAppSymbol({
@@ -39,7 +37,6 @@ export default function WhatsAppButton({
   floating?: boolean;
   className?: string;
 }) {
-  const dialog = useRef<HTMLDialogElement>(null);
   const styling = cn(
     "rounded-xl",
     floating &&
@@ -53,60 +50,14 @@ export default function WhatsAppButton({
     </>
   );
   return (
-    <>
-      {schoolContact.whatsappUrl ? (
-        <Button asChild className={styling}>
-          <a
-            href={schoolContact.whatsappUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            {content}
-          </a>
-        </Button>
-      ) : (
-        <Button className={styling} onClick={() => dialog.current?.showModal()}>
-          {content}
-        </Button>
-      )}
-      <dialog
-        ref={dialog}
-        aria-labelledby={floating ? "wa-floating-title" : undefined}
-        aria-label="Kontak WhatsApp sekolah"
-        className="m-auto w-[calc(100%_-_2rem)] max-w-sm rounded-3xl border border-white bg-white p-7 text-ink shadow-xl backdrop:bg-ink/30 backdrop:backdrop-blur-sm"
+    <Button asChild className={styling}>
+      <a
+        href={schoolContact.whatsappUrl}
+        target="_blank"
+        rel="noopener noreferrer"
       >
-        <div className="flex items-center justify-between">
-          <p className="text-xs font-semibold uppercase tracking-widest text-primary">
-            Kontak WhatsApp
-          </p>
-          <button
-            onClick={() => dialog.current?.close()}
-            aria-label="Tutup informasi WhatsApp"
-            className="rounded-full p-2 hover:bg-mist"
-          >
-            <Close className="h-4 w-4" />
-          </button>
-        </div>
-        <h2
-          id={floating ? "wa-floating-title" : undefined}
-          className="mt-6 text-2xl font-bold"
-        >
-          Nomor contoh
-        </h2>
-        <p className="mt-3 text-xl text-primary">
-          {schoolContact.whatsappDisplay}
-        </p>
-        <p className="mt-4 text-sm leading-6 text-muted">
-          Nomor resmi sekolah belum tersedia. Kontak ini masih berupa contoh
-          tampilan.
-        </p>
-        <Button
-          className="mt-6 w-full rounded-xl"
-          onClick={() => dialog.current?.close()}
-        >
-          Tutup
-        </Button>
-      </dialog>
-    </>
+        {content}
+      </a>
+    </Button>
   );
 }
