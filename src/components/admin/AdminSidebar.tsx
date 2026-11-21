@@ -66,15 +66,15 @@ export default function AdminSidebar({
               onClick={() => onNavigate(item.id)}
               aria-current={isActive ? "page" : undefined}
               className={cn(
-                "group relative flex items-center gap-3 py-3 pr-4 text-left text-sm font-medium transition duration-150",
+                "group relative flex items-center gap-2 py-3 pr-3 text-left text-sm font-medium transition duration-150",
                 isActive
-                  ? "ml-6 w-[calc(100%-1.5rem)] rounded-l-[1.85rem] bg-slate-50 py-3 pl-7 text-primary font-semibold shadow-[0_1px_0_rgba(255,255,255,0.4)]"
-                  : "w-full pl-12 text-white/85 hover:bg-white/10 hover:text-white",
+                  ? "ml-6 w-[calc(100%-1.5rem)] rounded-l-[1.85rem] bg-slate-50 py-3 pl-4 text-primary font-semibold shadow-[0_1px_0_rgba(255,255,255,0.4)]"
+                  : "w-full pl-10 text-white/85 hover:bg-white/10 hover:text-white",
               )}
             >
               <span
                 className={cn(
-                  "flex h-6 w-6 items-center justify-center transition",
+                  "flex h-5 w-5 shrink-0 items-center justify-center transition",
                   isActive
                     ? "text-primary"
                     : "text-white/85 group-hover:text-white",
@@ -83,12 +83,12 @@ export default function AdminSidebar({
                 <AdminIcon name={item.icon} className="h-4 w-4" />
               </span>
 
-              <span className="truncate">{item.label}</span>
+              <span className="min-w-0 flex-1 text-sm leading-snug">{item.label}</span>
 
               {count > 0 && (
                 <span
                   className={cn(
-                    "ml-auto rounded-full px-2 py-0.5 text-[10px] font-bold tabular-nums",
+                    "ml-auto shrink-0 rounded-full px-2 py-0.5 text-[10px] font-bold tabular-nums",
                     isActive
                       ? "bg-primary/10 text-primary"
                       : "bg-white/15 text-white/85 group-hover:bg-white/20 group-hover:text-white",

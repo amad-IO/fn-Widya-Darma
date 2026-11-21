@@ -13,6 +13,8 @@ import AdminGallerySection, {
   galleryTabForCategory,
   type GalleryTab,
 } from "./AdminGallerySection";
+import SaveFeedback from "./SaveFeedback";
+import type { SaveStage } from "@/lib/gallery-api";
 import AdminSpmbSection from "./AdminSpmbSection";
 import TeacherDetailModal from "@/components/shared/TeacherDetailModal";
 import { GalleryActivity } from "@/types/gallery";
@@ -33,9 +35,12 @@ export default function AdminDashboard() {
     activities: galleryActivities,
     saveActivity,
     removeActivity,
+    loading: galleryLoading,
+    error: galleryError,
+    reload: reloadGallery,
   } = useAdminGallery();
   const [isGalleryModalOpen, setIsGalleryModalOpen] = useState(false);
-  const [galleryTab, setGalleryTab] = useState<GalleryTab>("kreativitas-seni");
+  const [galleryTab, setGalleryTab] = useState<GalleryTab>("semua");
   const [editingGalleryActivity, setEditingGalleryActivity] =
     useState<GalleryActivity | null>(null);
   const [viewingGalleryActivity, setViewingGalleryActivity] =
@@ -79,14 +84,17 @@ export default function AdminDashboard() {
     setIsGalleryModalOpen(true);
   };
 
-  const handleDeleteGallery = (id: string) => {
-    removeActivity(id);
+  const handleDeleteGallery = async (id: string) => {
+    await removeActivity(id);
     setNotice("Kegiatan galeri berhasil dihapus.");
   };
 
-  const handleSaveGallery = (savedActivity: GalleryActivity) => {
-    saveActivity(savedActivity);
-    setGalleryTab(galleryTabForCategory(savedActivity.category));
+  const handleSaveGallery = async (
+    savedActivity: GalleryActivity,
+    onStage: (stage: SaveStage) => void,
+  ) => {
+    const saved = await saveActivity(savedActivity, onStage);
+    setGalleryTab(galleryTabForCategory(saved.category));
     setNotice(
       editingGalleryActivity
         ? "Kegiatan galeri berhasil diperbarui."
@@ -164,14 +172,34 @@ export default function AdminDashboard() {
           onNavigate={navigate}
         />
       ) : section === "galeri" ? (
-        <AdminGallerySection
-          activities={galleryActivities}
-          onAdd={handleOpenAddGallery}
-          onEdit={handleOpenEditGallery}
-          onView={setViewingGalleryActivity}
-          activeTab={galleryTab}
-          onTabChange={setGalleryTab}
-        />
+        <>
+          {galleryLoading && (
+            <SaveFeedback
+              stage="preparing"
+              message="Memuat publikasi dari backend…"
+            />
+          )}
+          {galleryError && (
+            <div className="mb-4">
+              <SaveFeedback stage="error" error={galleryError} />
+              <button
+                type="button"
+                onClick={reloadGallery}
+                className="mt-2 text-sm font-semibold text-primary"
+              >
+                Muat ulang publikasi
+              </button>
+            </div>
+          )}
+          <AdminGallerySection
+            activities={galleryActivities}
+            onAdd={handleOpenAddGallery}
+            onEdit={handleOpenEditGallery}
+            onView={setViewingGalleryActivity}
+            activeTab={galleryTab}
+            onTabChange={setGalleryTab}
+          />
+        </>
       ) : section === "guru" ? (
         <AdminTeacherTable
           teachers={teachers}

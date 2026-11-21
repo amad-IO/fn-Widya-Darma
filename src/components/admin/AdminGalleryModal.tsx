@@ -2,25 +2,28 @@
 
 import React, { useState, useEffect, useRef } from "react";
 import Image from "next/image";
+import SaveFeedback from "./SaveFeedback";
+import CropPreview from "./CropPreview";
+import { saveStageLabels, type SaveStage } from "@/lib/gallery-api";
 import { GalleryActivity, GalleryPhoto, CropConfig } from "@/types/gallery";
+import {
+  galleryCategories,
+  normalizeGalleryCategory,
+} from "@/lib/gallery-categories";
 
 interface AdminGalleryModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSave: (activity: GalleryActivity) => void;
-  onDelete?: (id: string) => void;
+  onSave: (
+    activity: GalleryActivity,
+    onStage: (stage: SaveStage) => void,
+  ) => Promise<void>;
+  onDelete?: (id: string) => Promise<void>;
   initialData?: GalleryActivity | null;
   initialCategory?: string;
 }
 
-const DEFAULT_CATEGORIES = [
-  "Kreativitas & Seni",
-  "Jurnal Karya",
-  "Prestasi Akademik",
-  "Kegiatan Sosial",
-  "Ekstrakurikuler",
-  "Pramuka & Olahraga",
-];
+const DEFAULT_CATEGORIES = galleryCategories;
 
 const INDONESIAN_MONTHS = [
   "Januari",
@@ -78,25 +81,40 @@ export default function AdminGalleryModal({
   onSave,
   onDelete,
   initialData,
-  initialCategory = "Kreativitas & Seni",
+  initialCategory = "Galeri Kegiatan",
 }: AdminGalleryModalProps) {
+  const [saveStage, setSaveStage] = useState<SaveStage>("idle");
+  const [saveError, setSaveError] = useState("");
+  const busy = ["preparing", "uploading", "saving"].includes(saveStage);
   const [title, setTitle] = useState("");
   const [slug, setSlug] = useState("");
   const [date, setDate] = useState("");
   const [authorName, setAuthorName] = useState(""); // MANDATORY field
-  const [category, setCategory] = useState("Kreativitas & Seni");
+  const [category, setCategory] = useState("Galeri Kegiatan");
   const [content, setContent] = useState("");
   const [photos, setPhotos] = useState<GalleryPhoto[]>([]);
   const [coverPhotoId, setCoverPhotoId] = useState<string>("");
-  const [cropConfig, setCropConfig] = useState<CropConfig>({
-    zoom: 1.0,
-    x: 0,
-    y: 0,
-  });
+  const [cropPhotoId, setCropPhotoId] = useState("");
+  const [photoCrops, setPhotoCrops] = useState<Record<string, CropConfig>>({});
+  const cropTargetId = photos.some((photo) => photo.id === cropPhotoId)
+    ? cropPhotoId
+    : coverPhotoId;
+  const cropConfig = photoCrops[cropTargetId] || { zoom: 1, x: 0, y: 0 };
+  const setCropConfig = (next: React.SetStateAction<CropConfig>) => {
+    setPhotoCrops((current) => ({
+      ...current,
+      [cropTargetId]:
+        typeof next === "function"
+          ? next(current[cropTargetId] || { zoom: 1, x: 0, y: 0 })
+          : next,
+    }));
+  };
   const [status, setStatus] = useState<"Terbit" | "Draf">("Terbit");
   const [isDatePickerOpen, setIsDatePickerOpen] = useState(false);
   const [isActivityDeleteOpen, setIsActivityDeleteOpen] = useState(false);
-  const [photoPendingDeletion, setPhotoPendingDeletion] = useState<string | null>(null);
+  const [photoPendingDeletion, setPhotoPendingDeletion] = useState<
+    string | null
+  >(null);
   const [pendingDate, setPendingDate] = useState("");
   const [calendarMonth, setCalendarMonth] = useState(() => new Date());
 
@@ -124,46 +142,53 @@ export default function AdminGalleryModal({
       setSlug(initialData.slug || "");
       setDate(toDateInputValue(initialData.date || ""));
       setAuthorName(initialData.authorName || "");
-      setCategory(initialData.category || "Kreativitas & Seni");
+      setCategory(normalizeGalleryCategory(initialData.category));
       setContent(initialData.content || "");
       const sortedPhotos = [...(initialData.photos || [])].sort(
         (a, b) => a.order - b.order,
       );
       setPhotos(sortedPhotos);
       setCoverPhotoId(initialData.coverPhotoId || (sortedPhotos[0]?.id ?? ""));
-      setCropConfig(initialData.cropConfig || { zoom: 1.0, x: 0, y: 0 });
+      setCropPhotoId(
+        initialData.coverPhotoId || initialData.photos[0]?.id || "",
+      );
+      setPhotoCrops(
+        Object.fromEntries(
+          initialData.photos.map((photo) => [
+            photo.id,
+            photo.cropConfig ||
+              (photo.id === initialData.coverPhotoId
+                ? initialData.cropConfig
+                : null) || { zoom: 1, x: 0, y: 0 },
+          ]),
+        ),
+      );
       setStatus(initialData.status || "Terbit");
     } else {
       // New Activity Defaults
       setTitle("");
       setSlug("");
-      setDate(new Date().toISOString().slice(0, 10));
+      setDate(toDateValue(new Date()));
       setAuthorName("");
       setCategory(initialCategory);
       setContent("");
-      const defaultPhotos: GalleryPhoto[] = [
-        {
-          id: `photo-${Date.now()}-1`,
-          url: "/images/32.webp",
-          caption: "Foto Sampul Utama",
-          order: 1,
-        },
-        {
-          id: `photo-${Date.now()}-2`,
-          url: "/images/31.webp",
-          caption: "Dokumentasi Kegiatan 2",
-          order: 2,
-        },
-      ];
-      setPhotos(defaultPhotos);
-      setCoverPhotoId(defaultPhotos[0].id);
-      setCropConfig({ zoom: 1.0, x: 0, y: 0 });
+      setPhotos([]);
+      setCoverPhotoId("");
+      setCropPhotoId("");
+      setPhotoCrops({});
       setStatus("Terbit");
     }
     setErrors({});
     setIsActivityDeleteOpen(false);
     setPhotoPendingDeletion(null);
   }, [initialData, initialCategory, isOpen]);
+
+  useEffect(() => {
+    if (isOpen) {
+      setSaveStage("idle");
+      setSaveError("");
+    }
+  }, [isOpen]);
 
   if (!isOpen) return null;
 
@@ -198,32 +223,49 @@ export default function AdminGalleryModal({
   })();
 
   // Photo Management
-  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = e.target.files;
-    if (!files || files.length === 0) return;
-
-    const newPhotosList: GalleryPhoto[] = [];
-    Array.from(files).forEach((file, index) => {
-      const reader = new FileReader();
-      reader.onload = (event) => {
-        if (event.target?.result) {
-          const newPhoto: GalleryPhoto = {
-            id: `photo-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`,
-            url: event.target.result as string,
-            caption: file.name.replace(/\.[^/.]+$/, ""),
-            order: photos.length + newPhotosList.length + index + 1,
-          };
-          setPhotos((prev) => {
-            const updated = [...prev, newPhoto];
-            if (!coverPhotoId && updated.length === 1) {
-              setCoverPhotoId(newPhoto.id);
-            }
-            return updated;
-          });
-        }
-      };
-      reader.readAsDataURL(file);
-    });
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(e.target.files || []);
+    e.target.value = "";
+    if (!files.length) return;
+    if (
+      files.some(
+        (file) =>
+          !["image/jpeg", "image/png", "image/webp", "image/gif"].includes(
+            file.type,
+          ) || file.size > 5 * 1024 * 1024,
+      )
+    ) {
+      setSaveError("Gunakan JPG, PNG, WebP, atau GIF, maksimal 5 MB per foto.");
+      return;
+    }
+    setSaveStage("preparing");
+    setSaveError("");
+    try {
+      const nextPhotos = await Promise.all(
+        files.map(
+          (file, index) =>
+            new Promise<GalleryPhoto>((resolve, reject) => {
+              const reader = new FileReader();
+              reader.onload = () =>
+                resolve({
+                  id: crypto.randomUUID(),
+                  url: String(reader.result),
+                  caption: file.name.replace(/\.[^/.]+$/, ""),
+                  order: photos.length + index + 1,
+                });
+              reader.onerror = () =>
+                reject(new Error("Foto tidak dapat dibaca."));
+              reader.readAsDataURL(file);
+            }),
+        ),
+      );
+      setPhotos((current) => [...current, ...nextPhotos]);
+      if (!coverPhotoId) setCoverPhotoId(nextPhotos[0].id);
+      setSaveStage("idle");
+    } catch (error) {
+      setSaveError((error as Error).message);
+      setSaveStage("error");
+    }
   };
 
   const handleDeletePhoto = (id: string) => {
@@ -290,16 +332,25 @@ export default function AdminGalleryModal({
     setIsActivityDeleteOpen(true);
   };
 
-  const confirmDeleteActivity = () => {
-    if (!initialData || !onDelete) return;
-    onDelete(initialData.id);
+  const confirmDeleteActivity = async () => {
+    if (!initialData || !onDelete || busy) return;
+    setSaveError("");
+    setSaveStage("saving");
     setIsActivityDeleteOpen(false);
-    onClose();
+    try {
+      await onDelete(initialData.id);
+      onClose();
+    } catch (error) {
+      setSaveError((error as Error).message);
+      setSaveStage("error");
+    }
   };
 
   // Form Validation & Save
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (busy) return;
+    setSaveError("");
     const newErrors: { [key: string]: string } = {};
 
     if (!title.trim()) {
@@ -310,6 +361,10 @@ export default function AdminGalleryModal({
     }
     if (!date.trim()) {
       newErrors.date = "Tanggal kegiatan wajib diisi!";
+    }
+    if (!content.trim()) {
+      newErrors.content = "Deskripsi publikasi wajib diisi.";
+      setSaveError(newErrors.content);
     }
     if (photos.length === 0) {
       newErrors.photos = "Minimal 1 foto kegiatan harus diunggah!";
@@ -326,6 +381,7 @@ export default function AdminGalleryModal({
     const currentCover = photos.find((p) => p.id === coverPhotoId) || photos[0];
 
     const savedActivity: GalleryActivity = {
+      backendId: initialData?.backendId,
       id: initialData?.id || `galeri-${Date.now()}`,
       title: title.trim(),
       slug: slug.trim() || generateSlug(title),
@@ -333,21 +389,30 @@ export default function AdminGalleryModal({
       authorName: authorName.trim(), // REQUIRED authorName
       category,
       content: content.trim(),
-      photos: photos.map((p, idx) => ({ ...p, order: idx + 1 })),
+      photos: photos.map((p, idx) => ({
+        ...p,
+        order: idx + 1,
+        cropConfig: photoCrops[p.id],
+      })),
       coverPhotoId: currentCover ? currentCover.id : photos[0]?.id || "",
-      cropConfig,
+      cropConfig: photoCrops[currentCover?.id || ""] || { zoom: 1, x: 0, y: 0 },
       status,
       createdAt:
         initialData?.createdAt || new Date().toISOString().split("T")[0],
     };
 
-    onSave(savedActivity);
-    onClose();
+    try {
+      await onSave(savedActivity, setSaveStage);
+      onClose();
+    } catch (error) {
+      setSaveError((error as Error).message);
+      setSaveStage("error");
+    }
   };
 
   // Find active cover photo URL
   const selectedCoverPhoto =
-    photos.find((p) => p.id === coverPhotoId)?.url ||
+    photos.find((p) => p.id === cropTargetId)?.url ||
     photos[0]?.url ||
     "/images/32.webp";
 
@@ -361,6 +426,7 @@ export default function AdminGalleryModal({
           </h2>
           <button
             type="button"
+            disabled={busy}
             onClick={onClose}
             className="flex h-8 w-8 items-center justify-center rounded-full text-slate-400 hover:bg-slate-200 hover:text-slate-700 transition"
           >
@@ -369,335 +435,354 @@ export default function AdminGalleryModal({
         </div>
 
         {/* Modal Form Body */}
+        <div className="px-6 pt-3">
+          <SaveFeedback stage={saveStage} error={saveError} />
+        </div>
         <form
           onSubmit={handleSubmit}
           className="flex flex-1 flex-col overflow-y-auto p-6"
         >
-          <div className="mx-auto w-full max-w-2xl space-y-5">
-            <div>
-              <label className="block text-xs font-semibold text-slate-700">
-                Judul Kegiatan <span className="text-rose-500">*</span>
-              </label>
-              <input
-                type="text"
-                value={title}
-                onChange={(e) => handleTitleChange(e.target.value)}
-                placeholder="Masukkan judul kegiatan"
-                className="mt-1 w-full rounded-xl border border-slate-200 px-3.5 py-2 text-sm text-slate-800 placeholder-slate-400 focus:border-primary focus:outline-hidden focus:ring-2 focus:ring-primary/20"
-              />
-              {errors.title && (
-                <p className="mt-1 text-xs text-rose-500">{errors.title}</p>
-              )}
-            </div>
-
-            <div>
-              <label className="block text-xs font-semibold text-slate-700">
-                Tanggal Kegiatan <span className="text-rose-500">*</span>
-              </label>
-              <button
-                type="button"
-                onClick={openDatePicker}
-                className="mt-1 flex w-full items-center justify-between rounded-xl border border-slate-200 bg-white px-3.5 py-2 text-left text-sm text-slate-800 transition hover:border-primary/50 focus:border-primary focus:outline-hidden focus:ring-2 focus:ring-primary/20"
-              >
-                <span>{date ? formatEventDate(date) : "Pilih tanggal"}</span>
-                <span className="text-base leading-none text-slate-400">⌄</span>
-              </button>
-              {errors.date && (
-                <p className="mt-1 text-xs text-rose-500">{errors.date}</p>
-              )}
-            </div>
-
-            <div>
-              <label className="block text-xs font-semibold text-slate-700">
-                Nama Penulis <span className="text-rose-500">*</span>
-              </label>
-              <input
-                type="text"
-                value={authorName}
-                onChange={(e) => setAuthorName(e.target.value)}
-                placeholder="Masukkan nama penulis"
-                className="mt-1 w-full rounded-xl border border-slate-200 px-3.5 py-2 text-sm text-slate-800 placeholder-slate-400 focus:border-primary focus:outline-hidden focus:ring-2 focus:ring-primary/20"
-              />
-              {errors.authorName && (
-                <p className="mt-1 text-xs text-rose-500">
-                  {errors.authorName}
-                </p>
-              )}
-            </div>
-
-            <div>
-              <label className="block text-xs font-semibold text-slate-700">
-                Kategori Kegiatan
-              </label>
-              <select
-                value={category}
-                onChange={(e) => setCategory(e.target.value)}
-                className="mt-1 w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2 text-sm text-slate-800 focus:border-primary focus:outline-hidden focus:ring-2 focus:ring-primary/20"
-              >
-                {DEFAULT_CATEGORIES.map((cat) => (
-                  <option key={cat} value={cat}>
-                    {cat}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            <div>
-              <label className="block text-xs font-semibold text-slate-700">
-                Caption Kegiatan
-              </label>
-              <textarea
-                rows={4}
-                value={content}
-                onChange={(e) => setContent(e.target.value)}
-                placeholder="Masukkan caption kegiatan"
-                className="mt-1 w-full rounded-xl border border-slate-200 px-3.5 py-2.5 text-sm text-slate-800 placeholder-slate-400 focus:border-primary focus:outline-hidden focus:ring-2 focus:ring-primary/20"
-              />
-            </div>
-
-            <section className="border-t border-slate-200 pt-5">
-              <div className="mb-3 flex items-center justify-between gap-3">
-                <h3 className="text-sm font-bold text-slate-800">Edit Foto</h3>
+          <fieldset disabled={busy} className="contents">
+            <div className="mx-auto w-full max-w-2xl space-y-5">
+              <div>
+                <label className="block text-xs font-semibold text-slate-700">
+                  Judul Kegiatan <span className="text-rose-500">*</span>
+                </label>
                 <input
-                  type="file"
-                  ref={fileInputRef}
-                  onChange={handleFileUpload}
-                  multiple
-                  accept="image/*"
-                  className="hidden"
+                  type="text"
+                  value={title}
+                  onChange={(e) => handleTitleChange(e.target.value)}
+                  placeholder="Masukkan judul kegiatan"
+                  className="mt-1 w-full rounded-xl border border-slate-200 px-3.5 py-2 text-sm text-slate-800 placeholder-slate-400 focus:border-primary focus:outline-hidden focus:ring-2 focus:ring-primary/20"
                 />
-                <button
-                  type="button"
-                  onClick={() => fileInputRef.current?.click()}
-                  className="rounded-lg bg-primary px-3 py-1.5 text-xs font-medium text-white shadow-xs transition hover:bg-primary-dark"
-                >
-                  + Upload Foto
-                </button>
-              </div>
-              {errors.photos && (
-                <p className="mt-2 text-xs text-rose-500">{errors.photos}</p>
-              )}
-
-              {/* Photos Sequence List */}
-              <div className="mt-1 space-y-2 max-h-60 overflow-y-auto pr-1">
-                {photos.length === 0 ? (
-                  <div className="rounded-lg border border-dashed border-slate-300 py-6 text-center text-xs text-slate-400">
-                    Belum ada foto.
-                  </div>
-                ) : (
-                  photos.map((photo, index) => {
-                    const isCover = photo.id === coverPhotoId;
-                    return (
-                      <div
-                        key={photo.id}
-                        className={`flex items-center justify-between rounded-xl border p-2.5 transition ${
-                          isCover
-                            ? "border-primary/50 bg-primary/5 shadow-xs"
-                            : "border-slate-200 bg-white"
-                        }`}
-                      >
-                        <div className="flex items-center gap-3 min-w-0">
-                          <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-slate-100 text-[11px] font-bold text-slate-600">
-                            {index + 1}
-                          </span>
-                          <div className="relative h-12 w-12 shrink-0 overflow-hidden rounded-lg bg-slate-200 border border-slate-200">
-                            <Image
-                              src={photo.url}
-                              alt={photo.caption || `Foto ${index + 1}`}
-                              fill
-                              unoptimized={photo.url.startsWith("data:")}
-                              className="object-cover"
-                            />
-                          </div>
-                          <div className="min-w-0 truncate">
-                            <p className="truncate text-xs font-semibold text-slate-800">
-                              {photo.caption || `Foto Kegiatan #${index + 1}`}
-                            </p>
-                            <div className="mt-0.5 flex items-center gap-2">
-                              <button
-                                type="button"
-                                onClick={() => setCoverPhotoId(photo.id)}
-                                className={`text-[10px] font-semibold px-2 py-0.5 rounded-full transition ${
-                                  isCover
-                                    ? "bg-primary text-white"
-                                    : "bg-slate-100 text-slate-600 hover:bg-slate-200"
-                                }`}
-                              >
-                                {isCover ? "★ Sampul Utama" : "Set Jadi Sampul"}
-                              </button>
-                            </div>
-                          </div>
-                        </div>
-
-                        <div className="flex items-center gap-1.5 shrink-0 ml-2">
-                          <button
-                            type="button"
-                            disabled={index === 0}
-                            onClick={() => handleMovePhoto(index, "up")}
-                            title="Pindahkan ke Atas"
-                            className="flex h-7 w-7 items-center justify-center rounded-lg border border-slate-200 bg-slate-50 text-xs font-bold text-slate-600 hover:bg-slate-100 disabled:opacity-30"
-                          >
-                            ↑
-                          </button>
-                          <button
-                            type="button"
-                            disabled={index === photos.length - 1}
-                            onClick={() => handleMovePhoto(index, "down")}
-                            title="Pindahkan ke Bawah"
-                            className="flex h-7 w-7 items-center justify-center rounded-lg border border-slate-200 bg-slate-50 text-xs font-bold text-slate-600 hover:bg-slate-100 disabled:opacity-30"
-                          >
-                            ↓
-                          </button>
-                          <button
-                            type="button"
-                            onClick={() => setPhotoPendingDeletion(photo.id)}
-                            title="Hapus Foto"
-                            className="flex h-7 w-7 items-center justify-center rounded-lg border border-rose-200 bg-rose-50 text-xs text-rose-600 hover:bg-rose-100 transition"
-                          >
-                            ✕
-                          </button>
-                        </div>
-                      </div>
-                    );
-                  })
+                {errors.title && (
+                  <p className="mt-1 text-xs text-rose-500">{errors.title}</p>
                 )}
               </div>
-            </section>
 
-            {photos.length > 0 && (
-              <section className="rounded-2xl border border-slate-200 bg-slate-900 p-4 text-white shadow-md">
-                <div className="flex items-center justify-between">
-                  <span className="text-sm font-bold text-white">
-                    Atur Foto Sampul
+              <div>
+                <label className="block text-xs font-semibold text-slate-700">
+                  Tanggal Kegiatan <span className="text-rose-500">*</span>
+                </label>
+                <button
+                  type="button"
+                  onClick={openDatePicker}
+                  className="mt-1 flex w-full items-center justify-between rounded-xl border border-slate-200 bg-white px-3.5 py-2 text-left text-sm text-slate-800 transition hover:border-primary/50 focus:border-primary focus:outline-hidden focus:ring-2 focus:ring-primary/20"
+                >
+                  <span>{date ? formatEventDate(date) : "Pilih tanggal"}</span>
+                  <span className="text-base leading-none text-slate-400">
+                    ⌄
                   </span>
+                </button>
+                {errors.date && (
+                  <p className="mt-1 text-xs text-rose-500">{errors.date}</p>
+                )}
+              </div>
+
+              <div>
+                <label className="block text-xs font-semibold text-slate-700">
+                  Nama Penulis <span className="text-rose-500">*</span>
+                </label>
+                <input
+                  type="text"
+                  value={authorName}
+                  onChange={(e) => setAuthorName(e.target.value)}
+                  placeholder="Masukkan nama penulis"
+                  className="mt-1 w-full rounded-xl border border-slate-200 px-3.5 py-2 text-sm text-slate-800 placeholder-slate-400 focus:border-primary focus:outline-hidden focus:ring-2 focus:ring-primary/20"
+                />
+                {errors.authorName && (
+                  <p className="mt-1 text-xs text-rose-500">
+                    {errors.authorName}
+                  </p>
+                )}
+              </div>
+
+              <div>
+                <label className="block text-xs font-semibold text-slate-700">
+                  Kategori Kegiatan
+                </label>
+                <select
+                  value={category}
+                  onChange={(e) => setCategory(e.target.value)}
+                  className="mt-1 w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2 text-sm text-slate-800 focus:border-primary focus:outline-hidden focus:ring-2 focus:ring-primary/20"
+                >
+                  {DEFAULT_CATEGORIES.map((cat) => (
+                    <option key={cat} value={cat}>
+                      {cat}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-xs font-semibold text-slate-700">
+                  Caption Kegiatan
+                </label>
+                <textarea
+                  rows={4}
+                  value={content}
+                  onChange={(e) => setContent(e.target.value)}
+                  placeholder="Masukkan caption kegiatan"
+                  className="mt-1 w-full rounded-xl border border-slate-200 px-3.5 py-2.5 text-sm text-slate-800 placeholder-slate-400 focus:border-primary focus:outline-hidden focus:ring-2 focus:ring-primary/20"
+                />
+              </div>
+
+              <section className="border-t border-slate-200 pt-5">
+                <div className="mb-3 flex items-center justify-between gap-3">
+                  <h3 className="text-sm font-bold text-slate-800">
+                    Edit Foto
+                  </h3>
+                  <input
+                    type="file"
+                    ref={fileInputRef}
+                    onChange={handleFileUpload}
+                    multiple
+                    accept="image/jpeg,image/png,image/webp,image/gif"
+                    className="hidden"
+                  />
                   <button
                     type="button"
-                    onClick={() => setCropConfig({ zoom: 1.0, x: 0, y: 0 })}
-                    className="text-xs text-slate-300 underline hover:text-white"
+                    onClick={() => fileInputRef.current?.click()}
+                    className="rounded-lg bg-primary px-3 py-1.5 text-xs font-medium text-white shadow-xs transition hover:bg-primary-dark"
                   >
-                    Reset Crop
+                    + Upload Foto
                   </button>
                 </div>
+                {errors.photos && (
+                  <p className="mt-2 text-xs text-rose-500">{errors.photos}</p>
+                )}
 
-                <div
-                  onMouseDown={handleMouseDownCrop}
-                  onMouseMove={handleMouseMoveCrop}
-                  onMouseUp={handleMouseUpCrop}
-                  onMouseLeave={handleMouseUpCrop}
-                  className="relative mx-auto mt-4 aspect-[3/4] w-48 overflow-hidden rounded-xl bg-slate-950 border-2 border-dashed border-amber-400/80 shadow-inner cursor-grab active:cursor-grabbing select-none"
-                >
-                  <img
-                    src={selectedCoverPhoto}
-                    alt="Preview Crop Sampul"
-                    className="h-full w-full object-cover transition-transform duration-75 origin-center pointer-events-none"
-                    style={{
-                      transform: `scale(${cropConfig.zoom}) translate(${cropConfig.x}%, ${cropConfig.y}%)`,
-                    }}
-                  />
-                </div>
-
-                <div className="mt-4 space-y-3 bg-slate-800/80 p-3 rounded-xl border border-slate-700/50">
-                  <div>
-                    <div className="flex items-center justify-between text-xs text-slate-300">
-                      <span>Zoom / Perbesaran</span>
-                      <span className="font-mono text-amber-400">
-                        {cropConfig.zoom.toFixed(2)}x
-                      </span>
+                {/* Photos Sequence List */}
+                <div className="mt-1 space-y-2 max-h-60 overflow-y-auto pr-1">
+                  {photos.length === 0 ? (
+                    <div className="rounded-lg border border-dashed border-slate-300 py-6 text-center text-xs text-slate-400">
+                      Belum ada foto.
                     </div>
-                    <input
-                      type="range"
-                      min="1.0"
-                      max="3.0"
-                      step="0.05"
-                      value={cropConfig.zoom}
-                      onChange={(e) =>
-                        setCropConfig((prev) => ({
-                          ...prev,
-                          zoom: parseFloat(e.target.value),
-                        }))
-                      }
-                      className="mt-1 w-full accent-amber-400 cursor-pointer"
+                  ) : (
+                    photos.map((photo, index) => {
+                      const isCover = photo.id === coverPhotoId;
+                      return (
+                        <div
+                          key={photo.id}
+                          className={`flex items-center justify-between rounded-xl border p-2.5 transition ${
+                            isCover
+                              ? "border-primary/50 bg-primary/5 shadow-xs"
+                              : "border-slate-200 bg-white"
+                          }`}
+                        >
+                          <div className="flex items-center gap-3 min-w-0">
+                            <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-slate-100 text-[11px] font-bold text-slate-600">
+                              {index + 1}
+                            </span>
+                            <div className="relative h-12 w-12 shrink-0 overflow-hidden rounded-lg bg-slate-200 border border-slate-200">
+                              <Image
+                                src={photo.url}
+                                alt={photo.caption || `Foto ${index + 1}`}
+                                fill
+                                unoptimized={photo.url.startsWith("data:")}
+                                className="object-cover"
+                              />
+                            </div>
+                            <div className="min-w-0 truncate">
+                              <p className="truncate text-xs font-semibold text-slate-800">
+                                {photo.caption || `Foto Kegiatan #${index + 1}`}
+                              </p>
+                              <div className="mt-0.5 flex items-center gap-2">
+                                <button
+                                  type="button"
+                                  onClick={() => setCoverPhotoId(photo.id)}
+                                  className={`text-[10px] font-semibold px-2 py-0.5 rounded-full transition ${
+                                    isCover
+                                      ? "bg-primary text-white"
+                                      : "bg-slate-100 text-slate-600 hover:bg-slate-200"
+                                  }`}
+                                >
+                                  {isCover
+                                    ? "★ Sampul Utama"
+                                    : "Set Jadi Sampul"}
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={() => setCropPhotoId(photo.id)}
+                                  className="rounded-full bg-blue-50 px-2 py-1 text-xs font-semibold text-primary"
+                                >
+                                  {cropTargetId === photo.id
+                                    ? "Sedang di-crop"
+                                    : "Atur crop"}
+                                </button>
+                              </div>
+                            </div>
+                          </div>
+
+                          <div className="flex items-center gap-1.5 shrink-0 ml-2">
+                            <button
+                              type="button"
+                              disabled={index === 0}
+                              onClick={() => handleMovePhoto(index, "up")}
+                              title="Pindahkan ke Atas"
+                              className="flex h-7 w-7 items-center justify-center rounded-lg border border-slate-200 bg-slate-50 text-xs font-bold text-slate-600 hover:bg-slate-100 disabled:opacity-30"
+                            >
+                              ↑
+                            </button>
+                            <button
+                              type="button"
+                              disabled={index === photos.length - 1}
+                              onClick={() => handleMovePhoto(index, "down")}
+                              title="Pindahkan ke Bawah"
+                              className="flex h-7 w-7 items-center justify-center rounded-lg border border-slate-200 bg-slate-50 text-xs font-bold text-slate-600 hover:bg-slate-100 disabled:opacity-30"
+                            >
+                              ↓
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => setPhotoPendingDeletion(photo.id)}
+                              title="Hapus Foto"
+                              className="flex h-7 w-7 items-center justify-center rounded-lg border border-rose-200 bg-rose-50 text-xs text-rose-600 hover:bg-rose-100 transition"
+                            >
+                              ✕
+                            </button>
+                          </div>
+                        </div>
+                      );
+                    })
+                  )}
+                </div>
+              </section>
+
+              {photos.length > 0 && (
+                <section className="rounded-2xl border border-slate-200 bg-slate-900 p-4 text-white shadow-md">
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm font-bold text-white">
+                      Atur Crop Foto
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => setCropConfig({ zoom: 1.0, x: 0, y: 0 })}
+                      className="text-xs text-slate-300 underline hover:text-white"
+                    >
+                      Reset Crop
+                    </button>
+                  </div>
+
+                  <div
+                    onMouseDown={handleMouseDownCrop}
+                    onMouseMove={handleMouseMoveCrop}
+                    onMouseUp={handleMouseUpCrop}
+                    onMouseLeave={handleMouseUpCrop}
+                    className="relative mx-auto mt-4 aspect-[16/10] w-full max-w-[480px] overflow-hidden rounded-xl bg-slate-950 border-2 border-dashed border-amber-400/80 shadow-inner cursor-grab active:cursor-grabbing select-none"
+                  >
+                    <CropPreview
+                      source={selectedCoverPhoto}
+                      crop={cropConfig}
                     />
                   </div>
 
-                  <div className="space-y-3">
+                  <div className="mt-4 space-y-3 bg-slate-800/80 p-3 rounded-xl border border-slate-700/50">
                     <div>
-                      <div className="flex items-center justify-between text-[11px] text-slate-300">
-                        <span>Geser Horisontal (X)</span>
+                      <div className="flex items-center justify-between text-xs text-slate-300">
+                        <span>Zoom / Perbesaran</span>
                         <span className="font-mono text-amber-400">
-                          {cropConfig.x}%
+                          {cropConfig.zoom.toFixed(2)}x
                         </span>
                       </div>
                       <input
                         type="range"
-                        min="-50"
-                        max="50"
-                        value={cropConfig.x}
+                        min="1.0"
+                        max="3.0"
+                        step="0.05"
+                        value={cropConfig.zoom}
                         onChange={(e) =>
                           setCropConfig((prev) => ({
                             ...prev,
-                            x: parseInt(e.target.value, 10),
+                            zoom: parseFloat(e.target.value),
                           }))
                         }
                         className="mt-1 w-full accent-amber-400 cursor-pointer"
                       />
                     </div>
 
-                    <div>
-                      <div className="flex items-center justify-between text-[11px] text-slate-300">
-                        <span>Geser Vertikal (Y)</span>
-                        <span className="font-mono text-amber-400">
-                          {cropConfig.y}%
-                        </span>
+                    <div className="space-y-3">
+                      <div>
+                        <div className="flex items-center justify-between text-[11px] text-slate-300">
+                          <span>Geser Horisontal (X)</span>
+                          <span className="font-mono text-amber-400">
+                            {cropConfig.x}%
+                          </span>
+                        </div>
+                        <input
+                          type="range"
+                          min="-50"
+                          max="50"
+                          value={cropConfig.x}
+                          onChange={(e) =>
+                            setCropConfig((prev) => ({
+                              ...prev,
+                              x: parseInt(e.target.value, 10),
+                            }))
+                          }
+                          className="mt-1 w-full accent-amber-400 cursor-pointer"
+                        />
                       </div>
-                      <input
-                        type="range"
-                        min="-50"
-                        max="50"
-                        value={cropConfig.y}
-                        onChange={(e) =>
-                          setCropConfig((prev) => ({
-                            ...prev,
-                            y: parseInt(e.target.value, 10),
-                          }))
-                        }
-                        className="mt-1 w-full accent-amber-400 cursor-pointer"
-                      />
+
+                      <div>
+                        <div className="flex items-center justify-between text-[11px] text-slate-300">
+                          <span>Geser Vertikal (Y)</span>
+                          <span className="font-mono text-amber-400">
+                            {cropConfig.y}%
+                          </span>
+                        </div>
+                        <input
+                          type="range"
+                          min="-50"
+                          max="50"
+                          value={cropConfig.y}
+                          onChange={(e) =>
+                            setCropConfig((prev) => ({
+                              ...prev,
+                              y: parseInt(e.target.value, 10),
+                            }))
+                          }
+                          className="mt-1 w-full accent-amber-400 cursor-pointer"
+                        />
+                      </div>
                     </div>
                   </div>
-                </div>
-              </section>
-            )}
-          </div>
+                </section>
+              )}
+            </div>
 
-          {/* Footer Actions */}
-          <div className="mt-8 flex items-center justify-between border-t border-slate-100 pt-4 bg-white sticky bottom-0">
-            <span className="text-xs text-slate-500">{photos.length} Foto</span>
-            <div className="flex items-center gap-3">
-              <button
-                type="button"
-                onClick={onClose}
-                className="rounded-xl border border-slate-200 bg-white px-4 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-100 transition"
-              >
-                Batal
-              </button>
-              {initialData && onDelete && (
+            {/* Footer Actions */}
+            <div className="mt-8 flex items-center justify-between border-t border-slate-100 pt-4 bg-white sticky bottom-0">
+              <span className="text-xs text-slate-500">
+                {photos.length} Foto
+              </span>
+              <div className="flex items-center gap-3">
                 <button
                   type="button"
-                  onClick={handleDeleteActivity}
-                  className="rounded-xl border border-rose-200 bg-rose-50 px-4 py-2 text-xs font-bold text-rose-600 transition hover:bg-rose-100"
+                  disabled={busy}
+                  onClick={onClose}
+                  className="rounded-xl border border-slate-200 bg-white px-4 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-100 transition"
                 >
-                  Hapus
+                  Batal
                 </button>
-              )}
-              <button
-                type="submit"
-                className="rounded-xl bg-primary px-6 py-2 text-xs font-bold text-white shadow-md hover:bg-primary-dark transition"
-              >
-                Simpan
-              </button>
+                {initialData && onDelete && (
+                  <button
+                    type="button"
+                    onClick={handleDeleteActivity}
+                    className="rounded-xl border border-rose-200 bg-rose-50 px-4 py-2 text-xs font-bold text-rose-600 transition hover:bg-rose-100"
+                  >
+                    Hapus
+                  </button>
+                )}
+                <button
+                  type="submit"
+                  className="rounded-xl bg-primary px-6 py-2 text-xs font-bold text-white shadow-md hover:bg-primary-dark transition"
+                >
+                  {saveStageLabels[saveStage]}
+                </button>
+              </div>
             </div>
-          </div>
+          </fieldset>
         </form>
       </div>
 
@@ -846,7 +931,9 @@ export default function AdminGalleryModal({
             className="absolute inset-0 cursor-default"
           />
           <div className="relative z-10 w-full max-w-sm rounded-2xl bg-white p-6 shadow-2xl">
-            <h3 className="text-base font-bold text-slate-900">Hapus publikasi?</h3>
+            <h3 className="text-base font-bold text-slate-900">
+              Hapus publikasi?
+            </h3>
             <p className="mt-2 text-sm leading-6 text-slate-500">
               Anda yakin ingin menghapus &ldquo;{initialData.title}&rdquo;?
             </p>

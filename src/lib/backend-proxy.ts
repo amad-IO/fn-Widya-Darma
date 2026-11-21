@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 
-function backendUrl(path: string) {
+export function backendUrl(path: string) {
   const baseUrl = (
     process.env.BACKEND_API_URL ||
     process.env.NEXT_PUBLIC_API_URL ||
@@ -9,10 +9,7 @@ function backendUrl(path: string) {
   return `${baseUrl}${path}`;
 }
 
-export async function proxyAdminRequest(
-  request: NextRequest,
-  path: string,
-) {
+export async function proxyAdminRequest(request: NextRequest, path: string) {
   const headers = new Headers({ Accept: "application/json" });
   const contentType = request.headers.get("content-type");
   const authorization = request.headers.get("authorization");
@@ -24,7 +21,9 @@ export async function proxyAdminRequest(
     const response = await fetch(backendUrl(path), {
       method: request.method,
       headers,
-      body: request.method === "GET" ? undefined : await request.text(),
+      body: ["GET", "HEAD"].includes(request.method)
+        ? undefined
+        : await request.arrayBuffer(),
       cache: "no-store",
     });
     const body = await response.text();
@@ -32,7 +31,8 @@ export async function proxyAdminRequest(
     return new NextResponse(body, {
       status: response.status,
       headers: {
-        "Content-Type": response.headers.get("content-type") || "application/json",
+        "Content-Type":
+          response.headers.get("content-type") || "application/json",
         "Cache-Control": "no-store",
       },
     });

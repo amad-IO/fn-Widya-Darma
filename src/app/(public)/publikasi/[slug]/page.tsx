@@ -1,19 +1,42 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { publications } from "@/lib/school";
+import { backendUrl } from "@/lib/backend-proxy";
+import { newsToPublication } from "@/lib/gallery-public";
+import type { NewsRecord } from "@/lib/gallery-api";
 import ActivitySlider from "@/components/shared/ActivitySlider";
-export const revalidate = 600;
-export function generateStaticParams() {
-  return publications.map(({ slug }) => ({ slug }));
-}
+export const dynamic = "force-dynamic";
 export default async function PublicationDetail({
   params,
 }: {
   params: Promise<{ slug: string }>;
 }) {
   const { slug } = await params;
-  const item = publications.find((p) => p.slug === slug);
-  if (!item) notFound();
+  let record: NewsRecord | null = null;
+  let missing = false;
+  try {
+    const response = await fetch(
+      backendUrl(`/news/${encodeURIComponent(slug)}`),
+      { headers: { Accept: "application/json" }, cache: "no-store" },
+    );
+    missing = response.status === 404;
+    if (response.ok) record = (await response.json()).data;
+  } catch {
+    /* The public page remains readable when the backend is unavailable. */
+  }
+  if (missing) notFound();
+  if (!record)
+    return (
+      <section className="container-width py-24">
+        <h1 className="text-2xl font-semibold">Publikasi belum dapat dimuat</h1>
+        <p className="mt-3 text-muted">
+          Silakan coba kembali beberapa saat lagi.
+        </p>
+        <Link href="/publikasi" className="mt-6 inline-block text-primary">
+          Kembali ke galeri
+        </Link>
+      </section>
+    );
+  const item = newsToPublication(record);
   const photos = item.photos?.length
     ? item.photos
     : [{ src: item.image, alt: item.title }];
@@ -33,10 +56,12 @@ export default async function PublicationDetail({
           <div className="mt-5 flex flex-wrap gap-x-5 gap-y-2 text-xs leading-6 text-muted">
             {item.activityDate && (
               <time dateTime={item.activityDate}>
-                {new Intl.DateTimeFormat("id-ID", {
-                  dateStyle: "long",
-                  timeZone: "UTC",
-                }).format(new Date(`${item.activityDate}T00:00:00Z`))}
+                {/^\d{4}-\d{2}-\d{2}$/.test(item.activityDate)
+                  ? new Intl.DateTimeFormat("id-ID", {
+                      dateStyle: "long",
+                      timeZone: "UTC",
+                    }).format(new Date(`${item.activityDate}T00:00:00Z`))
+                  : item.activityDate}
               </time>
             )}
             {item.authorName && (

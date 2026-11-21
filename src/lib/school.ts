@@ -12,6 +12,8 @@ export const publicationCategories = [
   "Karya",
   "Prestasi",
   "Ekstrakurikuler",
+  "Jurnal Karya",
+  "Galeri Kegiatan",
 ] as const;
 export type PublicationCategory = (typeof publicationCategories)[number];
 export type Publication = {
@@ -34,7 +36,7 @@ const publicationImageIds = [
 export const publications: Publication[] = publicationCategories
   .flatMap((category, index) =>
     [0, 1, 2].map((item) => ({
-      slug: `${category.toLowerCase()}-${item + 1}`,
+      slug: `${category.toLowerCase().replace(/\s+/g, "-")}-${item + 1}`,
       category,
       title: [
         "Lorem ipsum dolor sit amet.",
@@ -42,7 +44,9 @@ export const publications: Publication[] = publicationCategories
         "Sed do eiusmod tempor.",
       ][item],
       excerpt: copy.body,
-      image: imageAsset(publicationImageIds[index * 3 + item]),
+      image: imageAsset(
+        publicationImageIds[(index * 3 + item) % publicationImageIds.length],
+      ),
     })),
   )
   .map((item) => ({

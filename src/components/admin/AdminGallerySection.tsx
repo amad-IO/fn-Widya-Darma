@@ -3,61 +3,39 @@
 import { useMemo } from "react";
 import Image from "next/image";
 import type { GalleryActivity } from "@/types/gallery";
+import CollageEditor from "./CollageEditor";
+import { normalizeGalleryCategory } from "@/lib/gallery-categories";
 import { cn } from "@/lib/utils";
 
 export type GalleryTab =
-  | "kreativitas-seni"
-  | "jurnal-karya"
-  | "prestasi-akademik"
-  | "kegiatan-sosial"
-  | "ekstrakurikuler"
-  | "pramuka-olahraga";
+  "semua" | "jurnal-karya" | "prestasi" | "galeri-kegiatan";
 
-export const galleryTabs: { id: GalleryTab; label: string; category: string }[] = [
+export const galleryTabs: {
+  id: GalleryTab;
+  label: string;
+  category: string;
+}[] = [
+  { id: "semua", label: "Semua", category: "Galeri Kegiatan" },
+  { id: "jurnal-karya", label: "Jurnal Karya", category: "Jurnal Karya" },
+  { id: "prestasi", label: "Prestasi", category: "Prestasi" },
   {
-    id: "kreativitas-seni",
-    label: "Kreativitas & Seni",
-    category: "Kreativitas & Seni",
-  },
-  {
-    id: "jurnal-karya",
-    label: "Jurnal Karya",
-    category: "Jurnal Karya",
-  },
-  {
-    id: "prestasi-akademik",
-    label: "Prestasi Akademik",
-    category: "Prestasi Akademik",
-  },
-  {
-    id: "kegiatan-sosial",
-    label: "Kegiatan Sosial",
-    category: "Kegiatan Sosial",
-  },
-  {
-    id: "ekstrakurikuler",
-    label: "Ekstrakurikuler",
-    category: "Ekstrakurikuler",
-  },
-  {
-    id: "pramuka-olahraga",
-    label: "Pramuka & Olahraga",
-    category: "Pramuka & Olahraga",
+    id: "galeri-kegiatan",
+    label: "Galeri Kegiatan",
+    category: "Galeri Kegiatan",
   },
 ];
 
 export function galleryTabForCategory(category: string): GalleryTab {
-  if (category === "Kreativitas & Seni") return "kreativitas-seni";
-  if (category === "Jurnal Karya") return "jurnal-karya";
-  if (category === "Prestasi Akademik") return "prestasi-akademik";
-  if (category === "Kegiatan Sosial") return "kegiatan-sosial";
-  if (category === "Ekstrakurikuler") return "ekstrakurikuler";
-  if (category === "Pramuka & Olahraga") return "pramuka-olahraga";
-  return "kreativitas-seni";
+  const normalized = normalizeGalleryCategory(category);
+  return galleryTabs.find(
+    (tab) => tab.id !== "semua" && tab.category === normalized,
+  )!.id;
 }
 
 export function galleryCategoryForTab(tab: GalleryTab) {
-  return galleryTabs.find((item) => item.id === tab)?.category ?? "Kreativitas & Seni";
+  return (
+    galleryTabs.find((item) => item.id === tab)?.category ?? "Galeri Kegiatan"
+  );
 }
 
 interface AdminGallerySectionProps {
@@ -80,43 +58,70 @@ export default function AdminGallerySection({
   const visibleActivities = useMemo(
     () =>
       activities.filter(
-        (activity) => galleryTabForCategory(activity.category) === activeTab,
+        (activity) =>
+          activeTab === "semua" ||
+          galleryTabForCategory(activity.category) === activeTab,
       ),
     [activities, activeTab],
   );
-  const activeLabel =
-    galleryTabs.find((tab) => tab.id === activeTab)?.label ?? "Kreativitas & Seni";
 
   return (
-    <section className="space-y-5">
-      <nav
-        aria-label="Kategori galeri kegiatan"
-        className="grid grid-cols-2 gap-1.5 rounded-2xl bg-gradient-to-r from-[#07528c] via-[#0b639f] to-[#07528c] p-1.5 shadow-sm sm:grid-cols-3 xl:grid-cols-6"
+    <section className="mx-auto max-w-6xl space-y-8 pb-8">
+      <header className="flex flex-wrap items-start justify-between gap-4">
+        <div>
+          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-primary">
+            Publikasi sekolah
+          </p>
+          <h2 className="mt-2 text-2xl font-bold tracking-tight text-slate-900">
+            Galeri Kegiatan
+          </h2>
+          <p className="mt-2 text-sm leading-6 text-slate-500">
+            Atur kolase melalui ikon pensil. Klik kartu publikasi untuk mengedit
+            detail cerita.
+          </p>
+        </div>
+        <button
+          type="button"
+          onClick={onAdd}
+          className="rounded-full bg-primary px-5 py-3 text-sm font-semibold text-white transition hover:bg-[#063b68] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-primary"
+        >
+          + Tambah publikasi
+        </button>
+      </header>
+
+      <CollageEditor />
+
+      <div
+        role="group"
+        aria-label="Filter kategori galeri kegiatan"
+        className="flex flex-wrap gap-2"
       >
         {galleryTabs.map((tab) => {
-          const count = activities.filter(
-            (activity) => galleryTabForCategory(activity.category) === tab.id,
-          ).length;
-
+          const count =
+            tab.id === "semua"
+              ? activities.length
+              : activities.filter(
+                  (activity) =>
+                    galleryTabForCategory(activity.category) === tab.id,
+                ).length;
           return (
             <button
               key={tab.id}
               type="button"
+              aria-pressed={activeTab === tab.id}
               onClick={() => onTabChange(tab.id)}
               className={cn(
-                "flex min-w-0 items-center justify-center gap-1.5 rounded-xl px-2 py-2.5 text-xs font-semibold transition sm:px-3 sm:text-sm",
+                "flex items-center gap-2 rounded-full border px-4 py-2.5 text-sm font-medium transition",
                 activeTab === tab.id
-                  ? "bg-white text-primary shadow-sm"
-                  : "text-white/80 hover:bg-white/12 hover:text-white",
+                  ? "border-primary bg-primary text-white"
+                  : "border-slate-200 bg-white text-slate-600 hover:border-primary hover:text-primary",
               )}
             >
-              <span>{tab.label}</span>
+              {tab.label}
               <span
                 className={cn(
-                  "rounded-full px-1.5 py-0.5 text-[10px] font-bold tabular-nums",
-                  activeTab === tab.id
-                    ? "bg-primary/10 text-primary"
-                    : "bg-white/15 text-white/90",
+                  "rounded-full px-2 py-0.5 text-xs tabular-nums",
+                  activeTab === tab.id ? "bg-white/15" : "bg-slate-100",
                 )}
               >
                 {count}
@@ -124,86 +129,104 @@ export default function AdminGallerySection({
             </button>
           );
         })}
-      </nav>
+      </div>
 
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-        {visibleActivities.map((activity) => {
-          const coverPhoto =
-            activity.photos.find(
-              (photo) => photo.id === activity.coverPhotoId,
-            ) || activity.photos[0];
-          const coverUrl = coverPhoto?.url || "/images/32.webp";
-          const crop = activity.cropConfig || { zoom: 1, x: 0, y: 0 };
-
-          return (
-            <article
-              key={activity.id}
-              className="group flex flex-col overflow-hidden rounded-2xl border border-slate-200/80 bg-white shadow-xs transition duration-200 hover:border-primary/40 hover:shadow-md"
+      <div>
+        <div className="mb-5 flex items-center justify-between gap-3">
+          <h3 className="text-lg font-semibold text-slate-900">
+            Cerita & dokumentasi
+          </h3>
+          <p aria-live="polite" className="text-sm text-slate-500">
+            {visibleActivities.length} publikasi
+          </p>
+        </div>
+        {visibleActivities.length === 0 ? (
+          <div className="rounded-3xl border border-dashed border-slate-300 bg-white px-6 py-14 text-center">
+            <h4 className="font-semibold text-slate-900">
+              Belum ada publikasi di kategori ini
+            </h4>
+            <p className="mt-2 text-sm text-slate-500">
+              Tambahkan cerita pertama untuk ditampilkan di galeri kegiatan.
+            </p>
+            <button
+              type="button"
+              onClick={onAdd}
+              className="mt-5 rounded-full border border-primary px-5 py-2.5 text-sm font-semibold text-primary hover:bg-blue-50"
             >
-              <button
-                type="button"
-                onClick={() => onView(activity)}
-                className="relative aspect-[3/4] w-full cursor-pointer overflow-hidden bg-slate-950 text-left"
-                aria-label={`Lihat detail ${activity.title}`}
-              >
-                <Image
-                  src={coverUrl}
-                  alt={activity.title}
-                  fill
-                  unoptimized
-                  sizes="(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw"
-                  className="h-full w-full object-cover transition duration-300 group-hover:scale-105"
-                  style={{
-                    transform: `scale(${crop.zoom}) translate(${crop.x}%, ${crop.y}%)`,
-                  }}
-                />
-                <span className="absolute inset-0 bg-gradient-to-t from-slate-950/85 via-slate-950/20 to-transparent" />
-                <span className="absolute bottom-3 left-3 right-3 text-white">
-                  <span className="text-[10px] font-medium text-slate-300">
-                    {activity.date}
-                  </span>
-                  <span className="mt-1 block text-sm font-bold leading-snug text-white transition group-hover:text-amber-300">
-                    {activity.title}
-                  </span>
-                </span>
-              </button>
-
-              <div className="flex items-center justify-between gap-2 border-t border-slate-100 bg-white p-3">
-                <button
-                  type="button"
-                  onClick={() => onView(activity)}
-                  className="text-xs font-semibold text-primary hover:underline"
-                >
-                  Lihat Foto →
-                </button>
-                <button
-                  type="button"
-                  onClick={() => onEdit(activity)}
-                  className="rounded-lg border border-slate-200 bg-white px-2.5 py-1 text-xs font-semibold text-slate-700 transition hover:border-slate-300 hover:bg-slate-50"
-                >
-                  Edit
-                </button>
-              </div>
-            </article>
-          );
-        })}
-
-        <article className="group flex flex-col overflow-hidden rounded-2xl border border-dashed border-primary/40 bg-white transition duration-200 hover:border-primary hover:bg-primary/[0.025]">
-          <button
-            type="button"
-            onClick={onAdd}
-            className="flex aspect-[3/4] w-full flex-col items-center justify-center gap-3 text-primary outline-none transition hover:bg-primary/[0.03] focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-primary"
-            aria-label={`Tambah ${activeLabel}`}
-          >
-            <span className="flex h-12 w-12 items-center justify-center rounded-full bg-primary/10 text-3xl font-light leading-none transition group-hover:scale-105 group-hover:bg-primary group-hover:text-white">
-              +
-            </span>
-            <span className="text-sm font-semibold">Tambah {activeLabel}</span>
-          </button>
-          <div className="border-t border-dashed border-primary/20 px-3 py-3 text-center text-xs text-slate-500">
-            Buat publikasi baru
+              Tambah publikasi
+            </button>
           </div>
-        </article>
+        ) : (
+          <div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-3">
+            {visibleActivities.map((activity) => {
+              const cover =
+                activity.photos.find(
+                  (photo) => photo.id === activity.coverPhotoId,
+                ) || activity.photos[0];
+              const crop = activity.cropConfig || { zoom: 1, x: 0, y: 0 };
+              return (
+                <article
+                  key={activity.id}
+                  className="group flex flex-col rounded-3xl border border-slate-100 bg-white p-3 shadow-sm transition hover:-translate-y-1 hover:border-blue-200 hover:shadow-lg"
+                >
+                  <button
+                    type="button"
+                    onClick={() => onEdit(activity)}
+                    aria-label={`Edit ${activity.title}`}
+                    className="flex flex-1 flex-col text-left outline-offset-4 focus-visible:outline-2 focus-visible:outline-primary"
+                  >
+                    <span className="relative block aspect-[16/10] w-full overflow-hidden rounded-2xl bg-blue-50">
+                      <Image
+                        src={cover?.url || "/images/32.webp"}
+                        alt={activity.title}
+                        fill
+                        unoptimized
+                        sizes="(min-width: 1280px) 28vw, (min-width: 640px) 45vw, 90vw"
+                        className="object-cover"
+                        style={{
+                          transform: `scale(${crop.zoom}) translate(${crop.x}%, ${crop.y}%)`,
+                        }}
+                      />
+                      <span className="absolute right-3 top-3 rounded-full bg-white/95 px-3 py-1 text-xs font-semibold text-slate-700">
+                        {activity.status}
+                      </span>
+                      <span className="absolute inset-0 flex items-center justify-center bg-slate-950/20 opacity-0 transition group-hover:opacity-100 group-focus-within:opacity-100">
+                        <span className="rounded-full bg-white px-4 py-2 text-sm font-semibold text-primary">
+                          Edit publikasi
+                        </span>
+                      </span>
+                    </span>
+                    <span className="block p-4">
+                      <span className="flex flex-wrap items-center justify-between gap-2 text-xs text-slate-500">
+                        <span className="font-semibold text-primary">
+                          {normalizeGalleryCategory(activity.category)}
+                        </span>
+                        <span>{activity.date}</span>
+                      </span>
+                      <span className="mt-3 block text-lg font-semibold leading-snug text-slate-900 group-hover:text-primary">
+                        {activity.title}
+                      </span>
+                      <span className="mt-2 block line-clamp-3 text-sm leading-6 text-slate-500">
+                        {activity.content ||
+                          "Tambahkan cerita dan dokumentasi kegiatan sekolah."}
+                      </span>
+                    </span>
+                  </button>
+                  <div className="mx-4 flex items-center justify-between gap-3 border-t border-slate-100 py-3 text-xs text-slate-500">
+                    <span>{activity.photos.length} foto</span>
+                    <button
+                      type="button"
+                      onClick={() => onView(activity)}
+                      className="rounded px-1 py-1 text-sm font-medium text-primary hover:underline"
+                    >
+                      Lihat detail
+                    </button>
+                  </div>
+                </article>
+              );
+            })}
+          </div>
+        )}
       </div>
     </section>
   );

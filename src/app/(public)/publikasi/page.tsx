@@ -68,7 +68,7 @@ export default function PublicationsPage() {
         className="bg-white pt-4 pb-16 sm:pt-8 sm:pb-24"
       >
         <div className="container-width">
-          <PublicationGrid />
+          <PublicationGrid showFilters />
         </div>
       </section>
     </>

@@ -1,15 +1,14 @@
 "use client";
 
 import { useState } from "react";
+import { Pencil } from "lucide-react";
+import { usePublicGallery } from "@/hooks/usePublicGallery";
+import { useCollage, useCollageText } from "@/hooks/useCollage";
+import type { CollageSlot, CollageText } from "@/lib/collage-settings";
 import Image from "next/image";
 import Link from "next/link";
 import { motion, useReducedMotion } from "framer-motion";
-import {
-  publications,
-  publicationCategories,
-  type Publication,
-  type PublicationCategory,
-} from "@/lib/school";
+import { publicationCategories, type PublicationCategory } from "@/lib/school";
 import { cn } from "@/lib/utils";
 
 export default function PublicationGrid({
@@ -25,13 +24,12 @@ export default function PublicationGrid({
     "Semua",
   );
   const reduced = useReducedMotion();
+  const { items, loading, error, reload } = usePublicGallery();
   const ordered =
     category === "Semua"
-      ? [0, 4, 8, 9, 13, 2, 1, 3, 5, 6, 7, 10, 11, 12, 14]
-          .map((i) => publications[i])
-          .filter(Boolean)
-      : publications.filter((item) => item.category === category);
-  const count = limit ?? (preview ? 3 : 6);
+      ? items
+      : items.filter((item) => item.category === category);
+  const count = limit ?? (preview ? 3 : showFilters ? ordered.length : 6);
   const visible = ordered.slice(0, count);
 
   return (
@@ -45,6 +43,7 @@ export default function PublicationGrid({
           {["Semua", ...publicationCategories].map((item) => (
             <button
               key={item}
+              type="button"
               aria-pressed={category === item}
               onClick={() => setCategory(item as typeof category)}
               className={cn(
@@ -63,6 +62,31 @@ export default function PublicationGrid({
         {visible.length} konten ditampilkan
         {showFilters ? ` untuk kategori ${category}` : ""}.
       </p>
+      {loading && (
+        <p role="status" className="py-10 text-center text-sm text-muted">
+          Memuat publikasi…
+        </p>
+      )}
+      {error && (
+        <div
+          role="alert"
+          className="rounded-2xl bg-slate-50 p-6 text-center text-sm text-muted"
+        >
+          <p>Publikasi belum dapat dimuat.</p>
+          <button
+            type="button"
+            onClick={reload}
+            className="mt-3 font-semibold text-primary"
+          >
+            Coba lagi
+          </button>
+        </div>
+      )}
+      {!loading && !error && !visible.length && (
+        <p className="py-10 text-center text-sm text-muted">
+          Belum ada publikasi untuk kategori ini.
+        </p>
+      )}
       <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
         {visible.map((item, index) => (
           <motion.div
@@ -139,10 +163,22 @@ const mosaicLanes = [
 ] as const;
 
 export function PublicationMosaic({
-  publications: items = publications,
+  slots: suppliedSlots,
+  text: suppliedText,
+  compact = false,
+  onEditPhoto,
+  onEditText,
 }: {
-  publications?: Publication[];
+  slots?: CollageSlot[];
+  text?: CollageText;
+  compact?: boolean;
+  onEditPhoto?: (slot: CollageSlot) => void;
+  onEditText?: () => void;
 }) {
+  const { slots: remoteSlots } = useCollage(!suppliedSlots);
+  const { text: localText } = useCollageText();
+  const slots = suppliedSlots || remoteSlots;
+  const text = suppliedText || localText;
   const reduced = useReducedMotion();
   const mobileShapes = [
     "aspect-[4/5]",
@@ -153,7 +189,12 @@ export function PublicationMosaic({
   ];
 
   return (
-    <div className="relative mx-auto min-h-[620px] max-w-[1480px] lg:min-h-[650px]">
+    <div
+      className={cn(
+        "relative mx-auto max-w-[1480px]",
+        compact ? "lg:min-h-[360px]" : "min-h-[620px] lg:min-h-[650px]",
+      )}
+    >
       <motion.header
         initial={reduced ? false : "hidden"}
         whileInView="visible"
@@ -174,42 +215,63 @@ export function PublicationMosaic({
             },
           },
         }}
-        className="col-span-2 mb-8 text-center lg:absolute lg:left-1/4 lg:top-[390px] lg:z-10 lg:mb-0 lg:w-1/2 lg:px-8"
+        className={cn(
+          "relative col-span-2 mb-8 text-center lg:absolute lg:left-1/4 lg:z-10 lg:mb-0 lg:w-1/2 lg:px-5",
+          compact ? "lg:top-[220px]" : "lg:top-[390px]",
+        )}
       >
+        {onEditText && (
+          <button
+            type="button"
+            onClick={onEditText}
+            aria-label="Edit teks kolase"
+            className="absolute -right-1 -top-6 z-20 flex h-9 w-9 items-center justify-center rounded-full border border-blue-200 bg-white text-primary shadow-sm hover:bg-blue-50"
+          >
+            <Pencil size={16} />
+          </button>
+        )}
         <p className="mx-auto inline-flex rounded-full border border-slate-300 bg-white/90 px-5 py-2 text-xs font-medium text-ink shadow-sm">
-          Publikasi & Galeri
+          {text.label}
         </p>
-        <h1 className="mt-5 text-3xl font-semibold leading-tight tracking-tight sm:text-4xl lg:text-[2.5rem]">
-          Momen belajar, berkarya,
-          <span className="block text-slate-400">dan berprestasi</span>
-        </h1>
-        <p className="mt-3 text-sm leading-6 text-muted">
-          Cerita dari keluarga SMA Widya Darma.
-        </p>
+        <h2
+          className={cn(
+            "mt-5 font-semibold leading-tight tracking-tight",
+            compact
+              ? "text-xl sm:text-2xl"
+              : "text-3xl sm:text-4xl lg:text-[2.5rem]",
+          )}
+        >
+          {text.title}
+          <span className="block text-slate-400">{text.accent}</span>
+        </h2>
+        <p className="mt-3 text-sm leading-6 text-muted">{text.description}</p>
       </motion.header>
 
-      <div className="grid grid-cols-2 gap-4 lg:grid-cols-8 lg:gap-5">
+      <div
+        className={cn(
+          "grid lg:grid-cols-8",
+          compact ? "grid-cols-4 gap-2 lg:gap-3" : "grid-cols-2 gap-4 lg:gap-5",
+        )}
+      >
         {mosaicLanes.map((lane, laneIndex) => (
           <div
             key={laneIndex}
             className={cn("contents lg:flex lg:flex-col lg:gap-4", lane.offset)}
           >
             {lane.items.map((itemIndex, photoIndex) => {
-              const item = items[itemIndex % items.length];
-              if (!item) return null;
+              const slot = slots[itemIndex];
+              if (!slot) return null;
               const cropClass = [
                 "object-[50%_50%]",
                 "object-[35%_50%]",
                 "object-[65%_45%]",
-              ][
-                (laneIndex + photoIndex) % 3
-              ];
+              ][(laneIndex + photoIndex) % 3];
               const centerOffset = Math.abs(laneIndex - 3.5) - 0.5;
               const delay = centerOffset * 0.12 + photoIndex * 0.14;
 
               return (
                 <motion.div
-                  key={`${laneIndex}-${photoIndex}-${item.slug}`}
+                  key={`${laneIndex}-${photoIndex}-${slot.id}`}
                   initial={reduced ? false : "hidden"}
                   whileInView="visible"
                   viewport={{ once: false, amount: 0.12 }}
@@ -232,9 +294,7 @@ export function PublicationMosaic({
                     },
                   }}
                 >
-                  <Link
-                    href={`/publikasi/${item.slug}`}
-                    aria-label={`Buka publikasi: ${item.title}`}
+                  <div
                     className={cn(
                       "group relative block w-full overflow-hidden rounded-[1.35rem] bg-blue-50 outline-offset-4 transition-transform duration-500 ease-out hover:scale-[0.97] focus-visible:outline-2 focus-visible:outline-primary motion-reduce:transition-none",
                       mobileShapes[
@@ -244,17 +304,32 @@ export function PublicationMosaic({
                     )}
                   >
                     <Image
-                      src={item.coverImage || item.image}
-                      alt={item.title}
+                      src={slot.image}
+                      alt={`Foto kolase sekolah ${slot.id + 1}`}
+                      unoptimized={slot.image.startsWith("/api/media")}
                       fill
-                      sizes="(max-width: 1023px) 88vw, 28vw"
+                      sizes={
+                        compact
+                          ? "(max-width: 1023px) 22vw, 12vw"
+                          : "(max-width: 1023px) 44vw, 12vw"
+                      }
                       quality={85}
                       className={cn(
                         "scale-[1.05] object-cover transition-transform duration-500 ease-out group-hover:scale-100 motion-reduce:transition-none",
                         cropClass,
                       )}
                     />
-                  </Link>
+                    {onEditPhoto && (
+                      <button
+                        type="button"
+                        onClick={() => onEditPhoto(slot)}
+                        aria-label={`Edit foto kolase ${slot.id + 1}`}
+                        className="absolute right-2 top-2 z-10 flex h-9 w-9 items-center justify-center rounded-full border border-blue-100 bg-white text-primary shadow-md hover:bg-blue-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+                      >
+                        <Pencil size={16} />
+                      </button>
+                    )}
+                  </div>
                 </motion.div>
               );
             })}
@@ -264,4 +339,3 @@ export function PublicationMosaic({
     </div>
   );
 }
-

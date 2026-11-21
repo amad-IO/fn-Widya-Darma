@@ -62,7 +62,7 @@ export default function AdminOverview({
         >
           <div className="flex items-center justify-between">
             <span className="rounded-md border border-indigo-100 bg-indigo-50 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-indigo-700">
-              Galeri & Kegiatan
+              Galeri Kegiatan
             </span>
             <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-indigo-50 text-indigo-700 transition group-hover:bg-indigo-600 group-hover:text-white">
               <AdminIcon name="gallery" className="h-4 w-4" />
