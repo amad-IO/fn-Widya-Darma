@@ -24,24 +24,104 @@ const buttonClass =
   "rounded-full bg-primary px-5 py-2.5 text-sm font-semibold text-white disabled:cursor-wait disabled:opacity-60";
 
 export default function CollageEditor() {
-  const { slots, loading, error, reload, updateSlot } = useCollage();
+  const { slots, loading, error, reload, updateSlot, replaceSlots } = useCollage();
   const [photo, setPhoto] = useState<CollageSlot | null>(null);
   const [notice, setNotice] = useState("");
+  const [arrangingSlots, setArrangingSlots] = useState<CollageSlot[] | null>(null);
+  const [draggedPosition, setDraggedPosition] = useState<number | null>(null);
+  const [arrangeStage, setArrangeStage] = useState<SaveStage>("idle");
+  const [arrangeError, setArrangeError] = useState("");
+  const isArranging = arrangingSlots !== null;
+  const visibleSlots = arrangingSlots ?? slots;
+
+  function movePhotoToPosition(targetPosition: number) {
+    if (!arrangingSlots || draggedPosition === null || draggedPosition === targetPosition) return;
+    setArrangingSlots((current) => {
+      if (!current) return current;
+      const source = current.find(
+        (slot) => (slot.collageOrder ?? slot.id + 1) === draggedPosition,
+      );
+      const target = current.find(
+        (slot) => (slot.collageOrder ?? slot.id + 1) === targetPosition,
+      );
+      if (!source) return current;
+      return current.map((slot) => {
+        if (slot === source) return { ...slot, collageOrder: targetPosition };
+        if (slot === target) return { ...slot, collageOrder: draggedPosition };
+        return slot;
+      });
+    });
+    setDraggedPosition(null);
+  }
+
+  async function saveArrangement() {
+    if (!arrangingSlots) return;
+    setArrangeError("");
+    setArrangeStage("saving");
+    try {
+      const ordered = [...arrangingSlots].sort(
+        (first, second) =>
+          (first.collageOrder ?? first.id + 1) -
+          (second.collageOrder ?? second.id + 1),
+      );
+      await Promise.all(
+        ordered.map((slot) => {
+          if (!slot.backendId) {
+            throw new Error("Salah satu foto belum tersimpan di backend.");
+          }
+          return apiRequest<GalleryRecord>(
+            `/api/admin/galleries/${slot.backendId}`,
+            {
+              method: "PUT",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ collage_order: slot.collageOrder }),
+            },
+          );
+        }),
+      );
+      replaceSlots(ordered);
+      setArrangingSlots(null);
+      setArrangeStage("idle");
+      setNotice("Susunan kolase berhasil disimpan dan akan tampil sama di halaman publik.");
+    } catch (error) {
+      setArrangeError((error as Error).message);
+      setArrangeStage("error");
+    }
+  }
+
   return (
     <section
       aria-labelledby="collage-preview-heading"
       className="rounded-3xl border border-slate-200 bg-white p-4 sm:p-7"
     >
-      <div className="mb-6 text-center">
-        <h3
-          id="collage-preview-heading"
-          className="text-lg font-semibold text-primary"
-        >
-          Kolase foto & teks
-        </h3>
-        <p className="mt-1 text-sm text-slate-500">
-          Gunakan ikon pensil untuk mengatur foto atau teks secara terpisah.
-        </p>
+      <div className="mb-6 flex flex-col items-center justify-between gap-3 text-center sm:flex-row sm:text-left">
+        <div>
+          <h3 id="collage-preview-heading" className="text-lg font-semibold text-primary">
+            Susun kolase foto
+          </h3>
+          <p className="mt-1 text-sm text-slate-500">
+            Susunan ini sama dengan kolase yang muncul di halaman publik.
+          </p>
+        </div>
+        {slots.length > 0 && !loading && !error && !isArranging && (
+          <button
+            type="button"
+            onClick={() => {
+              setNotice("");
+              setArrangeError("");
+              setArrangeStage("idle");
+              setArrangingSlots(
+                slots.map((slot, index) => ({
+                  ...slot,
+                  collageOrder: slot.collageOrder ?? index + 1,
+                })),
+              );
+            }}
+            className="rounded-xl border border-primary px-4 py-2 text-sm font-semibold text-primary transition hover:bg-blue-50"
+          >
+            Atur susunan
+          </button>
+        )}
       </div>
       {loading && (
         <SaveFeedback stage="preparing" message="Memuat foto kolase…" />
@@ -65,9 +145,17 @@ export default function CollageEditor() {
       )}
       <PublicationMosaic
         compact
-        slots={slots}
+        slots={visibleSlots}
+        showEmptySlots
+        draggedPosition={isArranging ? draggedPosition : undefined}
+        onArrangeDragStart={
+          isArranging ? (position) => setDraggedPosition(position) : undefined
+        }
+        onArrangeDrop={
+          isArranging ? (position) => movePhotoToPosition(position) : undefined
+        }
         onEditPhoto={
-          !loading && !error
+          !loading && !error && !isArranging
             ? (slot) => {
                 if (!slot.backendId) return;
                 setNotice("");
@@ -76,6 +164,47 @@ export default function CollageEditor() {
             : undefined
         }
       />
+      {!loading && !error && !slots.length && (
+        <p className="mt-5 text-center text-sm text-slate-500">
+          Unggah foto melalui publikasi kegiatan terlebih dahulu. Foto yang tersimpan akan otomatis muncul sebagai slot kolase di sini.
+        </p>
+      )}
+      {isArranging && arrangingSlots && (
+        <section className="mt-6 rounded-2xl border border-blue-100 bg-blue-50/50 p-4 sm:p-5">
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <div>
+              <h4 className="font-semibold text-slate-900">Urutan slot kolase</h4>
+              <p className="mt-1 text-sm text-slate-500">
+                Seret foto langsung ke kotak kolase di atas, termasuk kotak yang masih kosong.
+              </p>
+            </div>
+            <span className="text-xs font-medium text-primary">{arrangingSlots.length} foto</span>
+          </div>
+          {(arrangeError || arrangeStage === "saving") && (
+            <div className="mt-4">
+              <SaveFeedback stage={arrangeStage} error={arrangeError} />
+            </div>
+          )}
+          <div className="mt-5 flex justify-end gap-3">
+            <button
+              type="button"
+              disabled={arrangeStage === "saving"}
+              onClick={() => setArrangingSlots(null)}
+              className="px-4 py-2 text-sm font-semibold text-slate-600"
+            >
+              Batal
+            </button>
+            <button
+              type="button"
+              disabled={arrangeStage === "saving"}
+              onClick={() => void saveArrangement()}
+              className={buttonClass}
+            >
+              Simpan susunan
+            </button>
+          </div>
+        </section>
+      )}
       {photo && (
         <CollagePhotoEditor
           key={photo.id}

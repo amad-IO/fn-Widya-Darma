@@ -20,6 +20,7 @@ export type GalleryRecord = {
   caption?: string;
   news_id?: number | null;
   is_cover?: boolean;
+  collage_order?: number | null;
 };
 export type NewsRecord = {
   news_id: number;

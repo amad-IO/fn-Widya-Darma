@@ -44,6 +44,17 @@ export function useCollage(enabled = true) {
   const [revision, setRevision] = useState(0);
   const reload = useCallback(() => setRevision((value) => value + 1), []);
   useEffect(() => {
+    const refreshAfterGalleryChange = () => reload();
+    window.addEventListener("gallery-collage-updated", refreshAfterGalleryChange);
+    return () => {
+      window.removeEventListener(
+        "gallery-collage-updated",
+        refreshAfterGalleryChange,
+      );
+    };
+  }, [reload]);
+
+  useEffect(() => {
     if (!enabled) return;
     let active = true;
     setLoading(true);
@@ -51,13 +62,19 @@ export function useCollage(enabled = true) {
     fetchAll<NewsRecord>("/api/content/news", false)
       .then((records) => {
         if (!active) return;
-        const photos = records.flatMap((record) =>
-          (record.galleries || []).map((photo) => ({
-            ...photo,
-            newsId: record.news_id,
-            fallbackCaption: record.title,
-          })),
-        );
+        const photos = records
+          .flatMap((record) =>
+            (record.galleries || []).map((photo) => ({
+              ...photo,
+              newsId: record.news_id,
+              fallbackCaption: record.title,
+            })),
+          )
+          .sort(
+            (first, second) =>
+              (first.collage_order ?? Number.MAX_SAFE_INTEGER) -
+              (second.collage_order ?? Number.MAX_SAFE_INTEGER),
+          );
         setSlots(
           photos.slice(0, collageSlotAspects.length).map((photo, index) => ({
             id: index,
@@ -67,6 +84,7 @@ export function useCollage(enabled = true) {
             newsId: photo.newsId,
             isCover: photo.is_cover,
             caption: photo.caption || photo.fallbackCaption,
+            collageOrder: photo.collage_order ?? undefined,
           })),
         );
       })
@@ -85,5 +103,8 @@ export function useCollage(enabled = true) {
       current.map((slot) => (slot.id === next.id ? next : slot)),
     );
   }
-  return { slots, loading, error, reload, updateSlot };
+  function replaceSlots(next: CollageSlot[]) {
+    setSlots(next);
+  }
+  return { slots, loading, error, reload, updateSlot, replaceSlots };
 }

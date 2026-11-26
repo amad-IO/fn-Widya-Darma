@@ -184,6 +184,21 @@ export default function AdminGallerySection({
                 </article>
               );
             })}
+            <button
+              type="button"
+              onClick={onAdd}
+              className="group flex min-h-[340px] flex-col items-center justify-center rounded-3xl border-2 border-dashed border-blue-200 bg-white p-5 text-center transition hover:border-primary hover:bg-blue-50/45 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-primary"
+            >
+              <span className="flex h-14 w-14 items-center justify-center rounded-full bg-blue-50 text-3xl font-light leading-none text-primary transition group-hover:scale-110 group-hover:bg-primary group-hover:text-white">
+                +
+              </span>
+              <span className="mt-4 text-base font-semibold text-slate-800">
+                Tambah Kegiatan
+              </span>
+              <span className="mt-1 text-sm text-slate-500">
+                Buat publikasi dan unggah foto baru
+              </span>
+            </button>
           </div>
         )}
       </div>

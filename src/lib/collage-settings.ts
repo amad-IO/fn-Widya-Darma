@@ -12,6 +12,7 @@ export type CollageSlot = {
   newsId?: number;
   isCover?: boolean;
   caption?: string;
+  collageOrder?: number;
 };
 export const defaultCollageText: CollageText = {
   label: "Publikasi & Galeri",

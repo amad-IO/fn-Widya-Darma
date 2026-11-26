@@ -172,15 +172,24 @@ export function PublicationMosaic({
   compact = false,
   onEditPhoto,
   onEditText,
+  showEmptySlots = false,
+  draggedPosition,
+  onArrangeDragStart,
+  onArrangeDrop,
 }: {
   slots?: CollageSlot[];
   text?: CollageText;
   compact?: boolean;
   onEditPhoto?: (slot: CollageSlot) => void;
   onEditText?: () => void;
+  showEmptySlots?: boolean;
+  draggedPosition?: number | null;
+  onArrangeDragStart?: (position: number) => void;
+  onArrangeDrop?: (position: number) => void;
 }) {
   const { slots: remoteSlots } = useCollage(!suppliedSlots);
   const slots = suppliedSlots || remoteSlots;
+  const positionFor = (slot: CollageSlot) => slot.collageOrder ?? slot.id + 1;
   const text = suppliedText || defaultCollageText;
   const reduced = useReducedMotion();
   const mobileShapes = [
@@ -262,8 +271,13 @@ export function PublicationMosaic({
             className={cn("contents lg:flex lg:flex-col lg:gap-4", lane.offset)}
           >
             {lane.items.map((itemIndex, photoIndex) => {
-              const slot = slots[itemIndex];
-              if (!slot) return null;
+              const position = itemIndex + 1;
+              const slot = slots.find((item) => positionFor(item) === position);
+              const hasPhotoAfter = slots.some(
+                (item) => positionFor(item) > position,
+              );
+              if (!slot && !showEmptySlots && !hasPhotoAfter) return null;
+              const isEmpty = !slot;
               const cropClass = [
                 "object-[50%_50%]",
                 "object-[35%_50%]",
@@ -274,7 +288,7 @@ export function PublicationMosaic({
 
               return (
                 <motion.div
-                  key={`${laneIndex}-${photoIndex}-${slot.id}`}
+                  key={`${laneIndex}-${photoIndex}-${slot?.backendId ?? position}`}
                   initial={reduced ? false : "hidden"}
                   whileInView="visible"
                   viewport={{ once: false, amount: 0.12 }}
@@ -304,29 +318,45 @@ export function PublicationMosaic({
                         (laneIndex + photoIndex) % mobileShapes.length
                       ],
                       lane.shape,
+                      isEmpty && showEmptySlots && "border border-dashed border-blue-200 bg-blue-50/55",
+                      isEmpty && !showEmptySlots && "invisible",
+                      draggedPosition === position && "ring-2 ring-primary ring-offset-2 opacity-45",
                     )}
+                    draggable={Boolean(slot && onArrangeDragStart)}
+                    onDragStart={() => onArrangeDragStart?.(position)}
+                    onDragOver={(event) => {
+                      if (onArrangeDrop) event.preventDefault();
+                    }}
+                    onDrop={() => onArrangeDrop?.(position)}
                   >
-                    <Image
-                      src={slot.image}
-                      alt={slot.caption || `Foto dokumentasi sekolah ${slot.id + 1}`}
-                      unoptimized={slot.image.startsWith("/api/media")}
-                      fill
-                      sizes={
-                        compact
-                          ? "(max-width: 1023px) 22vw, 12vw"
-                          : "(max-width: 1023px) 44vw, 12vw"
-                      }
-                      quality={85}
-                      className={cn(
-                        "scale-[1.05] object-cover transition-transform duration-500 ease-out group-hover:scale-100 motion-reduce:transition-none",
-                        cropClass,
-                      )}
-                    />
-                    {onEditPhoto && (
+                    {slot?.image ? (
+                      <Image
+                        src={slot.image}
+                        alt={slot.caption || `Foto dokumentasi sekolah ${position}`}
+                        unoptimized={slot.image.startsWith("/api/media")}
+                        fill
+                        sizes={
+                          compact
+                            ? "(max-width: 1023px) 22vw, 12vw"
+                            : "(max-width: 1023px) 44vw, 12vw"
+                        }
+                        quality={85}
+                        className={cn(
+                          "scale-[1.05] object-cover transition-transform duration-500 ease-out group-hover:scale-100 motion-reduce:transition-none",
+                          cropClass,
+                        )}
+                      />
+                    ) : (
+                      <span
+                        aria-label={`Slot kolase ${position} masih kosong`}
+                        className="absolute inset-0"
+                      />
+                    )}
+                    {onEditPhoto && slot && (
                       <button
                         type="button"
                         onClick={() => onEditPhoto(slot)}
-                        aria-label={`Edit foto kolase ${slot.id + 1}`}
+                        aria-label={`Edit foto kolase ${position}`}
                         className="absolute right-2 top-2 z-10 flex h-9 w-9 items-center justify-center rounded-full border border-blue-100 bg-white text-primary shadow-md hover:bg-blue-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
                       >
                         <Pencil size={16} />

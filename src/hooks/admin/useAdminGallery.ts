@@ -43,6 +43,7 @@ export function useAdminGallery() {
           ? current.map((item) => (item.id === saved.id ? saved : item))
           : [saved, ...current],
       );
+      window.dispatchEvent(new Event("gallery-collage-updated"));
       return saved;
     },
     [],
@@ -52,6 +53,7 @@ export function useAdminGallery() {
     setActivities((current) =>
       current.filter((activity) => activity.id !== id),
     );
+    window.dispatchEvent(new Event("gallery-collage-updated"));
   }, []);
   return { activities, saveActivity, removeActivity, loading, error, reload };
 }
