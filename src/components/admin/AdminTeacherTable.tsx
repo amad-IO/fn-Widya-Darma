@@ -7,6 +7,8 @@ import AdminIcon from "./AdminIcon";
 
 interface AdminTeacherTableProps {
   teachers: Teacher[];
+  isLoading?: boolean;
+  error?: string;
   onOpenAdd: () => void;
   onEdit: (teacher: Teacher) => void;
   onDelete: (id: string) => void;
@@ -15,6 +17,8 @@ interface AdminTeacherTableProps {
 
 export default function AdminTeacherTable({
   teachers,
+  isLoading = false,
+  error = "",
   onOpenAdd,
   onEdit,
   onDelete,
@@ -119,7 +123,19 @@ export default function AdminTeacherTable({
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100 bg-white">
-              {filteredTeachers.length === 0 ? (
+              {isLoading ? (
+                <tr>
+                  <td colSpan={5} className="px-4 py-12 text-center text-slate-400">
+                    Memuat data guru…
+                  </td>
+                </tr>
+              ) : error ? (
+                <tr>
+                  <td colSpan={5} className="px-4 py-12 text-center text-rose-600">
+                    {error}
+                  </td>
+                </tr>
+              ) : filteredTeachers.length === 0 ? (
                 <tr>
                   <td
                     colSpan={5}
@@ -171,6 +187,7 @@ export default function AdminTeacherTable({
                             alt={teacher.name}
                             fill
                             sizes="40px"
+                            unoptimized={teacher.image?.startsWith("/api/media?")}
                             className="object-cover"
                           />
                         </div>

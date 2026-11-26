@@ -23,6 +23,7 @@ import { type AdminSection } from "@/lib/admin-preview";
 import { useAdminGallery } from "@/hooks/admin/useAdminGallery";
 import { useAdminNotice } from "@/hooks/admin/useAdminNotice";
 import { useAdminTeachers } from "@/hooks/admin/useAdminTeachers";
+import { useAdminDashboardStats } from "@/hooks/admin/useAdminDashboardStats";
 import { validateAdminSession } from "@/lib/admin-auth";
 
 export default function AdminDashboard() {
@@ -86,7 +87,7 @@ export default function AdminDashboard() {
 
   const handleDeleteGallery = async (id: string) => {
     await removeActivity(id);
-    setNotice("Kegiatan galeri berhasil dihapus.");
+    setNotice("Publikasi galeri berhasil dihapus.");
   };
 
   const handleSaveGallery = async (
@@ -97,12 +98,14 @@ export default function AdminDashboard() {
     setGalleryTab(galleryTabForCategory(saved.category));
     setNotice(
       editingGalleryActivity
-        ? "Kegiatan galeri berhasil diperbarui."
-        : "Kegiatan galeri baru berhasil dipublikasikan.",
+        ? "Publikasi galeri berhasil diperbarui."
+        : "Publikasi galeri baru berhasil dipublikasikan.",
     );
   };
 
-  const { teachers, saveTeacher, removeTeacher } = useAdminTeachers();
+  const { teachers, isLoading: isTeachersLoading, error: teachersError, saveTeacher, removeTeacher } =
+    useAdminTeachers();
+  const { stats: dashboardStats } = useAdminDashboardStats();
   const [isTeacherModalOpen, setIsTeacherModalOpen] = useState(false);
   const [editingTeacher, setEditingTeacher] = useState<Teacher | null>(null);
   const [viewingTeacher, setViewingTeacher] = useState<Teacher | null>(null);
@@ -125,15 +128,23 @@ export default function AdminDashboard() {
     if (target) setTeacherPendingDeletion(target);
   };
 
-  const confirmDeleteTeacher = () => {
+  const confirmDeleteTeacher = async () => {
     if (!teacherPendingDeletion) return;
-    removeTeacher(teacherPendingDeletion.id);
-    setNotice(`Data guru "${teacherPendingDeletion.name}" berhasil dihapus.`);
-    setTeacherPendingDeletion(null);
+    try {
+      await removeTeacher(teacherPendingDeletion.id);
+      setNotice(`Data guru "${teacherPendingDeletion.name}" berhasil dihapus.`);
+      setTeacherPendingDeletion(null);
+    } catch (reason) {
+      setNotice(
+        reason instanceof Error
+          ? reason.message
+          : "Data guru gagal dihapus.",
+      );
+    }
   };
 
-  const handleSaveTeacher = (savedTeacher: Teacher) => {
-    saveTeacher(savedTeacher);
+  const handleSaveTeacher = async (teacher: Teacher, imageFile?: File) => {
+    const savedTeacher = await saveTeacher(teacher, imageFile);
     setNotice(
       editingTeacher
         ? `Data guru "${savedTeacher.name}" berhasil diperbarui.`
@@ -169,6 +180,7 @@ export default function AdminDashboard() {
         <AdminOverview
           teachers={teachers}
           galleryActivities={galleryActivities}
+          dashboardStats={dashboardStats}
           onNavigate={navigate}
         />
       ) : section === "galeri" ? (
@@ -203,6 +215,8 @@ export default function AdminDashboard() {
       ) : section === "guru" ? (
         <AdminTeacherTable
           teachers={teachers}
+          isLoading={isTeachersLoading}
+          error={teachersError}
           onOpenAdd={handleOpenAddTeacher}
           onEdit={handleOpenEditTeacher}
           onDelete={handleDeleteTeacher}

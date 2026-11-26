@@ -1,7 +1,8 @@
 import Image from "next/image";
 import Link from "next/link";
 import Reveal from "@/components/shared/Reveal";
-import { teachers, type Staff } from "@/lib/school";
+import type { Staff } from "@/lib/school";
+import { getPublicTeachers } from "@/lib/public-teachers";
 
 export const metadata = { title: "Daftar Guru" };
 
@@ -20,6 +21,7 @@ function StaffDirectoryCard({ person }: { person: Staff }) {
             alt={`${person.name} — ${person.role}`}
             fill
             sizes="144px"
+            unoptimized={person.image.startsWith("/api/media?")}
             className="object-cover object-top transition-transform duration-300 ease-out group-hover:scale-105"
           />
         </div>
@@ -63,7 +65,8 @@ function StaffDirectoryCard({ person }: { person: Staff }) {
   );
 }
 
-export default function TeachersPage() {
+export default async function TeachersPage() {
+  const teachers = await getPublicTeachers();
   return (
     <>
       {/* HERO — Profil Guru dengan Background Image Full */}

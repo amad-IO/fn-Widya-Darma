@@ -3,8 +3,12 @@
 import { useState } from "react";
 import { Pencil } from "lucide-react";
 import { usePublicGallery } from "@/hooks/usePublicGallery";
-import { useCollage, useCollageText } from "@/hooks/useCollage";
-import type { CollageSlot, CollageText } from "@/lib/collage-settings";
+import { useCollage } from "@/hooks/useCollage";
+import {
+  defaultCollageText,
+  type CollageSlot,
+  type CollageText,
+} from "@/lib/collage-settings";
 import Image from "next/image";
 import Link from "next/link";
 import { motion, useReducedMotion } from "framer-motion";
@@ -176,9 +180,8 @@ export function PublicationMosaic({
   onEditText?: () => void;
 }) {
   const { slots: remoteSlots } = useCollage(!suppliedSlots);
-  const { text: localText } = useCollageText();
   const slots = suppliedSlots || remoteSlots;
-  const text = suppliedText || localText;
+  const text = suppliedText || defaultCollageText;
   const reduced = useReducedMotion();
   const mobileShapes = [
     "aspect-[4/5]",
@@ -305,7 +308,7 @@ export function PublicationMosaic({
                   >
                     <Image
                       src={slot.image}
-                      alt={`Foto kolase sekolah ${slot.id + 1}`}
+                      alt={slot.caption || `Foto dokumentasi sekolah ${slot.id + 1}`}
                       unoptimized={slot.image.startsWith("/api/media")}
                       fill
                       sizes={

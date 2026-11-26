@@ -7,7 +7,7 @@ import AdminIcon from "./AdminIcon";
 interface AdminTeacherModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSave: (teacher: Teacher) => void;
+  onSave: (teacher: Teacher, imageFile?: File) => Promise<void> | void;
   initialData?: Teacher | null;
 }
 
@@ -24,7 +24,9 @@ export default function AdminTeacherModal({
   const [education, setEducation] = useState("");
   const [subject, setSubject] = useState("");
   const [image, setImage] = useState(DEFAULT_IMAGE);
-  const [errors, setErrors] = useState<{ name?: string }>({});
+  const [imageFile, setImageFile] = useState<File | undefined>();
+  const [isSaving, setIsSaving] = useState(false);
+  const [errors, setErrors] = useState<{ name?: string; form?: string }>({});
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -41,6 +43,8 @@ export default function AdminTeacherModal({
       setSubject("");
       setImage(DEFAULT_IMAGE);
     }
+    setImageFile(undefined);
+    setIsSaving(false);
     setErrors({});
   }, [initialData, isOpen]);
 
@@ -62,9 +66,10 @@ export default function AdminTeacherModal({
     const reader = new FileReader();
     reader.onloadend = () => setImage(reader.result as string);
     reader.readAsDataURL(file);
+    setImageFile(file);
   };
 
-  const handleSave = (event: React.FormEvent) => {
+  const handleSave = async (event: React.FormEvent) => {
     event.preventDefault();
     const nextErrors: { name?: string } = {};
     if (!name.trim()) nextErrors.name = "Nama lengkap wajib diisi.";
@@ -74,21 +79,37 @@ export default function AdminTeacherModal({
       return;
     }
 
-    onSave({
-      ...initialData,
-      id: initialData?.id || `guru-${Date.now()}`,
-      name: name.trim(),
-      subject: subject.trim() || "-",
-      bio: description.trim() || undefined,
-      education: education.trim() ? [education.trim()] : undefined,
-      image: image || DEFAULT_IMAGE,
-      role: initialData?.role || "Guru Mata Pelajaran",
-      category: initialData?.category || "Lainnya",
-      email: initialData?.email || "-",
-      status: initialData?.status || "Aktif",
-      order: initialData?.order || Date.now(),
-    });
-    onClose();
+    setIsSaving(true);
+    setErrors({});
+    try {
+      await onSave(
+        {
+          ...initialData,
+          id: initialData?.id || `guru-${Date.now()}`,
+          name: name.trim(),
+          subject: subject.trim() || "-",
+          bio: description.trim() || undefined,
+          education: education.trim() ? [education.trim()] : undefined,
+          image: image || DEFAULT_IMAGE,
+          role: initialData?.role || "Guru Mata Pelajaran",
+          category: initialData?.category || "Lainnya",
+          email: initialData?.email || "-",
+          status: initialData?.status || "Guru Tetap",
+          order: initialData?.order || Date.now(),
+        },
+        imageFile,
+      );
+      onClose();
+    } catch (reason) {
+      setErrors({
+        form:
+          reason instanceof Error
+            ? reason.message
+            : "Data guru gagal disimpan. Silakan coba lagi.",
+      });
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   const previewName = name || "Nama Guru";
@@ -227,18 +248,29 @@ export default function AdminTeacherModal({
           </div>
 
           <div className="flex items-center justify-end gap-3 border-t border-slate-100 pt-5">
+            {errors.form && (
+              <p className="mr-auto text-xs font-medium text-rose-600">
+                {errors.form}
+              </p>
+            )}
             <button
               type="button"
               onClick={onClose}
+              disabled={isSaving}
               className="rounded-xl bg-slate-100 px-4 py-2.5 text-xs font-semibold text-slate-600 transition hover:bg-slate-200"
             >
               Batal
             </button>
             <button
               type="submit"
-              className="rounded-xl bg-[#31529a] px-5 py-2.5 text-xs font-bold text-white shadow-sm transition hover:bg-[#26437f]"
+              disabled={isSaving}
+              className="rounded-xl bg-[#31529a] px-5 py-2.5 text-xs font-bold text-white shadow-sm transition hover:bg-[#26437f] disabled:cursor-wait disabled:opacity-70"
             >
-              {initialData ? "Simpan Perubahan" : "Tambahkan Guru"}
+              {isSaving
+                ? "Menyimpan…"
+                : initialData
+                  ? "Simpan Perubahan"
+                  : "Tambahkan Guru"}
             </button>
           </div>
         </form>

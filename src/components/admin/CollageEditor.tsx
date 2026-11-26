@@ -3,9 +3,8 @@
 import { useEffect, useRef, useState } from "react";
 import { X } from "lucide-react";
 import { PublicationMosaic } from "@/components/shared/PublicationGrid";
-import { useCollage, useCollageText } from "@/hooks/useCollage";
+import { useCollage } from "@/hooks/useCollage";
 import {
-  collageSlotTitle,
   type CollageSlot,
   type CollageText,
 } from "@/lib/collage-settings";
@@ -26,9 +25,7 @@ const buttonClass =
 
 export default function CollageEditor() {
   const { slots, loading, error, reload, updateSlot } = useCollage();
-  const { text, saveText } = useCollageText();
   const [photo, setPhoto] = useState<CollageSlot | null>(null);
-  const [textOpen, setTextOpen] = useState(false);
   const [notice, setNotice] = useState("");
   return (
     <section
@@ -69,19 +66,15 @@ export default function CollageEditor() {
       <PublicationMosaic
         compact
         slots={slots}
-        text={text}
         onEditPhoto={
           !loading && !error
             ? (slot) => {
+                if (!slot.backendId) return;
                 setNotice("");
                 setPhoto(slot);
               }
             : undefined
         }
-        onEditText={() => {
-          setNotice("");
-          setTextOpen(true);
-        }}
       />
       {photo && (
         <CollagePhotoEditor
@@ -92,17 +85,6 @@ export default function CollageEditor() {
             updateSlot(slot);
             setPhoto(null);
             setNotice("Foto kolase berhasil disimpan ke backend.");
-          }}
-        />
-      )}
-      {textOpen && (
-        <CollageTextEditor
-          text={text}
-          onClose={() => setTextOpen(false)}
-          onSave={(next) => {
-            saveText(next);
-            setTextOpen(false);
-            setNotice("Teks kolase tersimpan di browser ini.");
           }}
         />
       )}
@@ -191,7 +173,7 @@ function CollagePhotoEditor({
     }
   }
   async function save() {
-    if (!blob || busy) return;
+    if (!blob || busy || !slot.backendId) return;
     setError("");
     try {
       setStage("preparing");
@@ -200,17 +182,22 @@ function CollagePhotoEditor({
       const path = await uploadPhoto(cropped, "collage");
       setStage("saving");
       const record = await apiRequest<GalleryRecord>(
-        `/api/admin/galleries${slot.backendId ? `/${slot.backendId}` : ""}`,
+        `/api/admin/galleries/${slot.backendId}`,
         {
-          method: slot.backendId ? "PUT" : "POST",
+          method: "PUT",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
-            title: collageSlotTitle(slot.id),
             image_url: path,
-            news_id: null,
           }),
         },
       );
+      if (slot.newsId && slot.isCover) {
+        await apiRequest(`/api/admin/news/${slot.newsId}`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ image_url: path }),
+        });
+      }
       onSaved({
         ...slot,
         image: mediaUrl(record.image_url),

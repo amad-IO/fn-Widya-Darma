@@ -28,6 +28,7 @@ export default function StaffCard({
           alt={`${person.name} — ${roleLabel}`}
           fill
           sizes="(max-width: 640px) 42vw, 190px"
+          unoptimized={person.image.startsWith("/api/media?")}
           className="object-cover object-top"
         />
         <div

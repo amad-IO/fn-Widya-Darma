@@ -5,7 +5,8 @@ import SectionLabel from "@/components/shared/SectionLabel";
 import StaffMarquee from "@/components/shared/StaffMarquee";
 import { Button } from "@/components/ui/button";
 import { copy } from "@/lib/constants";
-import { leadership, teachers } from "@/lib/school";
+import { leadership } from "@/lib/school";
+import { getPublicTeachers } from "@/lib/public-teachers";
 
 const sectionClass = "school-section relative py-16 sm:py-24";
 
@@ -17,7 +18,7 @@ type StaffSectionProps = {
   id?: string;
 };
 
-export default function StaffSection({
+export default async function StaffSection({
   showPrincipalWelcome = false,
   showButton = false,
   limit,
@@ -25,6 +26,7 @@ export default function StaffSection({
   id,
 }: StaffSectionProps) {
   const principal = leadership[0];
+  const teachers = await getPublicTeachers();
   const allItems = teachers.map((person) => ({ person, teacher: true }));
   const visibleItems = limit ? allItems.slice(0, limit) : allItems;
 

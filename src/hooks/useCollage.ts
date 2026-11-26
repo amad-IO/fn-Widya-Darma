@@ -2,15 +2,14 @@
 
 import { useCallback, useEffect, useState, useSyncExternalStore } from "react";
 import {
-  collageSlotTitle,
+  collageSlotAspects,
   collageTextKey,
-  defaultCollageSlots,
   defaultCollageText,
   parseCollageText,
   type CollageSlot,
   type CollageText,
 } from "@/lib/collage-settings";
-import { fetchAll, mediaUrl, type GalleryRecord } from "@/lib/gallery-api";
+import { fetchAll, mediaUrl, type NewsRecord } from "@/lib/gallery-api";
 
 function subscribe(onChange: () => void) {
   window.addEventListener("storage", onChange);
@@ -39,7 +38,7 @@ export function useCollageText() {
 }
 
 export function useCollage(enabled = true) {
-  const [slots, setSlots] = useState(defaultCollageSlots);
+  const [slots, setSlots] = useState<CollageSlot[]>([]);
   const [loading, setLoading] = useState(enabled);
   const [error, setError] = useState("");
   const [revision, setRevision] = useState(0);
@@ -49,23 +48,26 @@ export function useCollage(enabled = true) {
     let active = true;
     setLoading(true);
     setError("");
-    fetchAll<GalleryRecord>("/api/content/galleries", false)
+    fetchAll<NewsRecord>("/api/content/news", false)
       .then((records) => {
         if (!active) return;
+        const photos = records.flatMap((record) =>
+          (record.galleries || []).map((photo) => ({
+            ...photo,
+            newsId: record.news_id,
+            fallbackCaption: record.title,
+          })),
+        );
         setSlots(
-          defaultCollageSlots.map((slot) => {
-            const record = records.find(
-              (record) =>
-                !record.news_id && record.title === collageSlotTitle(slot.id),
-            );
-            return record
-              ? {
-                  ...slot,
-                  backendId: record.gallery_id,
-                  image: mediaUrl(record.image_url),
-                }
-              : slot;
-          }),
+          photos.slice(0, collageSlotAspects.length).map((photo, index) => ({
+            id: index,
+            image: mediaUrl(photo.image_url),
+            aspect: collageSlotAspects[index] || 1,
+            backendId: photo.gallery_id,
+            newsId: photo.newsId,
+            isCover: photo.is_cover,
+            caption: photo.caption || photo.fallbackCaption,
+          })),
         );
       })
       .catch((error: Error) => {

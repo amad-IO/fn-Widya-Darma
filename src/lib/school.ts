@@ -67,7 +67,7 @@ export const publications: Publication[] = publicationCategories
 
 export type Staff = {
   id: string;
-  code?: number;
+  code?: string | number;
   name: string;
   role: string;
   image: string;

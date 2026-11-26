@@ -14,19 +14,16 @@ export async function GET(request: NextRequest) {
         "Foto belum dapat diakses dari penyimpanan backend.",
         { status: response.status },
       );
-    const bytes = new Uint8Array(await response.arrayBuffer());
-    const text = new TextDecoder("ascii");
-    if (
-      text.decode(bytes.slice(0, 4)) !== "RIFF" ||
-      text.decode(bytes.slice(8, 12)) !== "WEBP"
-    ) {
+    const contentType = response.headers.get("content-type") || "";
+    if (!/^image\/(webp|jpeg|png|gif)$/i.test(contentType)) {
       return new NextResponse(
-        "Backend belum menghasilkan file WebP yang valid. Periksa dukungan GD/WebP pada PHP backend.",
+        "Backend tidak mengembalikan berkas gambar yang valid.",
         { status: 502 },
       );
     }
+    const bytes = new Uint8Array(await response.arrayBuffer());
     return new NextResponse(bytes, {
-      headers: { "Content-Type": "image/webp", "Cache-Control": "no-store" },
+      headers: { "Content-Type": contentType, "Cache-Control": "no-store" },
     });
   } catch {
     return new NextResponse(

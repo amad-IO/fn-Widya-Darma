@@ -7,11 +7,12 @@ import WhatsAppButton from "@/components/shared/WhatsAppButton";
 import { ArrowUpRight } from "@/components/shared/Svg";
 import { Button } from "@/components/ui/button";
 import { copy } from "@/lib/constants";
-import { teachers } from "@/lib/school";
+import { getPublicTeachers } from "@/lib/public-teachers";
 
 const sectionClass = "school-section relative py-16 sm:py-24";
 
-export function SchoolIntro({ profile = false }: { profile?: boolean }) {
+export async function SchoolIntro({ profile = false }: { profile?: boolean }) {
+  const teachers = await getPublicTeachers();
   const pillars = [
     {
       tag: "01 · Akademik",

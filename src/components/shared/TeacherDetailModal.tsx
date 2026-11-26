@@ -78,6 +78,7 @@ export default function TeacherDetailModal({
                   alt={teacher.name}
                   fill
                   sizes="144px"
+                  unoptimized={teacher.image?.startsWith("/api/media?")}
                   className="object-cover"
                 />
               </div>
@@ -181,6 +182,7 @@ export default function TeacherDetailModal({
                   alt={teacher.name}
                   fill
                   sizes="240px"
+                  unoptimized={teacher.image?.startsWith("/api/media?")}
                   className="object-cover"
                 />
               </div>

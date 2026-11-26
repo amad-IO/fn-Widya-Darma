@@ -67,26 +67,8 @@ export default function AdminGallerySection({
 
   return (
     <section className="mx-auto max-w-6xl space-y-8 pb-8">
-      <header className="flex flex-wrap items-start justify-between gap-4">
-        <div>
-          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-primary">
-            Publikasi sekolah
-          </p>
-          <h2 className="mt-2 text-2xl font-bold tracking-tight text-slate-900">
-            Galeri Kegiatan
-          </h2>
-          <p className="mt-2 text-sm leading-6 text-slate-500">
-            Atur kolase melalui ikon pensil. Klik kartu publikasi untuk mengedit
-            detail cerita.
-          </p>
-        </div>
-        <button
-          type="button"
-          onClick={onAdd}
-          className="rounded-full bg-primary px-5 py-3 text-sm font-semibold text-white transition hover:bg-[#063b68] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-primary"
-        >
-          + Tambah publikasi
-        </button>
+      <header className="flex items-center justify-center rounded-2xl bg-gradient-to-r from-[#07528c] via-[#0b639f] to-[#07528c] px-5 py-3.5 text-center text-white shadow-sm">
+        <h2 className="text-sm font-bold tracking-wide">Galeri Kegiatan</h2>
       </header>
 
       <CollageEditor />
@@ -94,16 +76,9 @@ export default function AdminGallerySection({
       <div
         role="group"
         aria-label="Filter kategori galeri kegiatan"
-        className="flex flex-wrap gap-2"
+        className="grid w-full grid-cols-2 gap-1.5 rounded-2xl bg-gradient-to-r from-[#07528c] via-[#0b639f] to-[#07528c] p-1.5 shadow-sm sm:grid-cols-4"
       >
         {galleryTabs.map((tab) => {
-          const count =
-            tab.id === "semua"
-              ? activities.length
-              : activities.filter(
-                  (activity) =>
-                    galleryTabForCategory(activity.category) === tab.id,
-                ).length;
           return (
             <button
               key={tab.id}
@@ -111,35 +86,19 @@ export default function AdminGallerySection({
               aria-pressed={activeTab === tab.id}
               onClick={() => onTabChange(tab.id)}
               className={cn(
-                "flex items-center gap-2 rounded-full border px-4 py-2.5 text-sm font-medium transition",
+                "rounded-xl px-3 py-2.5 text-sm font-semibold transition",
                 activeTab === tab.id
-                  ? "border-primary bg-primary text-white"
-                  : "border-slate-200 bg-white text-slate-600 hover:border-primary hover:text-primary",
+                  ? "bg-white text-[#31529a] shadow-sm"
+                  : "text-white/80 hover:bg-white/12 hover:text-white",
               )}
             >
               {tab.label}
-              <span
-                className={cn(
-                  "rounded-full px-2 py-0.5 text-xs tabular-nums",
-                  activeTab === tab.id ? "bg-white/15" : "bg-slate-100",
-                )}
-              >
-                {count}
-              </span>
             </button>
           );
         })}
       </div>
 
       <div>
-        <div className="mb-5 flex items-center justify-between gap-3">
-          <h3 className="text-lg font-semibold text-slate-900">
-            Cerita & dokumentasi
-          </h3>
-          <p aria-live="polite" className="text-sm text-slate-500">
-            {visibleActivities.length} publikasi
-          </p>
-        </div>
         {visibleActivities.length === 0 ? (
           <div className="rounded-3xl border border-dashed border-slate-300 bg-white px-6 py-14 text-center">
             <h4 className="font-semibold text-slate-900">
